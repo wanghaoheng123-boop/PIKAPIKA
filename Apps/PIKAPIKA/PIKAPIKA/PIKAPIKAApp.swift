@@ -8,6 +8,7 @@ struct PIKAPIKAApp: App {
 
     @StateObject private var authSession = AuthSession()
     @State private var aiHolder = AIClientHolder()
+    @Environment(\.scenePhase) private var scenePhase
 
     private let modelContainer: ModelContainer
 
@@ -39,6 +40,11 @@ struct PIKAPIKAApp: App {
                 .environment(aiHolder)
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    if phase == .active {
+                        aiHolder.refresh()
+                    }
                 }
         }
         .modelContainer(modelContainer)
