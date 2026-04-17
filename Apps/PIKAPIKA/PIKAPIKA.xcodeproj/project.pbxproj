@@ -8,15 +8,41 @@
 
 /* Begin PBXBuildFile section */
 		B1000000000000000000001 /* PIKAPIKAApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000002 /* PIKAPIKAApp.swift */; };
-		B1000000000000000000003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000004 /* ContentView.swift */; };
+		B1000000000000000000003 /* PetListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000004 /* PetListView.swift */; };
+		B1000000000000000000501 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000502 /* RootView.swift */; };
+		B1000000000000000000503 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000504 /* LoginView.swift */; };
+		B1000000000000000000505 /* AuthSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000506 /* AuthSession.swift */; };
+		B1000000000000000000507 /* AddPetSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000508 /* AddPetSheet.swift */; };
+		B1000000000000000000509 /* PetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000000000050A /* PetDetailView.swift */; };
+		B100000000000000000050B /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000000000050C /* ChatView.swift */; };
+		B100000000000000000050D /* MockAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000000000050E /* MockAIClient.swift */; };
+		B100000000000000000050F /* OpenAIChatClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000510 /* OpenAIChatClient.swift */; };
+		B1000000000000000000511 /* AIClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000512 /* AIClientProvider.swift */; };
+		B1000000000000000000513 /* AIClientHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000514 /* AIClientHolder.swift */; };
+		B1000000000000000000515 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000516 /* SettingsView.swift */; };
 		B1000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000006 /* Assets.xcassets */; };
+		B1000000000000000000700 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000701 /* AuthenticationServices.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		B1000000000000000000007 /* PIKAPIKA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PIKAPIKA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1000000000000000000002 /* PIKAPIKAApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PIKAPIKAApp.swift; sourceTree = "<group>"; };
-		B1000000000000000000004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B1000000000000000000004 /* PetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetListView.swift; sourceTree = "<group>"; };
+		B1000000000000000000502 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		B1000000000000000000504 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		B1000000000000000000506 /* AuthSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSession.swift; sourceTree = "<group>"; };
+		B1000000000000000000508 /* AddPetSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPetSheet.swift; sourceTree = "<group>"; };
+		B100000000000000000050A /* PetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDetailView.swift; sourceTree = "<group>"; };
+		B100000000000000000050C /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		B100000000000000000050E /* MockAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIClient.swift; sourceTree = "<group>"; };
+		B1000000000000000000510 /* OpenAIChatClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIChatClient.swift; sourceTree = "<group>"; };
+		B1000000000000000000512 /* AIClientProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIClientProvider.swift; sourceTree = "<group>"; };
+		B1000000000000000000514 /* AIClientHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIClientHolder.swift; sourceTree = "<group>"; };
+		B1000000000000000000516 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B1000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B1000000000000000000600 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B1000000000000000000601 /* PIKAPIKA.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PIKAPIKA.entitlements; sourceTree = "<group>"; };
+		B1000000000000000000701 /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -24,6 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1000000000000000000700 /* AuthenticationServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -50,8 +77,21 @@
 			isa = PBXGroup;
 			children = (
 				B1000000000000000000002 /* PIKAPIKAApp.swift */,
-				B1000000000000000000004 /* ContentView.swift */,
+				B1000000000000000000502 /* RootView.swift */,
+				B1000000000000000000504 /* LoginView.swift */,
+				B1000000000000000000506 /* AuthSession.swift */,
+				B1000000000000000000004 /* PetListView.swift */,
+				B1000000000000000000508 /* AddPetSheet.swift */,
+				B100000000000000000050A /* PetDetailView.swift */,
+				B100000000000000000050C /* ChatView.swift */,
+				B100000000000000000050E /* MockAIClient.swift */,
+				B1000000000000000000510 /* OpenAIChatClient.swift */,
+				B1000000000000000000512 /* AIClientProvider.swift */,
+				B1000000000000000000514 /* AIClientHolder.swift */,
+				B1000000000000000000516 /* SettingsView.swift */,
 				B1000000000000000000006 /* Assets.xcassets */,
+				B1000000000000000000600 /* Info.plist */,
+				B1000000000000000000601 /* PIKAPIKA.entitlements */,
 			);
 			path = PIKAPIKA;
 			sourceTree = "<group>";
@@ -74,6 +114,7 @@
 			name = PIKAPIKA;
 			packageProductDependencies = (
 				B1000000000000000000010 /* PikaCore */,
+				B1000000000000000000801 /* GoogleSignIn */,
 			);
 			productName = PIKAPIKA;
 			productReference = B1000000000000000000007 /* PIKAPIKA.app */;
@@ -105,6 +146,7 @@
 			mainGroup = B1000000000000000000009;
 			packageReferences = (
 				B1000000000000000000013 /* XCLocalSwiftPackageReference */,
+				B1000000000000000000800 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			productRefGroup = B100000000000000000000B /* Products */;
 			projectDirPath = "";
@@ -132,7 +174,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				B1000000000000000000001 /* PIKAPIKAApp.swift in Sources */,
-				B1000000000000000000003 /* ContentView.swift in Sources */,
+				B1000000000000000000501 /* RootView.swift in Sources */,
+				B1000000000000000000503 /* LoginView.swift in Sources */,
+				B1000000000000000000505 /* AuthSession.swift in Sources */,
+				B1000000000000000000003 /* PetListView.swift in Sources */,
+				B1000000000000000000507 /* AddPetSheet.swift in Sources */,
+				B1000000000000000000509 /* PetDetailView.swift in Sources */,
+				B100000000000000000050B /* ChatView.swift in Sources */,
+				B100000000000000000050D /* MockAIClient.swift in Sources */,
+				B100000000000000000050F /* OpenAIChatClient.swift in Sources */,
+				B1000000000000000000511 /* AIClientProvider.swift in Sources */,
+				B1000000000000000000513 /* AIClientHolder.swift in Sources */,
+				B1000000000000000000515 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,15 +237,13 @@
 		B1000000000000000000016 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PIKAPIKA/PIKAPIKA.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PIKAPIKA/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -211,15 +262,13 @@
 		B1000000000000000000017 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PIKAPIKA/PIKAPIKA.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PIKAPIKA/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -265,11 +314,27 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		B1000000000000000000800 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		B1000000000000000000010 /* PikaCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B1000000000000000000013 /* XCLocalSwiftPackageReference */;
 			productName = PikaCore;
+		};
+		B1000000000000000000801 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1000000000000000000800 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
