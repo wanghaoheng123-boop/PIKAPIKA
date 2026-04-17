@@ -22,6 +22,9 @@
 		B1000000000000000000515 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000516 /* SettingsView.swift */; };
 		B1000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000006 /* Assets.xcassets */; };
 		B1000000000000000000700 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000701 /* AuthenticationServices.framework */; };
+		B1000902 /* AuthSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000901 /* AuthSessionTests.swift */; };
+		B1000904 /* MockAIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000903 /* MockAIClientTests.swift */; };
+		B100090D /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B100090C /* XCTest.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +46,10 @@
 		B1000000000000000000600 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1000000000000000000601 /* PIKAPIKA.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PIKAPIKA.entitlements; sourceTree = "<group>"; };
 		B1000000000000000000701 /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
+		B1000900 /* PIKAPIKATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PIKAPIKATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1000901 /* AuthSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSessionTests.swift; sourceTree = "<group>"; };
+		B1000903 /* MockAIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIClientTests.swift; sourceTree = "<group>"; };
+		B100090C /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +61,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B1000908 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B100090D /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -61,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				B100000000000000000000A /* PIKAPIKA */,
+				B1000000000000000000910 /* PIKAPIKATests */,
 				B100000000000000000000B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -69,8 +85,18 @@
 			isa = PBXGroup;
 			children = (
 				B1000000000000000000007 /* PIKAPIKA.app */,
+				B1000900 /* PIKAPIKATests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B1000000000000000000910 /* PIKAPIKATests */ = {
+			isa = PBXGroup;
+			children = (
+				B1000901 /* AuthSessionTests.swift */,
+				B1000903 /* MockAIClientTests.swift */,
+			);
+			path = PIKAPIKATests;
 			sourceTree = "<group>";
 		};
 		B100000000000000000000A /* PIKAPIKA */ = {
@@ -120,6 +146,24 @@
 			productReference = B1000000000000000000007 /* PIKAPIKA.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B1000905 /* PIKAPIKATests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B1000906 /* Build configuration list for PBXNativeTarget "PIKAPIKATests" */;
+			buildPhases = (
+				B1000907 /* Sources */,
+				B1000908 /* Frameworks */,
+				B1000909 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B1000914 /* PBXTargetDependency */,
+			);
+			name = PIKAPIKATests;
+			productName = PIKAPIKATests;
+			productReference = B1000900 /* PIKAPIKATests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -132,6 +176,10 @@
 				TargetAttributes = {
 					B100000000000000000000C = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					B1000905 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = B100000000000000000000C;
 					};
 				};
 			};
@@ -153,6 +201,7 @@
 			projectRoot = "";
 			targets = (
 				B100000000000000000000C /* PIKAPIKA */,
+				B1000905 /* PIKAPIKATests */,
 			);
 		};
 /* End PBXProject section */
@@ -163,6 +212,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				B1000000000000000000005 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1000909 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -189,7 +245,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B1000907 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1000902 /* AuthSessionTests.swift in Sources */,
+				B1000904 /* MockAIClientTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
+		B1000913 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B1000000000000000000011 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B100000000000000000000C;
+			remoteInfo = PIKAPIKA;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		B1000914 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B100000000000000000000C /* PIKAPIKA */;
+			targetProxy = B1000913 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		B1000000000000000000014 /* Debug */ = {
@@ -242,6 +325,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_TESTABILITY = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PIKAPIKA/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -284,6 +368,46 @@
 			};
 			name = Release;
 		};
+		B1000911 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pikapika.PIKAPIKATests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PIKAPIKA.app/PIKAPIKA";
+			};
+			name = Debug;
+		};
+		B1000912 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pikapika.PIKAPIKATests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PIKAPIKA.app/PIKAPIKA";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -301,6 +425,15 @@
 			buildConfigurations = (
 				B1000000000000000000016 /* Debug */,
 				B1000000000000000000017 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B1000906 /* Build configuration list for PBXNativeTarget "PIKAPIKATests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B1000911 /* Debug */,
+				B1000912 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
