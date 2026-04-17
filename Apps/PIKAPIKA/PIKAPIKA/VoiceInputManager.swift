@@ -49,7 +49,8 @@ final class VoiceInputManager: ObservableObject {
                 return
             }
             guard let recognizer, recognizer.isAvailable else {
-                authorizationDenied = true
+                // Temporary recognizer availability issues should not show permission-denied UX.
+                authorizationDenied = false
                 return
             }
 
@@ -81,7 +82,8 @@ final class VoiceInputManager: ObservableObject {
                 }
             }
         } catch {
-            authorizationDenied = true
+            let status = SFSpeechRecognizer.authorizationStatus()
+            authorizationDenied = (status == .denied || status == .restricted)
             stop(commit: false, onText: { _ in })
         }
     }

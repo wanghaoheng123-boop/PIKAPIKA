@@ -6,6 +6,7 @@ struct PetMemoryListView: View {
     @Bindable var pet: Pet
 
     @Environment(\.modelContext) private var modelContext
+    @State private var errorText: String?
 
     private var facts: [PetMemoryFact] {
         pet.memoryFacts.sorted {
@@ -57,6 +58,16 @@ struct PetMemoryListView: View {
         .background(PIKAPIKATheme.homeBackground.ignoresSafeArea())
         .navigationTitle("Memories")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Could not save changes", isPresented: Binding(
+            get: { errorText != nil },
+            set: { newValue in
+                if !newValue { errorText = nil }
+            }
+        )) {
+            Button("OK", role: .cancel) { errorText = nil }
+        } message: {
+            Text(errorText ?? "Unknown error")
+        }
     }
 
     private func priorityLabel(_ i: Int) -> String {
@@ -72,7 +83,11 @@ struct PetMemoryListView: View {
             let fact = facts[i]
             modelContext.delete(fact)
         }
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorText = error.localizedDescription
+        }
         PetMemoryFileStore.syncFacts(petId: pet.id, petName: pet.name, facts: pet.memoryFacts)
     }
 }

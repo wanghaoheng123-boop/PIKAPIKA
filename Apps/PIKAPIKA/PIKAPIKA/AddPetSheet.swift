@@ -211,7 +211,13 @@ struct AddPetSheet: View {
             lastImagePrompt: nil
         )
         modelContext.insert(pet)
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorText = error.localizedDescription
+            modelContext.delete(pet)
+            return
+        }
 
         var hadSaveError = false
         if let jpeg = uploadedJPEG {
@@ -227,11 +233,20 @@ struct AddPetSheet: View {
 
         if hadSaveError {
             modelContext.delete(pet)
-            try? modelContext.save()
+            do {
+                try modelContext.save()
+            } catch {
+                errorText = error.localizedDescription
+            }
             return
         }
 
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorText = error.localizedDescription
+            return
+        }
         PetMemoryFileStore.syncFacts(petId: pet.id, petName: pet.name, facts: pet.memoryFacts)
         dismiss()
     }

@@ -38,6 +38,9 @@ final class OpenAIChatClient: AIClient, @unchecked Sendable {
             throw AIClientError.networkUnavailable
         }
         guard (200 ... 299).contains(http.statusCode) else {
+            if http.statusCode == 429 {
+                throw AIClientError.rateLimited
+            }
             let body = String(data: respData, encoding: .utf8) ?? ""
             throw AIClientError.serverError(statusCode: http.statusCode, body: body)
         }
@@ -59,8 +62,9 @@ final class OpenAIChatClient: AIClient, @unchecked Sendable {
 
     func generateImage(prompt: String, size: ImageSize) async throws -> Data {
         let apiSize = Self.openAISize(for: size)
+        let modelName = Self.openAIImageModel(for: size)
         let body: [String: Any] = [
-            "model": "dall-e-3",
+            "model": modelName,
             "prompt": prompt,
             "n": 1,
             "size": apiSize,
@@ -78,6 +82,9 @@ final class OpenAIChatClient: AIClient, @unchecked Sendable {
             throw AIClientError.networkUnavailable
         }
         guard (200 ... 299).contains(http.statusCode) else {
+            if http.statusCode == 429 {
+                throw AIClientError.rateLimited
+            }
             let body = String(data: respData, encoding: .utf8) ?? ""
             throw AIClientError.serverError(statusCode: http.statusCode, body: body)
         }
@@ -131,6 +138,9 @@ final class OpenAIChatClient: AIClient, @unchecked Sendable {
             throw AIClientError.networkUnavailable
         }
         guard (200 ... 299).contains(http.statusCode) else {
+            if http.statusCode == 429 {
+                throw AIClientError.rateLimited
+            }
             let body = String(data: respData, encoding: .utf8) ?? ""
             throw AIClientError.serverError(statusCode: http.statusCode, body: body)
         }
@@ -148,8 +158,19 @@ final class OpenAIChatClient: AIClient, @unchecked Sendable {
 
     private static func openAISize(for size: ImageSize) -> String {
         switch size {
-        case .square256, .square512, .square1024:
+        case .square256, .square512:
+            return size.rawValue
+        case .square1024:
             return "1024x1024"
+        }
+    }
+
+    private static func openAIImageModel(for size: ImageSize) -> String {
+        switch size {
+        case .square256, .square512:
+            return "dall-e-2"
+        case .square1024:
+            return "dall-e-3"
         }
     }
 }

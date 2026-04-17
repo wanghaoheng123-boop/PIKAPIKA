@@ -5,6 +5,10 @@ import SwiftData
 
 /// Shared send/receive flow for `ChatView` and `PetDetailView` playground.
 enum PetChatActions {
+    private static let maxStoredMessagesPerPet = 50
+    private static let memoryExtractionMinInterval: TimeInterval = 5 * 60
+    private static let memoryExtractionMinChars = 20
+
     struct SendOptions {
         var allowRemoteChat: Bool = true
         var allowMemoryExtraction: Bool = true
@@ -47,9 +51,42 @@ enum PetChatActions {
 
     @MainActor
     static func messages(for pet: Pet, modelContext: ModelContext) throws -> [ConversationMessage] {
-        let descriptor = FetchDescriptor<ConversationMessage>()
-        let all = try modelContext.fetch(descriptor)
-        return all.filter { $0.pet?.id == pet.id }.sorted { $0.timestamp < $1.timestamp }
+        let petId = pet.id
+        let descriptor = FetchDescriptor<ConversationMessage>(
+            predicate: #Predicate<ConversationMessage> { message in
+                message.pet?.id == petId
+            },
+            sortBy: [SortDescriptor(\.timestamp)]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
+    @MainActor
+    private static func trimHistoryIfNeeded(for pet: Pet, modelContext: ModelContext) throws {
+        let history = try messages(for: pet, modelContext: modelContext)
+        guard history.count > maxStoredMessagesPerPet else { return }
+        let overflow = history.count - maxStoredMessagesPerPet
+        for row in history.prefix(overflow) {
+            modelContext.delete(row)
+        }
+        try modelContext.save()
+    }
+
+    private static func shouldExtractMemory(for pet: Pet, userText: String) -> Bool {
+        let trimmed = userText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= memoryExtractionMinChars else { return false }
+        let key = "pet_memory_extract_last_\(pet.id.uuidString)"
+        let now = Date()
+        if let last = UserDefaults.standard.object(forKey: key) as? Date,
+           now.timeIntervalSince(last) < memoryExtractionMinInterval {
+            return false
+        }
+        return true
+    }
+
+    private static func markMemoryExtractedNow(for pet: Pet) {
+        let key = "pet_memory_extract_last_\(pet.id.uuidString)"
+        UserDefaults.standard.set(Date(), forKey: key)
     }
 
     /// Sends a user line and streams the assistant reply; persists both messages.
@@ -68,6 +105,7 @@ enum PetChatActions {
         let userMsg = ConversationMessage(pet: pet, role: "user", content: trimmed)
         modelContext.insert(userMsg)
         try modelContext.save()
+        try trimHistoryIfNeeded(for: pet, modelContext: modelContext)
 
         let history = try messages(for: pet, modelContext: modelContext)
         var chatMessages: [ChatMessage] = history.map { ChatMessage(role: $0.role, content: $0.content) }
@@ -97,9 +135,12 @@ enum PetChatActions {
         PetInteractionStreak.recordInteraction(pet: pet)
         pet.lastInteractedAt = Date()
         try modelContext.save()
+        try trimHistoryIfNeeded(for: pet, modelContext: modelContext)
 
-        if options.allowRemoteChat && options.allowMemoryExtraction {
-            await PetMemoryExtractor.extractAndStore(
+        if options.allowRemoteChat &&
+            options.allowMemoryExtraction &&
+            shouldExtractMemory(for: pet, userText: trimmed) {
+            let extracted = await PetMemoryExtractor.extractAndStore(
                 pet: pet,
                 userLine: trimmed,
                 assistantLine: clean,
@@ -107,6 +148,9 @@ enum PetChatActions {
                 aiClient: aiClient,
                 enabled: options.allowMemoryExtraction
             )
+            if extracted {
+                markMemoryExtractedNow(for: pet)
+            }
         }
     }
 

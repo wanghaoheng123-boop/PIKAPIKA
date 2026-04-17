@@ -9,7 +9,7 @@ struct PetDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AIClientHolder.self) private var aiHolder
 
-    @Query(sort: \ConversationMessage.timestamp, order: .reverse) private var allMessages: [ConversationMessage]
+    @Query(sort: \ConversationMessage.timestamp, order: .reverse) private var messagesForPet: [ConversationMessage]
 
     @State private var streamingAssistant = ""
     @State private var reactionBubble: String?
@@ -22,8 +22,15 @@ struct PetDetailView: View {
     @State private var moveSearch = ""
     @StateObject private var voiceInput = VoiceInputManager()
 
-    private var messagesForPet: [ConversationMessage] {
-        allMessages.filter { $0.pet?.id == pet.id }
+    init(pet: Pet) {
+        self.pet = pet
+        let petId = pet.id
+        _messagesForPet = Query(
+            filter: #Predicate<ConversationMessage> { message in
+                message.pet?.id == petId
+            },
+            sort: [SortDescriptor(\ConversationMessage.timestamp, order: .reverse)]
+        )
     }
 
     private var lastAssistantSnippet: String? {
@@ -401,7 +408,11 @@ struct PetDetailView: View {
         PetInteractionStreak.recordInteraction(pet: pet)
         pet.lastInteractedAt = Date()
         modelContext.insert(BondEvent(pet: pet, eventType: event, xpAwarded: xp))
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorText = error.localizedDescription
+        }
     }
 
     private func sendWithAI(_ text: String) async {
@@ -410,7 +421,6 @@ struct PetDetailView: View {
         isTalking = true
         streamingAssistant = ""
         reactionBubble = nil
-        awardBond(event: "chat", xp: 2)
         do {
             try await PetChatActions.send(
                 pet: pet,
@@ -424,6 +434,7 @@ struct PetDetailView: View {
             ) { partial in
                 streamingAssistant = partial
             }
+            awardBond(event: "chat", xp: 2)
             PetSoundEngine.shared.speakReplyIfEnabled(streamingAssistant, for: pet, mood: spirit)
             streamingAssistant = ""
         } catch {
@@ -443,7 +454,11 @@ struct PetDetailView: View {
         modelContext.insert(ConversationMessage(pet: pet, role: "assistant", content: reply))
         awardBond(event: "chat_local", xp: 2)
         PetSoundEngine.shared.speakReplyIfEnabled(reply, for: pet, mood: spirit)
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorText = error.localizedDescription
+        }
     }
 
     private func applyVoiceIntent(_ intent: VoiceIntent) {

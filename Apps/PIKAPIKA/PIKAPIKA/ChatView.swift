@@ -8,7 +8,7 @@ struct ChatView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AIClientHolder.self) private var aiHolder
 
-    @Query(sort: \ConversationMessage.timestamp) private var allMessages: [ConversationMessage]
+    @Query(sort: \ConversationMessage.timestamp) private var messages: [ConversationMessage]
 
     @State private var draft = ""
     @State private var streamingAssistant = ""
@@ -16,8 +16,15 @@ struct ChatView: View {
     @State private var errorText: String?
     @StateObject private var voiceInput = VoiceInputManager()
 
-    private var messages: [ConversationMessage] {
-        allMessages.filter { $0.pet?.id == pet.id }
+    init(pet: Pet) {
+        self.pet = pet
+        let petId = pet.id
+        _messages = Query(
+            filter: #Predicate<ConversationMessage> { message in
+                message.pet?.id == petId
+            },
+            sort: \ConversationMessage.timestamp
+        )
     }
 
     private var spirit: PetSpiritState { PetSpiritState.evaluate(for: pet) }
@@ -214,7 +221,11 @@ struct ChatView: View {
         pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
         modelContext.insert(BondEvent(pet: pet, eventType: event, xpAwarded: xp))
         modelContext.insert(ConversationMessage(pet: pet, role: "assistant", content: reply))
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            errorText = error.localizedDescription
+        }
         PetSoundEngine.shared.speakReplyIfEnabled(reply, for: pet, mood: spirit)
     }
 }
