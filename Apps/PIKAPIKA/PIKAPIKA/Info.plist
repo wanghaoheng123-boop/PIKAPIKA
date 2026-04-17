@@ -33,6 +33,12 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PIKAPIKA needs photo access to set your pet’s portrait.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>PIKAPIKA uses microphone input for on-device voice-to-text chat.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>PIKAPIKA uses Speech Recognition to convert your voice into text locally.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

@@ -23,6 +23,24 @@ public final class Pet {
     public var tintColorHex: String?         // Optional accent color override
     public var accessoryKey: String?         // Active cosmetic accessory identifier
 
+    /// Free-form lore: user-described creature (“electric fox with crystal wings…”).
+    public var creatureDescription: String
+    /// Relative path inside app storage to a user or AI-generated portrait (see `PetImageStore`).
+    public var avatarImagePath: String
+    /// Last image-generation prompt (audit / regenerate).
+    public var lastImagePrompt: String?
+
+    /// Optional custom USDZ 3D model path relative to Documents.
+    public var modelUSDZPath: String
+
+    /// Local sound profile key (cute/chirpy, soft, playful...) used by on-device synthesizer.
+    public var soundProfileKey: String
+    /// Whether this pet emits character sounds and optional spoken lines.
+    public var soundEnabled: Bool
+
+    @Relationship(deleteRule: .cascade, inverse: \PetMemoryFact.pet)
+    public var memoryFacts: [PetMemoryFact] = []
+
     public init(
         id: UUID = UUID(),
         name: String,
@@ -38,7 +56,13 @@ public final class Pet {
         longestStreak: Int = 0,
         totalWorkSessionMinutes: Int = 0,
         tintColorHex: String? = nil,
-        accessoryKey: String? = nil
+        accessoryKey: String? = nil,
+        creatureDescription: String = "",
+        avatarImagePath: String = "",
+        lastImagePrompt: String? = nil,
+        modelUSDZPath: String = "",
+        soundProfileKey: String = "cute",
+        soundEnabled: Bool = true
     ) {
         self.id = id
         self.name = name
@@ -55,6 +79,12 @@ public final class Pet {
         self.totalWorkSessionMinutes = totalWorkSessionMinutes
         self.tintColorHex = tintColorHex
         self.accessoryKey = accessoryKey
+        self.creatureDescription = creatureDescription
+        self.avatarImagePath = avatarImagePath
+        self.lastImagePrompt = lastImagePrompt
+        self.modelUSDZPath = modelUSDZPath
+        self.soundProfileKey = soundProfileKey
+        self.soundEnabled = soundEnabled
     }
 }
 

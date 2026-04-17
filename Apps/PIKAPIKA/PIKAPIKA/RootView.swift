@@ -12,5 +12,6 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: authSession.isSignedIn)
+        .tint(PIKAPIKATheme.accent)
     }
 }
