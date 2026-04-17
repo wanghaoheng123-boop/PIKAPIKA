@@ -24,7 +24,8 @@ struct SettingsView: View {
                         dismiss()
                     }
                 }
-                Section("OpenAI (optional)") {
+
+                Section("OpenAI") {
                     SecureField("API key", text: $openAIKey)
                         .textContentType(.password)
                     Button("Save key") {
@@ -37,11 +38,13 @@ struct SettingsView: View {
                         aiHolder.refresh()
                         showKeySaved = true
                     }
-                    Text("Leave empty to use the built-in mock replies. Keys stay in Keychain on this device.")
+                    Text("Leave empty for mock replies. With a key: chat, vision (describe photo), DALL·E portraits, and memory extraction use your account. Keys stay in Keychain on this device.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(PIKAPIKATheme.homeBackground.ignoresSafeArea())
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -58,5 +61,6 @@ struct SettingsView: View {
                 Text("API key updated. Chat will use OpenAI when a key is present.")
             }
         }
+        .tint(PIKAPIKATheme.accent)
     }
 }

@@ -1,5 +1,6 @@
 import Foundation
 import PikaCoreBase
+import UIKit
 
 /// Deterministic offline replies for Simulator and testing.
 final class MockAIClient: AIClient, @unchecked Sendable {
@@ -23,7 +24,12 @@ final class MockAIClient: AIClient, @unchecked Sendable {
     }
 
     func generateImage(prompt: String, size: ImageSize) async throws -> Data {
-        Data()
+        let r = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8))
+        let img = r.image { ctx in
+            UIColor.systemPink.setFill()
+            ctx.fill(CGRect(x: 0, y: 0, width: 8, height: 8))
+        }
+        return img.pngData() ?? Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
     }
 
     func describeImage(_ imageData: Data, prompt: String) async throws -> String {

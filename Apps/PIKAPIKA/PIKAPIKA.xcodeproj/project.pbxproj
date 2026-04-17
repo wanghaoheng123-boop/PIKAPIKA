@@ -20,6 +20,21 @@
 		B1000000000000000000511 /* AIClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000512 /* AIClientProvider.swift */; };
 		B1000000000000000000513 /* AIClientHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000514 /* AIClientHolder.swift */; };
 		B1000000000000000000515 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000516 /* SettingsView.swift */; };
+		B1000000000000000000519 /* PetAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000517 /* PetAvatarView.swift */; };
+		B1000000000000000000520 /* PetChatActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000518 /* PetChatActions.swift */; };
+		B1000000000000000000610 /* PetImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000620 /* PetImageStore.swift */; };
+		B1000000000000000000611 /* PetActionCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000621 /* PetActionCatalog.swift */; };
+		B1000000000000000000612 /* PetScene3DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000622 /* PetScene3DView.swift */; };
+		B1000000000000000000613 /* PetMemoryFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000623 /* PetMemoryFileStore.swift */; };
+		B1000000000000000000614 /* PetMemoryExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000624 /* PetMemoryExtractor.swift */; };
+		B1000000000000000000615 /* PetMemoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000625 /* PetMemoryListView.swift */; };
+		B1000000000000000000640 /* PIKAPIKATheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000634 /* PIKAPIKATheme.swift */; };
+		B1000000000000000000641 /* PetSpiritState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000635 /* PetSpiritState.swift */; };
+		B1000000000000000000642 /* PetInteractionStreak.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000636 /* PetInteractionStreak.swift */; };
+		B1000000000000000000643 /* PikaComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000637 /* PikaComponents.swift */; };
+		B1000000000000000000644 /* PetSoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000638 /* PetSoundEngine.swift */; };
+		B1000000000000000000645 /* VoiceInputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000639 /* VoiceInputManager.swift */; };
+		B1000000000000000000646 /* PetCustomizationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000647 /* PetCustomizationSheet.swift */; };
 		B1000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000006 /* Assets.xcassets */; };
 		B1000000000000000000700 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000701 /* AuthenticationServices.framework */; };
 		B1000902 /* AuthSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000901 /* AuthSessionTests.swift */; };
@@ -42,6 +57,21 @@
 		B1000000000000000000512 /* AIClientProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIClientProvider.swift; sourceTree = "<group>"; };
 		B1000000000000000000514 /* AIClientHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIClientHolder.swift; sourceTree = "<group>"; };
 		B1000000000000000000516 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B1000000000000000000517 /* PetAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetAvatarView.swift; sourceTree = "<group>"; };
+		B1000000000000000000518 /* PetChatActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetChatActions.swift; sourceTree = "<group>"; };
+		B1000000000000000000620 /* PetImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetImageStore.swift; sourceTree = "<group>"; };
+		B1000000000000000000621 /* PetActionCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetActionCatalog.swift; sourceTree = "<group>"; };
+		B1000000000000000000622 /* PetScene3DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetScene3DView.swift; sourceTree = "<group>"; };
+		B1000000000000000000623 /* PetMemoryFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetMemoryFileStore.swift; sourceTree = "<group>"; };
+		B1000000000000000000624 /* PetMemoryExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetMemoryExtractor.swift; sourceTree = "<group>"; };
+		B1000000000000000000625 /* PetMemoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetMemoryListView.swift; sourceTree = "<group>"; };
+		B1000000000000000000634 /* PIKAPIKATheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PIKAPIKATheme.swift; sourceTree = "<group>"; };
+		B1000000000000000000635 /* PetSpiritState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetSpiritState.swift; sourceTree = "<group>"; };
+		B1000000000000000000636 /* PetInteractionStreak.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetInteractionStreak.swift; sourceTree = "<group>"; };
+		B1000000000000000000637 /* PikaComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PikaComponents.swift; sourceTree = "<group>"; };
+		B1000000000000000000638 /* PetSoundEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetSoundEngine.swift; sourceTree = "<group>"; };
+		B1000000000000000000639 /* VoiceInputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputManager.swift; sourceTree = "<group>"; };
+		B1000000000000000000647 /* PetCustomizationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetCustomizationSheet.swift; sourceTree = "<group>"; };
 		B1000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1000000000000000000600 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1000000000000000000601 /* PIKAPIKA.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PIKAPIKA.entitlements; sourceTree = "<group>"; };
@@ -109,6 +139,21 @@
 				B1000000000000000000004 /* PetListView.swift */,
 				B1000000000000000000508 /* AddPetSheet.swift */,
 				B100000000000000000050A /* PetDetailView.swift */,
+				B1000000000000000000517 /* PetAvatarView.swift */,
+				B1000000000000000000518 /* PetChatActions.swift */,
+				B1000000000000000000620 /* PetImageStore.swift */,
+				B1000000000000000000621 /* PetActionCatalog.swift */,
+				B1000000000000000000622 /* PetScene3DView.swift */,
+				B1000000000000000000623 /* PetMemoryFileStore.swift */,
+				B1000000000000000000624 /* PetMemoryExtractor.swift */,
+				B1000000000000000000625 /* PetMemoryListView.swift */,
+				B1000000000000000000634 /* PIKAPIKATheme.swift */,
+				B1000000000000000000635 /* PetSpiritState.swift */,
+				B1000000000000000000636 /* PetInteractionStreak.swift */,
+				B1000000000000000000637 /* PikaComponents.swift */,
+				B1000000000000000000638 /* PetSoundEngine.swift */,
+				B1000000000000000000639 /* VoiceInputManager.swift */,
+				B1000000000000000000647 /* PetCustomizationSheet.swift */,
 				B100000000000000000050C /* ChatView.swift */,
 				B100000000000000000050E /* MockAIClient.swift */,
 				B1000000000000000000510 /* OpenAIChatClient.swift */,
@@ -236,6 +281,21 @@
 				B1000000000000000000003 /* PetListView.swift in Sources */,
 				B1000000000000000000507 /* AddPetSheet.swift in Sources */,
 				B1000000000000000000509 /* PetDetailView.swift in Sources */,
+				B1000000000000000000519 /* PetAvatarView.swift in Sources */,
+				B1000000000000000000520 /* PetChatActions.swift in Sources */,
+				B1000000000000000000610 /* PetImageStore.swift in Sources */,
+				B1000000000000000000611 /* PetActionCatalog.swift in Sources */,
+				B1000000000000000000612 /* PetScene3DView.swift in Sources */,
+				B1000000000000000000613 /* PetMemoryFileStore.swift in Sources */,
+				B1000000000000000000614 /* PetMemoryExtractor.swift in Sources */,
+				B1000000000000000000615 /* PetMemoryListView.swift in Sources */,
+				B1000000000000000000640 /* PIKAPIKATheme.swift in Sources */,
+				B1000000000000000000641 /* PetSpiritState.swift in Sources */,
+				B1000000000000000000642 /* PetInteractionStreak.swift in Sources */,
+				B1000000000000000000643 /* PikaComponents.swift in Sources */,
+				B1000000000000000000644 /* PetSoundEngine.swift in Sources */,
+				B1000000000000000000645 /* VoiceInputManager.swift in Sources */,
+				B1000000000000000000646 /* PetCustomizationSheet.swift in Sources */,
 				B100000000000000000050B /* ChatView.swift in Sources */,
 				B100000000000000000050D /* MockAIClient.swift in Sources */,
 				B100000000000000000050F /* OpenAIChatClient.swift in Sources */,

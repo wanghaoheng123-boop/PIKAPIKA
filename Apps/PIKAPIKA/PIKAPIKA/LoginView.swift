@@ -13,72 +13,115 @@ struct LoginView: View {
     @State private var showGoogleNotConfigured = false
 
     var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "pawprint.circle.fill")
-                .font(.system(size: 72))
-                .foregroundStyle(.tint)
-            Text("PIKAPIKA")
-                .font(.largeTitle.bold())
-            Text("Sign in to continue")
-                .foregroundStyle(.secondary)
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.35, green: 0.2, blue: 0.55),
+                    PIKAPIKATheme.accent.opacity(0.95),
+                    PIKAPIKATheme.warmth.opacity(0.9)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
-            SignInWithAppleButton(.signIn) { request in
-                request.requestedScopes = [.fullName, .email]
-            } onCompletion: { result in
-                Task { @MainActor in
-                    switch result {
-                    case .success(let authorization):
-                        if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
-                            authSession.signInApple(userIdentifier: credential.user)
-                        } else {
-                            appleErrorMessage = "Unexpected credential type. Try again."
-                            showAppleError = true
+            VStack(spacing: 0) {
+                Spacer(minLength: 24)
+
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .fill(.white.opacity(0.2))
+                            .frame(width: 112, height: 112)
+                        Image(systemName: "pawprint.circle.fill")
+                            .font(.system(size: 72))
+                            .foregroundStyle(.white)
+                            .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+                    }
+                    Text("PIKAPIKA")
+                        .font(.system(size: 36, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .tracking(1)
+                    Text("An AI companion with spirit")
+                        .font(.title3.weight(.medium))
+                        .foregroundStyle(.white.opacity(0.95))
+                    Text("Care, chat, and daily moments — a living bond, not just a chat window.")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.88))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 28)
+                }
+
+                Spacer(minLength: 32)
+
+                VStack(spacing: 14) {
+                    SignInWithAppleButton(.signIn) { request in
+                        request.requestedScopes = [.fullName, .email]
+                    } onCompletion: { result in
+                        Task { @MainActor in
+                            switch result {
+                            case .success(let authorization):
+                                if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                                    authSession.signInApple(userIdentifier: credential.user)
+                                } else {
+                                    appleErrorMessage = "Unexpected credential type. Try again."
+                                    showAppleError = true
+                                }
+                            case .failure(let error):
+                                if isAppleUserCanceled(error) {
+                                    return
+                                }
+                                appleErrorMessage = error.localizedDescription
+                                showAppleError = true
+                            }
                         }
-                    case .failure(let error):
-                        if isAppleUserCanceled(error) {
-                            return
+                    }
+                    .signInWithAppleButtonStyle(.white)
+                    .frame(height: 52)
+                    .clipShape(RoundedRectangle(cornerRadius: PIKAPIKATheme.cornerMedium, style: .continuous))
+
+                    Button {
+                        Task { await signInGoogle() }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "g.circle.fill")
+                                .font(.title3)
+                            Text("Sign in with Google")
+                                .fontWeight(.semibold)
                         }
-                        appleErrorMessage = error.localizedDescription
-                        showAppleError = true
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(.white.opacity(0.95))
+                        .foregroundStyle(.primary)
+                        .clipShape(RoundedRectangle(cornerRadius: PIKAPIKATheme.cornerMedium, style: .continuous))
+                    }
+
+                    Button {
+                        authSession.signInGuest()
+                    } label: {
+                        Text("Try without signing in")
+                            .font(.body.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background {
+                                RoundedRectangle(cornerRadius: PIKAPIKATheme.cornerMedium, style: .continuous)
+                                    .strokeBorder(.white.opacity(0.85), lineWidth: 1.5)
+                            }
+                            .foregroundStyle(.white)
                     }
                 }
-            }
-            .signInWithAppleButtonStyle(.black)
-            .frame(height: 50)
-            .padding(.horizontal, 24)
+                .padding(.horizontal, 28)
 
-            Button {
-                Task { await signInGoogle() }
-            } label: {
-                HStack {
-                    Image(systemName: "g.circle.fill")
-                    Text("Sign in with Google")
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(Color(.systemGray6))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
-            .padding(.horizontal, 24)
+                Text(footerHint)
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .padding(.top, 20)
 
-            Button {
-                authSession.signInGuest()
-            } label: {
-                Text("Continue without account")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                Spacer(minLength: 40)
             }
-            .buttonStyle(.bordered)
-            .padding(.horizontal, 24)
-
-            Text(footerHint)
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemBackground))
         .alert("Sign in with Apple failed", isPresented: $showAppleError) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -93,18 +136,18 @@ struct LoginView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(
-                "Add your iOS OAuth client ID as GIDClientID and the reversed client ID as a URL scheme in Info.plist (Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID for iOS, bundle id com.pikapika.PIKAPIKA). Or use “Continue without account” to try the app."
+                "Add your iOS OAuth client ID as GIDClientID and the reversed client ID as a URL scheme in Info.plist (Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID for iOS, bundle id com.pikapika.PIKAPIKA). Or use “Try without signing in” to try the app."
             )
         }
     }
 
     private var footerHint: String {
         var parts: [String] = []
-        parts.append("Use “Continue without account” to try pets and chat without Apple or Google.")
+        parts.append("Guest mode saves pets on this device.")
         if !isGoogleClientConfigured {
             parts.append("Google needs a real GIDClientID in Info.plist.")
         }
-        parts.append("Apple needs Sign in with Apple enabled for this App ID in the Apple Developer portal.")
+        parts.append("Enable Sign in with Apple for this App ID in the Developer portal.")
         return parts.joined(separator: " ")
     }
 
@@ -150,7 +193,6 @@ struct LoginView: View {
             authSession.signInGoogle(userIdentifier: uid)
         } catch {
             let ns = error as NSError
-            // kGIDSignInErrorCodeCanceled == -5
             if ns.code == -5, ns.domain.contains("GIDSignIn") {
                 return
             }
@@ -159,7 +201,6 @@ struct LoginView: View {
         }
     }
 
-    /// Resolves a view controller for Google Sign-In across all connected window scenes (key window is not always set during launch).
     private static func presentingViewControllerForSignIn() -> UIViewController? {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         for scene in scenes {

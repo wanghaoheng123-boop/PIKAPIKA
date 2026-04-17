@@ -16,7 +16,8 @@ struct PIKAPIKAApp: App {
             Pet.self,
             BondEvent.self,
             ConversationMessage.self,
-            SeasonalEvent.self
+            SeasonalEvent.self,
+            PetMemoryFact.self
         ])
         do {
             modelContainer = try ModelContainer(for: schema, configurations: [ModelConfiguration()])
