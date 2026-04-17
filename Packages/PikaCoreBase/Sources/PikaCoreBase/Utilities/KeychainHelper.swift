@@ -9,6 +9,8 @@ public enum KeychainHelper {
         case openAIKey      = "openai_api_key"
         case anthropicKey   = "anthropic_api_key"
         case userToken      = "user_auth_token"
+        case appleUserId    = "apple_user_id"
+        case googleUserId   = "google_user_id"
     }
 
     private static let service = "com.pikapika.app"
