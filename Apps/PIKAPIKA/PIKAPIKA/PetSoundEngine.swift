@@ -12,6 +12,9 @@ final class PetSoundEngine {
 
     func chirp(for pet: Pet, mood: PetSpiritState) {
         guard pet.soundEnabled else { return }
+        if synth.isSpeaking {
+            _ = synth.stopSpeaking(at: .immediate)
+        }
         let token: String
         switch pet.soundProfileKey {
         case "soft":
@@ -28,6 +31,9 @@ final class PetSoundEngine {
 
     func speakReplyIfEnabled(_ text: String, for pet: Pet, mood: PetSpiritState) {
         guard pet.soundEnabled else { return }
+        if synth.isSpeaking {
+            _ = synth.stopSpeaking(at: .word)
+        }
         speak(text: text, for: pet, mood: mood, forceCompact: false)
     }
 

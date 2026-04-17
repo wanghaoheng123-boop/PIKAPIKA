@@ -25,6 +25,10 @@ struct AddPetSheet: View {
         return c.isEmpty ? speciesPreset : c
     }
 
+    private var canUseRemoteImage: Bool {
+        aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteImage
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -64,14 +68,19 @@ struct AddPetSheet: View {
                     } label: {
                         Label("Describe photo with AI (uses your API key)", systemImage: "text.viewfinder")
                     }
-                    .disabled(isWorking || uploadedJPEG == nil)
+                    .disabled(isWorking || uploadedJPEG == nil || !canUseRemoteImage)
 
                     Button {
                         Task { await generatePortrait() }
                     } label: {
                         Label("Generate portrait with AI (DALL·E, uses your key)", systemImage: "wand.and.stars")
                     }
-                    .disabled(isWorking || creatureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(isWorking || creatureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !canUseRemoteImage)
+                    if !canUseRemoteImage {
+                        Text("Enable “Use remote AI for image design” in Settings and add an API key to use these tools.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 if let errorText {
@@ -118,6 +127,7 @@ struct AddPetSheet: View {
 
     private func analyzePhoto() async {
         guard let data = uploadedJPEG else { return }
+        guard canUseRemoteImage else { return }
         await MainActor.run {
             isWorking = true
             errorText = nil
@@ -145,6 +155,7 @@ struct AddPetSheet: View {
     private func generatePortrait() async {
         let desc = creatureDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !desc.isEmpty else { return }
+        guard canUseRemoteImage else { return }
         let vibe = await MainActor.run { resolvedSpecies }
         await MainActor.run {
             isWorking = true
@@ -202,14 +213,22 @@ struct AddPetSheet: View {
         modelContext.insert(pet)
         try? modelContext.save()
 
+        var hadSaveError = false
         if let jpeg = uploadedJPEG {
             do {
                 let path = try PetImageStore.saveJPEG(jpeg, petId: pet.id, filename: "avatar.jpg")
                 pet.avatarImagePath = path
                 pet.lastImagePrompt = creatureDescription
             } catch {
+                hadSaveError = true
                 errorText = error.localizedDescription
             }
+        }
+
+        if hadSaveError {
+            modelContext.delete(pet)
+            try? modelContext.save()
+            return
         }
 
         try? modelContext.save()

@@ -5,6 +5,10 @@ import SwiftData
 
 /// Shared send/receive flow for `ChatView` and `PetDetailView` playground.
 enum PetChatActions {
+    struct SendOptions {
+        var allowRemoteChat: Bool = true
+        var allowMemoryExtraction: Bool = true
+    }
 
     static func systemPrompt(for pet: Pet, modelContext: ModelContext) -> String {
         let traits = pet.personalityTraits.joined(separator: ", ")
@@ -55,6 +59,7 @@ enum PetChatActions {
         userText: String,
         modelContext: ModelContext,
         aiClient: any AIClient,
+        options: SendOptions = .init(),
         onStreamingAssistant: @escaping (String) -> Void
     ) async throws {
         let trimmed = userText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -64,34 +69,58 @@ enum PetChatActions {
         modelContext.insert(userMsg)
         try modelContext.save()
 
-        var history = try messages(for: pet, modelContext: modelContext)
+        let history = try messages(for: pet, modelContext: modelContext)
         var chatMessages: [ChatMessage] = history.map { ChatMessage(role: $0.role, content: $0.content) }
         if chatMessages.last?.role != "user" || chatMessages.last?.content != trimmed {
             chatMessages.append(ChatMessage(role: "user", content: trimmed))
         }
 
-        let stream = try await aiClient.chat(
-            messages: chatMessages,
-            systemPrompt: systemPrompt(for: pet, modelContext: modelContext),
-            temperature: 0.75
-        )
         var full = ""
-        for try await chunk in stream {
-            full += chunk
+        if options.allowRemoteChat {
+            let stream = try await aiClient.chat(
+                messages: chatMessages,
+                systemPrompt: systemPrompt(for: pet, modelContext: modelContext),
+                temperature: 0.75
+            )
+            for try await chunk in stream {
+                full += chunk
+                onStreamingAssistant(full)
+            }
+        } else {
+            full = localCompanionReply(for: pet, userText: trimmed)
             onStreamingAssistant(full)
         }
-        let assistant = ConversationMessage(pet: pet, role: "assistant", content: full)
+        let clean = full.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty else { return }
+        let assistant = ConversationMessage(pet: pet, role: "assistant", content: clean)
         modelContext.insert(assistant)
         PetInteractionStreak.recordInteraction(pet: pet)
         pet.lastInteractedAt = Date()
         try modelContext.save()
 
-        await PetMemoryExtractor.extractAndStore(
-            pet: pet,
-            userLine: trimmed,
-            assistantLine: full,
-            modelContext: modelContext,
-            aiClient: aiClient
-        )
+        if options.allowRemoteChat && options.allowMemoryExtraction {
+            await PetMemoryExtractor.extractAndStore(
+                pet: pet,
+                userLine: trimmed,
+                assistantLine: clean,
+                modelContext: modelContext,
+                aiClient: aiClient,
+                enabled: options.allowMemoryExtraction
+            )
+        }
+    }
+
+    static func localCompanionReply(for pet: Pet, userText: String) -> String {
+        let key = userText.lowercased()
+        if key.contains("joke") {
+            return "Why did the pet sit by the computer? To keep an eye on your mouse. \(PetAvatarView.speciesEmoji(pet.species))"
+        }
+        if key.contains("how are you") || key.contains("how r you") {
+            return "I feel great when you check in. Want to play or chat more?"
+        }
+        if key.contains("miss") {
+            return "I missed you too. Your vibe makes my spirit brighter."
+        }
+        return "I’m here with you. Tap me, play, or open full chat when you want deeper AI talk."
     }
 }

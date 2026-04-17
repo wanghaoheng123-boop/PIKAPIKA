@@ -1,6 +1,5 @@
 import Foundation
 import PikaCore
-import PikaCoreBase
 import SwiftData
 
 /// After a chat turn, asks the model for 0–2 compact memory facts (only when a real API key is configured).
@@ -13,9 +12,10 @@ enum PetMemoryExtractor {
         userLine: String,
         assistantLine: String,
         modelContext: ModelContext,
-        aiClient: any AIClient
+        aiClient: any AIClient,
+        enabled: Bool
     ) async {
-        guard KeychainHelper.load(.openAIKey) != nil else { return }
+        guard enabled else { return }
         guard !userLine.isEmpty, !assistantLine.isEmpty else { return }
 
         let existingContents = pet.memoryFacts.map(\.content)

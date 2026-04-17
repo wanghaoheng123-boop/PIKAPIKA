@@ -20,6 +20,7 @@ struct PetDetailView: View {
     @State private var showMovesSheet = false
     @State private var showCustomize = false
     @State private var moveSearch = ""
+    @StateObject private var voiceInput = VoiceInputManager()
 
     private var messagesForPet: [ConversationMessage] {
         allMessages.filter { $0.pet?.id == pet.id }
@@ -57,6 +58,10 @@ struct PetDetailView: View {
         return PetActionCatalog.all.filter { $0.lowercased().contains(q) }
     }
 
+    private var hoursAway: Int {
+        Int(Date().timeIntervalSince(pet.lastInteractedAt) / 3600)
+    }
+
     private var spirit: PetSpiritState { PetSpiritState.evaluate(for: pet) }
 
     var body: some View {
@@ -64,6 +69,27 @@ struct PetDetailView: View {
             VStack(alignment: .leading, spacing: PikaMetrics.sectionSpacing) {
                 SpiritBondStrip(pet: pet, spirit: spirit)
                     .padding(.horizontal, PikaMetrics.screenHorizontal)
+
+                if hoursAway >= 6 {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("While you were away")
+                            .font(.subheadline.weight(.semibold))
+                        Text("\(pet.name) stayed \(spirit.shortTitle.lowercased()) and waited \(hoursAway)h for your return.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if let lastAssistantSnippet {
+                            Text("Last thought: \(lastAssistantSnippet)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(PikaMetrics.cardPadding)
+                    .background {
+                        RoundedRectangle(cornerRadius: PIKAPIKATheme.cornerMedium, style: .continuous)
+                            .fill(Color(.secondarySystemGroupedBackground))
+                    }
+                    .padding(.horizontal, PikaMetrics.screenHorizontal)
+                }
 
                 if !pet.creatureDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     Text(pet.creatureDescription)
@@ -195,6 +221,14 @@ struct PetDetailView: View {
                     .padding(.bottom, 8)
             }
         }
+        .onDisappear {
+            voiceInput.stop(commit: false) { _ in }
+        }
+        .alert("Microphone or speech permission denied", isPresented: $voiceInput.authorizationDenied) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Enable Speech Recognition and Microphone in Settings to use voice input.")
+        }
     }
 
     private var movesButton: some View {
@@ -254,16 +288,31 @@ struct PetDetailView: View {
 
     private var quickPhrasesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            PikaSectionHeader(
-                title: "Quick talk",
-                subtitle: "One tap — they answer with spirit."
-            )
+            HStack {
+                PikaSectionHeader(
+                    title: "Quick talk",
+                    subtitle: "One tap — they answer with spirit."
+                )
+                Button {
+                    voiceInput.toggle { text in
+                        if let intent = VoiceIntentRouter.parse(text) {
+                            applyVoiceIntent(intent)
+                        } else {
+                            Task { await sendWithAI(text) }
+                        }
+                    }
+                } label: {
+                    Image(systemName: voiceInput.isListening ? "mic.fill" : "mic")
+                        .frame(width: 32, height: 32)
+                }
+                .buttonStyle(.bordered)
+            }
             .padding(.horizontal, PikaMetrics.screenHorizontal)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     ForEach(quickPhrases, id: \.self) { phrase in
                         Button {
-                            Task { await sendWithAI(phrase) }
+                            handleQuickPhrase(phrase)
                         } label: {
                             Text(phrase)
                                 .font(.subheadline.weight(.medium))
@@ -367,7 +416,11 @@ struct PetDetailView: View {
                 pet: pet,
                 userText: text,
                 modelContext: modelContext,
-                aiClient: aiHolder.client
+                aiClient: aiHolder.client,
+                options: .init(
+                    allowRemoteChat: aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteChat,
+                    allowMemoryExtraction: aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteMemoryExtraction
+                )
             ) { partial in
                 streamingAssistant = partial
             }
@@ -377,6 +430,41 @@ struct PetDetailView: View {
             errorText = error.localizedDescription
         }
         isTalking = false
+    }
+
+    private func handleQuickPhrase(_ phrase: String) {
+        let canRemote = aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteChat
+        if canRemote {
+            Task { await sendWithAI(phrase) }
+            return
+        }
+        let reply = PetChatActions.localCompanionReply(for: pet, userText: phrase)
+        modelContext.insert(ConversationMessage(pet: pet, role: "user", content: phrase))
+        modelContext.insert(ConversationMessage(pet: pet, role: "assistant", content: reply))
+        awardBond(event: "chat_local", xp: 2)
+        PetSoundEngine.shared.speakReplyIfEnabled(reply, for: pet, mood: spirit)
+        try? modelContext.save()
+    }
+
+    private func applyVoiceIntent(_ intent: VoiceIntent) {
+        switch intent {
+        case .ask(let text):
+            Task { await sendWithAI(text) }
+        case .pet:
+            awardBond(event: "pet", xp: 4)
+            triggerAction("nuzzle")
+        case .feed:
+            awardBond(event: "feed", xp: 6)
+            triggerAction("eat")
+        case .play:
+            awardBond(event: "play", xp: 8)
+            triggerAction("fetch")
+        case .move(let name):
+            triggerAction(name)
+            awardBond(event: "voice_move", xp: 2)
+        case .openMemories:
+            flashReaction("Tap Heart & memory below")
+        }
     }
 
     private func clip(_ s: String, max: Int) -> String {

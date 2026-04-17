@@ -22,28 +22,38 @@ final class VoiceInputManager: ObservableObject {
     }
 
     func stop(commit: Bool, onText: @escaping (String) -> Void) {
-        guard isListening else { return }
-        audioEngine.stop()
-        audioEngine.inputNode.removeTap(onBus: 0)
+        if audioEngine.isRunning {
+            audioEngine.stop()
+        }
+        if audioEngine.inputNode.numberOfInputs > 0 {
+            audioEngine.inputNode.removeTap(onBus: 0)
+        }
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
+        recognitionTask = nil
+        recognitionRequest = nil
+        let captured = liveText.trimmingCharacters(in: .whitespacesAndNewlines)
         isListening = false
-        if commit, !liveText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            onText(liveText)
+        if commit, !captured.isEmpty {
+            onText(captured)
         }
         liveText = ""
     }
 
     private func start() async {
         do {
+            authorizationDenied = false
             let granted = await requestPermissions()
             guard granted else {
                 authorizationDenied = true
                 return
             }
+            guard let recognizer, recognizer.isAvailable else {
+                authorizationDenied = true
+                return
+            }
 
-            recognitionTask?.cancel()
-            recognitionTask = nil
+            stop(commit: false, onText: { _ in })
 
             let request = SFSpeechAudioBufferRecognitionRequest()
             request.shouldReportPartialResults = true
@@ -61,7 +71,7 @@ final class VoiceInputManager: ObservableObject {
             isListening = true
             liveText = ""
 
-            recognitionTask = recognizer?.recognitionTask(with: request) { [weak self] result, error in
+            recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
                 guard let self else { return }
                 if let result {
                     self.liveText = result.bestTranscription.formattedString
@@ -83,7 +93,7 @@ final class VoiceInputManager: ObservableObject {
             }
         }
         let mic = await withCheckedContinuation { continuation in
-            AVAudioSession.sharedInstance().requestRecordPermission { ok in
+            AVAudioApplication.requestRecordPermission { ok in
                 continuation.resume(returning: ok)
             }
         }
