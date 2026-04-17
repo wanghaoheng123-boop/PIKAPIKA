@@ -3,7 +3,7 @@ import PikaCoreBase
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(AuthSession.self) private var authSession
+    @EnvironmentObject private var authSession: AuthSession
     @Environment(AIClientHolder.self) private var aiHolder
 
     @State private var openAIKey = ""

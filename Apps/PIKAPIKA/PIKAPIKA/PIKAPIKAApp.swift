@@ -6,7 +6,7 @@ import PikaCore
 @main
 struct PIKAPIKAApp: App {
 
-    @State private var authSession = AuthSession()
+    @StateObject private var authSession = AuthSession()
     @State private var aiHolder = AIClientHolder()
 
     private let modelContainer: ModelContainer
@@ -34,7 +34,7 @@ struct PIKAPIKAApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .environment(authSession)
+                .environmentObject(authSession)
                 .environment(aiHolder)
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
