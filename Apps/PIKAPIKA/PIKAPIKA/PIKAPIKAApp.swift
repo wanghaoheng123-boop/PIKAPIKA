@@ -23,7 +23,17 @@ struct PIKAPIKAApp: App {
         do {
             modelContainer = try ModelContainer(for: schema, configurations: [ModelConfiguration()])
         } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
+            // Keep app bootable even if persistent store initialization fails.
+            // This fallback uses an in-memory store so users can still open the app.
+            do {
+                modelContainer = try ModelContainer(
+                    for: schema,
+                    configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
+                )
+                print("PIKAPIKAApp: persistent ModelContainer failed, using in-memory fallback: \(error)")
+            } catch {
+                fatalError("Failed to create both persistent and in-memory ModelContainer: \(error)")
+            }
         }
 
         if let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String,
