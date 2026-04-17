@@ -1,5 +1,16 @@
 # PIKAPIKA
 
+**GitHub:** [https://github.com/wanghaoheng123-boop/PIKAPIKA](https://github.com/wanghaoheng123-boop/PIKAPIKA)
+
+### Clone for Xcode
+
+1. **Xcode:** **File → Clone Repository…** → paste `https://github.com/wanghaoheng123-boop/PIKAPIKA.git` → choose a folder → **Clone**. When it finishes, open **`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`**.
+2. **Terminal:** `git clone https://github.com/wanghaoheng123-boop/PIKAPIKA.git` then open the same `.xcodeproj`.
+
+After cloning, run **`swift test`** inside `Packages/PikaCoreBase` if you want to verify packages; open the app project in Xcode and **⌘R** on a simulator.
+
+---
+
 Shared workspace for the **PIKAPIKA** product. Core Swift code is split into:
 
 - **`PikaCoreBase`** ([`Packages/PikaCoreBase`](Packages/PikaCoreBase)) — domain types, protocols, utilities (no SwiftData). **CLI-safe:** run `swift test` here for CI.
