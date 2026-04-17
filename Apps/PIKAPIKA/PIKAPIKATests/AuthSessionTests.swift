@@ -50,4 +50,17 @@ final class AuthSessionTests: XCTestCase {
 
         second.signOut()
     }
+
+    func testGuestSignInAndSignOut() {
+        let session = AuthSession()
+        session.signOut()
+
+        session.signInGuest()
+        XCTAssertTrue(session.isSignedIn)
+        XCTAssertEqual(session.provider, .guest)
+        XCTAssertNotNil(session.userId)
+
+        session.signOut()
+        XCTAssertFalse(session.isSignedIn)
+    }
 }

@@ -11,5 +11,6 @@ struct RootView: View {
                 LoginView()
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: authSession.isSignedIn)
     }
 }

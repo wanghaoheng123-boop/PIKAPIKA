@@ -8,7 +8,11 @@ final class AuthSession: ObservableObject {
     enum Provider: String {
         case apple
         case google
+        /// Local-only session when Sign in with Apple / Google is not set up or fails.
+        case guest
     }
+
+    private static let guestUserDefaultsKey = "com.pikapika.PIKAPIKA.guestUserId"
 
     @Published private(set) var isSignedIn = false
     @Published private(set) var provider: Provider?
@@ -29,11 +33,29 @@ final class AuthSession: ObservableObject {
             provider = .google
             userId = id
             isSignedIn = true
+            return
+        }
+        if let id = UserDefaults.standard.string(forKey: Self.guestUserDefaultsKey), !id.isEmpty {
+            provider = .guest
+            userId = id
+            isSignedIn = true
         }
     }
 
     @MainActor
+    func signInGuest() {
+        KeychainHelper.delete(.appleUserId)
+        KeychainHelper.delete(.googleUserId)
+        let id = UserDefaults.standard.string(forKey: Self.guestUserDefaultsKey) ?? UUID().uuidString
+        UserDefaults.standard.set(id, forKey: Self.guestUserDefaultsKey)
+        provider = .guest
+        userId = id
+        isSignedIn = true
+    }
+
+    @MainActor
     func signInApple(userIdentifier: String) {
+        UserDefaults.standard.removeObject(forKey: Self.guestUserDefaultsKey)
         _ = KeychainHelper.save(userIdentifier, for: .appleUserId)
         KeychainHelper.delete(.googleUserId)
         provider = .apple
@@ -43,6 +65,7 @@ final class AuthSession: ObservableObject {
 
     @MainActor
     func signInGoogle(userIdentifier: String) {
+        UserDefaults.standard.removeObject(forKey: Self.guestUserDefaultsKey)
         _ = KeychainHelper.save(userIdentifier, for: .googleUserId)
         KeychainHelper.delete(.appleUserId)
         provider = .google
@@ -52,6 +75,7 @@ final class AuthSession: ObservableObject {
 
     @MainActor
     func signOut() {
+        UserDefaults.standard.removeObject(forKey: Self.guestUserDefaultsKey)
         KeychainHelper.delete(.appleUserId)
         KeychainHelper.delete(.googleUserId)
         provider = nil
