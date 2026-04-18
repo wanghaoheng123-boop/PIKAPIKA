@@ -63,7 +63,7 @@ cd Packages/PikaCoreBase
 swift test
 ```
 
-Tests use **Swift Testing** (`swift-testing` package) so they run without full **XCTest** from Xcode Command Line Tools alone.
+Tests use **XCTest** (no extra packages; runs on GitHub Actions `macos-14` with the default Xcode toolchain).
 
 ### `PikaCore` (SwiftData umbrella)
 

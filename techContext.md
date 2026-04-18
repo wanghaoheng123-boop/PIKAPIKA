@@ -7,7 +7,7 @@
 - **Platforms:** macOS 14+, iOS 17+.
 - **Concurrency:** `StrictConcurrency` enabled on package targets.
 - **Persistence:** SwiftData (`@Model`) in `PikaCorePersistence` (inside `PikaCore` package); CloudKit mentioned in comments as optional sync path.
-- **Unit tests:** `PikaCoreBase` uses **Swift Testing** via the `swift-testing` package (pulls `swift-syntax`; `Package.resolved` pins versions). This avoids relying on **XCTest** when only Apple Command Line Tools are installed.
+- **Unit tests:** `PikaCoreBase` uses **XCTest** only (removed `swift-testing` so `swift test` works on Xcode 15 / Swift 5.10 CI images without a Swift 6-only dependency graph).
 
 ## Execution environments
 

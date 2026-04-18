@@ -95,3 +95,10 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 - **CI still red after first fix:** Added `swift build --build-tests` so compile errors surface before `swift test`. **Skip `AIProviderRouterTests` when `GITHUB_ACTIONS` is set** (keychain is unreliable on hosted runners); router tests remain for **local Mac** runs.
 
 ---
+
+## 2026-04-18 — PikaCoreBase tests: XCTest for CI compatibility
+
+- **Root cause of Pika CI failures:** `PikaCoreBase` depended on **`swift-testing` 6.x**, which requires **Swift 6**; GitHub `macos-14` + Xcode 15 could not resolve/build that graph reliably.
+- **Change:** Removed `swift-testing` from [Packages/PikaCoreBase/Package.swift](Packages/PikaCoreBase/Package.swift); rewrote [BondLevelTests.swift](Packages/PikaCoreBase/Tests/PikaCoreTests/BondLevelTests.swift) and [KeychainHelperTests.swift](Packages/PikaCoreBase/Tests/PikaCoreTests/KeychainHelperTests.swift) with **XCTest** (keychain tests **skipped** on `GITHUB_ACTIONS`). Removed pinned [Package.resolved](Packages/PikaCoreBase/Package.resolved). Updated [README.md](README.md) and [techContext.md](techContext.md).
+
+---

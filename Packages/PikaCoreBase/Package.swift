@@ -10,9 +10,7 @@ let package = Package(
     products: [
         .library(name: "PikaCoreBase", targets: ["PikaCoreBase"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-testing.git", from: "6.0.0")
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "PikaCoreBase",
@@ -24,10 +22,7 @@ let package = Package(
         ),
         .testTarget(
             name: "PikaCoreTests",
-            dependencies: [
-                "PikaCoreBase",
-                .product(name: "Testing", package: "swift-testing")
-            ],
+            dependencies: ["PikaCoreBase"],
             path: "Tests/PikaCoreTests"
         )
     ]
