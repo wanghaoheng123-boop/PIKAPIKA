@@ -36,7 +36,7 @@ final class PromptLibraryTests: XCTestCase {
 final class MockAIClientTests: XCTestCase {
 
     func testMockChatStreamsWords() async throws {
-        let client = MockAIClient(scriptedReplies: ["hello world"], delay: .milliseconds(1))
+        let client = MockAIClient(scriptedReplies: ["hello world"], delay: .zero)
         let stream = try await client.chat(
             messages: [ChatMessage(role: "user", content: "hi")],
             systemPrompt: "sys",

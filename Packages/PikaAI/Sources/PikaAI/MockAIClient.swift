@@ -29,7 +29,9 @@ public final class MockAIClient: AIClient, @unchecked Sendable {
         return AsyncThrowingStream { continuation in
             Task {
                 for word in text.split(separator: " ") {
-                    try? await Task.sleep(for: d)
+                    if d != .zero {
+                        try? await Task.sleep(for: d)
+                    }
                     continuation.yield(String(word) + " ")
                 }
                 continuation.finish()
