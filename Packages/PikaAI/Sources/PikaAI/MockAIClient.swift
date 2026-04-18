@@ -2,7 +2,8 @@ import Foundation
 import PikaCore
 
 /// Deterministic in-memory `AIClient` for previews, tests, and offline demos.
-public final class MockAIClient: AIClient {
+/// `@unchecked Sendable`: class is immutable after init; required for `AIClient: Sendable` under strict concurrency.
+public final class MockAIClient: AIClient, @unchecked Sendable {
 
     private let scriptedReplies: [String]
     private let imageBytes: Data

@@ -80,3 +80,12 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 - **Verify (local):** This session’s host had **no Swift/Xcode on PATH**; full checklist remains: `Scripts/generate-xcode.sh`, Xcode build **Pika** iOS + macOS, `swift test` in `Packages/PikaAI`, manual chat + Settings probe. Use GitHub Actions run for PikaAI on next push.
 
 ---
+
+## 2026-04-18 — GitHub Actions Pika CI + tool hygiene
+
+- **CI failure (run 24599323700):** Addressed likely **Swift 6 / XCTest** friction from `@MainActor` on `XCTestCase` by moving router tests into `@MainActor` `AIProviderRouterTestHarness`; Pika CI workflow now uses **`working-directory: Packages/PikaAI`**, **`swift test -v`**, **`macos-14`**, and resilient **Xcode path** selection.
+- **Strict concurrency:** `MockAIClient` now declares **`@unchecked Sendable`** to satisfy `AIClient: Sendable`.
+- **Line endings:** Added [`.gitattributes`](.gitattributes) (`eol=lf` for Swift/Markdown/YAML/shell) to reduce CRLF corruption across OSes.
+- **Docs:** [README.md](README.md) troubleshooting for **Cursor / Claude Code** on non-ASCII or cloud paths; [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) Memory Bank rows clarified for duplicate routing files.
+
+---

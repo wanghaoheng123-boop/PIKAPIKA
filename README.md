@@ -93,3 +93,7 @@ PIKAPIKA/
 ## Sync note
 
 This tree may live on **Google Drive**. Avoid editing the same files concurrently on two machines; sync before you start work.
+
+## Cursor / Claude Code troubleshooting
+
+If the IDE, Claude Code, or Swift indexing misbehaves (missing files, symlink errors, or very slow analysis), **clone the repo to a short ASCII-only path** on disk (for example `~/Developer/PIKAPIKA` on macOS or `C:\dev\PIKAPIKA` on Windows). Cloud-sync folders and **non-ASCII path segments** can break some toolchains. After moving, run `bash Scripts/bootstrap.sh` again before opening Xcode.

@@ -3,7 +3,7 @@ import PikaCore
 @testable import PikaAI
 
 /// Fails `chat` with a fixed `AIClientError` (no stream).
-private struct FailingChatClient: AIClient {
+private struct FailingChatClient: AIClient, Sendable {
     let error: AIClientError
 
     func chat(
@@ -23,16 +23,11 @@ private struct FailingChatClient: AIClient {
     }
 }
 
+/// Isolated helpers avoid `@MainActor` on `XCTestCase` (Swift 6 + XCTest friction on CI).
 @MainActor
-final class AIProviderRouterTests: XCTestCase {
+private enum AIProviderRouterTestHarness {
 
-    override func tearDown() {
-        KeychainHelper.delete(.anthropicKey)
-        KeychainHelper.delete(.openAIKey)
-        super.tearDown()
-    }
-
-    func testFallbackOnRateLimitUsesAlternateProvider() async throws {
+    static func fallbackOnRateLimit() async throws -> String {
         XCTAssertTrue(KeychainHelper.save("anthropic-test-key", for: .anthropicKey))
         XCTAssertTrue(KeychainHelper.save("openai-test-key", for: .openAIKey))
 
@@ -42,17 +37,17 @@ final class AIProviderRouterTests: XCTestCase {
             openAIFactory: { _ in MockAIClient(scriptedReplies: ["fallback ok"], delay: .milliseconds(1)) }
         )
 
-        var out = ""
+        var accumulated = ""
         try await router.runChatWithFallback(
             messages: [ChatMessage(role: "user", content: "hi")],
             systemPrompt: "sys",
             temperature: 0.5,
-            onChunk: { out += $0 }
+            onChunk: { accumulated += $0 }
         )
-        XCTAssertTrue(out.contains("fallback"))
+        return accumulated
     }
 
-    func testNoFallbackOnMissingKeyAlternate() async throws {
+    static func noFallbackOnMissingKeyAlternate() async throws {
         XCTAssertTrue(KeychainHelper.save("anthropic-only", for: .anthropicKey))
         KeychainHelper.delete(.openAIKey)
 
@@ -75,7 +70,7 @@ final class AIProviderRouterTests: XCTestCase {
         }
     }
 
-    func testFallbackOnServerError5xx() async throws {
+    static func fallbackOnServerError5xx() async throws -> String {
         XCTAssertTrue(KeychainHelper.save("a", for: .anthropicKey))
         XCTAssertTrue(KeychainHelper.save("o", for: .openAIKey))
 
@@ -85,13 +80,36 @@ final class AIProviderRouterTests: XCTestCase {
             anthropicFactory: { _ in MockAIClient(scriptedReplies: ["anthropic rescue"], delay: .milliseconds(1)) }
         )
 
-        var out = ""
+        var accumulated = ""
         try await router.runChatWithFallback(
             messages: [ChatMessage(role: "user", content: "x")],
             systemPrompt: "s",
             temperature: 0,
-            onChunk: { out += $0 }
+            onChunk: { accumulated += $0 }
         )
+        return accumulated
+    }
+}
+
+final class AIProviderRouterTests: XCTestCase {
+
+    override func tearDown() {
+        KeychainHelper.delete(.anthropicKey)
+        KeychainHelper.delete(.openAIKey)
+        super.tearDown()
+    }
+
+    func testFallbackOnRateLimitUsesAlternateProvider() async throws {
+        let out = try await AIProviderRouterTestHarness.fallbackOnRateLimit()
+        XCTAssertTrue(out.contains("fallback"))
+    }
+
+    func testNoFallbackOnMissingKeyAlternate() async throws {
+        try await AIProviderRouterTestHarness.noFallbackOnMissingKeyAlternate()
+    }
+
+    func testFallbackOnServerError5xx() async throws {
+        let out = try await AIProviderRouterTestHarness.fallbackOnServerError5xx()
         XCTAssertTrue(out.contains("anthropic"))
     }
 }

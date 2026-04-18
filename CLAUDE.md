@@ -39,7 +39,8 @@ Canonical skills: `~/.cursor/skills/<name>/SKILL.md` — use for domain workflow
 | `techContext.md` | Stack, tooling, env constraints |
 | `progress.md` | Append-only history |
 | `activeContext.md` | Current task, handoff, next steps |
-| `AGENTS.md` | This file |
+| `AGENTS.md` | Canonical agent routing (keep `CLAUDE.md` in lockstep) |
+| `CLAUDE.md` | Same routing rules as `AGENTS.md` (for tools that only read `CLAUDE.md`) |
 | `Docs/ROADMAP.md` | Product milestones (P0–P6); checklist for what to build next |
 
 ## Anti-patterns
