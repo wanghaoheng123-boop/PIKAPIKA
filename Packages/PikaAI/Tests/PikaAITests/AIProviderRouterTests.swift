@@ -1,5 +1,5 @@
 import XCTest
-import PikaCore
+import PikaCoreBase
 @testable import PikaAI
 
 /// Fails `chat` with a fixed `AIClientError` (no stream).

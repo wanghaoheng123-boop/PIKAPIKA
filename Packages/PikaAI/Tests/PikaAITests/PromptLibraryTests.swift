@@ -1,5 +1,5 @@
 import XCTest
-import PikaCore
+import PikaCoreBase
 @testable import PikaAI
 
 final class PromptLibraryTests: XCTestCase {

@@ -1,5 +1,5 @@
 import Foundation
-import PikaCore
+import PikaCoreBase
 
 /// OpenAI implementation of `AIClient`. Uses `/v1/chat/completions` with SSE
 /// streaming, `/v1/images/generations` for sprites, and vision via the chat

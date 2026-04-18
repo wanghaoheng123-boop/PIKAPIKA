@@ -1,5 +1,5 @@
 import Foundation
-import PikaCore
+import PikaCoreBase
 
 /// Anthropic implementation of `AIClient`. Uses `/v1/messages` with SSE
 /// streaming. The system prompt is marked `cache_control: ephemeral` so

@@ -1,5 +1,5 @@
 import Foundation
-import PikaCore
+import PikaCoreBase
 
 /// Generates personality-aware system prompts for pet chat turns.
 /// The resulting prompt is long-lived per pet + context, so it's a good

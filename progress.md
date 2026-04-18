@@ -102,3 +102,10 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 - **Change:** Removed `swift-testing` from [Packages/PikaCoreBase/Package.swift](Packages/PikaCoreBase/Package.swift); rewrote [BondLevelTests.swift](Packages/PikaCoreBase/Tests/PikaCoreTests/BondLevelTests.swift) and [KeychainHelperTests.swift](Packages/PikaCoreBase/Tests/PikaCoreTests/KeychainHelperTests.swift) with **XCTest** (keychain tests **skipped** on `GITHUB_ACTIONS`). Removed pinned [Package.resolved](Packages/PikaCoreBase/Package.resolved). Updated [README.md](README.md) and [techContext.md](techContext.md).
 
 ---
+
+## 2026-04-18 — PikaAI package depends on PikaCoreBase only (CI)
+
+- **Pika CI:** The **PikaAI swift test** job still failed after PikaCoreBase went green because **`swift test` for `PikaAI` pulled `PikaCore`**, which compiles **SwiftData `@Model`** code (`PikaCorePersistence`)—unreliable under plain SPM on hosted runners.
+- **Change:** [Packages/PikaAI/Package.swift](Packages/PikaAI/Package.swift) now depends on **`../PikaCoreBase`** only; sources/tests use `import PikaCoreBase`. Apps that need SwiftData models still link **`PikaCore`** separately.
+
+---

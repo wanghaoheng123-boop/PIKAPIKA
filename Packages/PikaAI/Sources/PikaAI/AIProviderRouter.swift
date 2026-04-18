@@ -1,5 +1,5 @@
 import Foundation
-import PikaCore
+import PikaCoreBase
 
 /// Selects an `AIClient` based on user preference and available keys.
 /// If the preferred provider fails with a recoverable error, falls back to

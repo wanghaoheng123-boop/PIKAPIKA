@@ -11,19 +11,20 @@ let package = Package(
         .library(name: "PikaAI", targets: ["PikaAI"])
     ],
     dependencies: [
-        .package(path: "../PikaCore")
+        // PikaCoreBase only: avoids pulling SwiftData `@Model` targets into `swift test` on CI.
+        .package(path: "../PikaCoreBase")
     ],
     targets: [
         .target(
             name: "PikaAI",
-            dependencies: ["PikaCore"],
+            dependencies: [.product(name: "PikaCoreBase", package: "PikaCoreBase")],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency")
             ]
         ),
         .testTarget(
             name: "PikaAITests",
-            dependencies: ["PikaAI", "PikaCore"]
+            dependencies: ["PikaAI", .product(name: "PikaCoreBase", package: "PikaCoreBase")]
         )
     ]
 )

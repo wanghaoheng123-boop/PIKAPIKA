@@ -65,6 +65,17 @@ swift test
 
 Tests use **XCTest** (no extra packages; runs on GitHub Actions `macos-14` with the default Xcode toolchain).
 
+### `PikaAI` (providers + prompts)
+
+The package depends on **`PikaCoreBase` only** (not `PikaCore`), so **`swift test` works from the command line** without SwiftData macro plugins—the same layout **Pika CI** uses.
+
+```bash
+cd Packages/PikaAI
+swift test
+```
+
+App targets that need SwiftData models still add **`PikaCore`** as a separate dependency in Xcode.
+
 ### `PikaCore` (SwiftData umbrella)
 
 `PikaCore` uses **SwiftData** (`@Model`). Command-line `swift build` / `swift test` may fail with `SwiftDataMacros` / `PersistentModelMacro` not found if SwiftData macro plugins are not loaded.

@@ -1,5 +1,5 @@
 import Foundation
-import PikaCore
+import PikaCoreBase
 
 /// Deterministic in-memory `AIClient` for previews, tests, and offline demos.
 /// `@unchecked Sendable`: class is immutable after init; required for `AIClient: Sendable` under strict concurrency.
