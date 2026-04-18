@@ -1,0 +1,20 @@
+name: Pika CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  pikaai-swift-test:
+    name: PikaAI swift test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode (default)
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer || true
+
+      - name: Swift test (PikaAI)
+        run: swift test --package-path Packages/PikaAI

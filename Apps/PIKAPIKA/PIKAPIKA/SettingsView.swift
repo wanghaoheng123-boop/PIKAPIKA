@@ -7,7 +7,12 @@ struct SettingsView: View {
     @Environment(AIClientHolder.self) private var aiHolder
 
     @State private var openAIKey = ""
-    @State private var showKeySaved = false
+    @State private var showSaveResult = false
+    @State private var saveResultTitle = "Saved"
+    @State private var saveResultMessage = "API key updated. Chat will use OpenAI when a key is present."
+    @State private var allowRemoteChat = true
+    @State private var allowRemoteImage = true
+    @State private var allowRemoteMemoryExtraction = true
 
     var body: some View {
         NavigationStack {
@@ -28,17 +33,37 @@ struct SettingsView: View {
                 Section("OpenAI") {
                     SecureField("API key", text: $openAIKey)
                         .textContentType(.password)
+                    Toggle("Use remote AI for chat", isOn: $allowRemoteChat)
+                    Toggle("Use remote AI for image design", isOn: $allowRemoteImage)
+                    Toggle("Use remote AI for memory extraction", isOn: $allowRemoteMemoryExtraction)
                     Button("Save key") {
                         let trimmed = openAIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let keyUpdated: Bool
                         if trimmed.isEmpty {
                             KeychainHelper.delete(.openAIKey)
+                            keyUpdated = true
                         } else {
-                            _ = KeychainHelper.save(trimmed, for: .openAIKey)
+                            keyUpdated = KeychainHelper.save(trimmed, for: .openAIKey)
                         }
+                        guard keyUpdated else {
+                            saveResultTitle = "Could not save key"
+                            saveResultMessage = "Keychain write failed. Please try again."
+                            showSaveResult = true
+                            return
+                        }
+                        aiHolder.saveUsagePolicy(
+                            AIUsagePolicy(
+                                allowRemoteChat: allowRemoteChat,
+                                allowRemoteImage: allowRemoteImage,
+                                allowRemoteMemoryExtraction: allowRemoteMemoryExtraction
+                            )
+                        )
                         aiHolder.refresh()
-                        showKeySaved = true
+                        saveResultTitle = "Saved"
+                        saveResultMessage = "API key updated. Chat will use OpenAI when a key is present."
+                        showSaveResult = true
                     }
-                    Text("Leave empty for mock replies. With a key: chat, vision (describe photo), DALL·E portraits, and memory extraction use your account. Keys stay in Keychain on this device.")
+                    Text("Use toggles to choose where remote AI is used. Voice input, pet sounds, and local quick interactions remain on-device.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -54,11 +79,15 @@ struct SettingsView: View {
             }
             .onAppear {
                 openAIKey = KeychainHelper.load(.openAIKey) ?? ""
+                let policy = aiHolder.usagePolicy
+                allowRemoteChat = policy.allowRemoteChat
+                allowRemoteImage = policy.allowRemoteImage
+                allowRemoteMemoryExtraction = policy.allowRemoteMemoryExtraction
             }
-            .alert("Saved", isPresented: $showKeySaved) {
+            .alert(saveResultTitle, isPresented: $showSaveResult) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text("API key updated. Chat will use OpenAI when a key is present.")
+                Text(saveResultMessage)
             }
         }
         .tint(PIKAPIKATheme.accent)

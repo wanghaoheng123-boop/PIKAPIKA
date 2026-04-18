@@ -8,7 +8,7 @@ struct ChatView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AIClientHolder.self) private var aiHolder
 
-    @Query(sort: \ConversationMessage.timestamp) private var allMessages: [ConversationMessage]
+    @Query(sort: \ConversationMessage.timestamp) private var messages: [ConversationMessage]
 
     @State private var draft = ""
     @State private var streamingAssistant = ""
@@ -16,8 +16,15 @@ struct ChatView: View {
     @State private var errorText: String?
     @StateObject private var voiceInput = VoiceInputManager()
 
-    private var messages: [ConversationMessage] {
-        allMessages.filter { $0.pet?.id == pet.id }
+    init(pet: Pet) {
+        self.pet = pet
+        let petId = pet.id
+        _messages = Query(
+            filter: #Predicate<ConversationMessage> { message in
+                message.pet?.id == petId
+            },
+            sort: \ConversationMessage.timestamp
+        )
     }
 
     private var spirit: PetSpiritState { PetSpiritState.evaluate(for: pet) }
@@ -80,7 +87,11 @@ struct ChatView: View {
                     .lineLimit(1 ... 5)
                 Button {
                     voiceInput.toggle { text in
-                        draft = text
+                        if let intent = VoiceIntentRouter.parse(text) {
+                            applyVoiceIntent(intent)
+                        } else {
+                            draft = text
+                        }
                     }
                 } label: {
                     Image(systemName: voiceInput.isListening ? "mic.fill" : "mic")
@@ -169,7 +180,11 @@ struct ChatView: View {
                 pet: pet,
                 userText: text,
                 modelContext: modelContext,
-                aiClient: aiHolder.client
+                aiClient: aiHolder.client,
+                options: .init(
+                    allowRemoteChat: aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteChat,
+                    allowMemoryExtraction: aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteMemoryExtraction
+                )
             ) { partial in
                 streamingAssistant = partial
             }
@@ -180,5 +195,37 @@ struct ChatView: View {
         }
 
         isSending = false
+    }
+
+    private func applyVoiceIntent(_ intent: VoiceIntent) {
+        switch intent {
+        case .ask(let text):
+            draft = text
+        case .pet:
+            localAction(event: "pet", xp: 4, reply: "Aww. I feel loved.")
+        case .feed:
+            localAction(event: "feed", xp: 6, reply: "Yum! That was delicious.")
+        case .play:
+            localAction(event: "play", xp: 8, reply: "That was fun. Again?")
+        case .move(let name):
+            localAction(event: "voice_move", xp: 2, reply: "Got it. I’m trying move: \(name).")
+        case .openMemories:
+            localAction(event: "voice_memories", xp: 1, reply: "Use the Heart & memory screen in pet details to browse memories.")
+        }
+    }
+
+    private func localAction(event: String, xp: Int, reply: String) {
+        PetInteractionStreak.recordInteraction(pet: pet)
+        pet.lastInteractedAt = Date()
+        pet.bondXP += xp
+        pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
+        modelContext.insert(BondEvent(pet: pet, eventType: event, xpAwarded: xp))
+        modelContext.insert(ConversationMessage(pet: pet, role: "assistant", content: reply))
+        do {
+            try modelContext.save()
+        } catch {
+            errorText = error.localizedDescription
+        }
+        PetSoundEngine.shared.speakReplyIfEnabled(reply, for: pet, mood: spirit)
     }
 }

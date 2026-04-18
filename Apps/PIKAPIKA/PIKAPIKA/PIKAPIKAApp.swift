@@ -8,6 +8,7 @@ struct PIKAPIKAApp: App {
 
     @StateObject private var authSession = AuthSession()
     @State private var aiHolder = AIClientHolder()
+    @Environment(\.scenePhase) private var scenePhase
 
     private let modelContainer: ModelContainer
 
@@ -22,7 +23,17 @@ struct PIKAPIKAApp: App {
         do {
             modelContainer = try ModelContainer(for: schema, configurations: [ModelConfiguration()])
         } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
+            // Keep app bootable even if persistent store initialization fails.
+            // This fallback uses an in-memory store so users can still open the app.
+            do {
+                modelContainer = try ModelContainer(
+                    for: schema,
+                    configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
+                )
+                print("PIKAPIKAApp: persistent ModelContainer failed, using in-memory fallback: \(error)")
+            } catch {
+                fatalError("Failed to create both persistent and in-memory ModelContainer: \(error)")
+            }
         }
 
         if let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String,
@@ -39,6 +50,11 @@ struct PIKAPIKAApp: App {
                 .environment(aiHolder)
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    if phase == .active {
+                        aiHolder.refresh()
+                    }
                 }
         }
         .modelContainer(modelContainer)

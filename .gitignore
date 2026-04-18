@@ -13,3 +13,6 @@ DerivedData/
 # Editor
 *.swp
 *~
+
+# Local agent / worktree metadata (do not publish)
+.claude/

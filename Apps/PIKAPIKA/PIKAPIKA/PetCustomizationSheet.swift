@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import SceneKit
 import PikaCore
 
 struct PetCustomizationSheet: View {
@@ -61,7 +62,22 @@ struct PetCustomizationSheet: View {
                 case .success(let urls):
                     guard let url = urls.first else { return }
                     do {
+                        let maxBytes = 20 * 1024 * 1024
+                        let hasScope = url.startAccessingSecurityScopedResource()
+                        defer {
+                            if hasScope { url.stopAccessingSecurityScopedResource() }
+                        }
+                        let attrs = try FileManager.default.attributesOfItem(atPath: url.path)
+                        if let bytes = attrs[.size] as? Int64, bytes > Int64(maxBytes) {
+                            throw NSError(domain: "PetCustomization", code: 1, userInfo: [NSLocalizedDescriptionKey: "USDZ is too large. Please use a file under 20 MB."])
+                        }
                         let data = try Data(contentsOf: url)
+                        let temp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".usdz")
+                        try data.write(to: temp, options: .atomic)
+                        defer { try? FileManager.default.removeItem(at: temp) }
+                        guard (try? SCNScene(url: temp, options: nil)) != nil else {
+                            throw NSError(domain: "PetCustomization", code: 2, userInfo: [NSLocalizedDescriptionKey: "This USDZ could not be loaded. Try another model file."])
+                        }
                         let relative = try PetImageStore.saveUSDZ(data, petId: pet.id, filename: "pet.usdz")
                         pet.modelUSDZPath = relative
                         onModelImported(relative)

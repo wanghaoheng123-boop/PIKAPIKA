@@ -40,6 +40,7 @@ struct PetScene3DView: UIViewRepresentable {
         private var importedModelNode: SCNNode?
         private var avatarPlaneNode: SCNNode?
         private var material: SCNMaterial!
+        private var loadedModelURL: URL?
         private let basePosition = SCNVector3(0, 0.85, 0)
         private var link: CADisplayLink?
         private var startRef = CACurrentMediaTime()
@@ -102,12 +103,17 @@ struct PetScene3DView: UIViewRepresentable {
 
         func updateVisual(image: UIImage?, modelURL: URL?, emoji: String) {
             if let modelURL {
-                loadUSDZIfNeeded(modelURL)
-                avatarPlaneNode?.isHidden = true
-                return
+                if let modelNode = loadUSDZIfNeeded(modelURL) {
+                    avatarPlaneNode?.isHidden = true
+                    modelNode.isHidden = false
+                    return
+                }
+                avatarPlaneNode?.isHidden = false
+                importedModelNode?.isHidden = true
             } else {
                 importedModelNode?.removeFromParentNode()
                 importedModelNode = nil
+                loadedModelURL = nil
                 avatarPlaneNode?.isHidden = false
             }
             let resolved = image ?? Self.emojiImage(emoji)
@@ -158,9 +164,15 @@ struct PetScene3DView: UIViewRepresentable {
             }
         }
 
-        private func loadUSDZIfNeeded(_ url: URL) {
-            guard importedModelNode == nil else { return }
-            guard let scene = try? SCNScene(url: url, options: nil) else { return }
+        private func loadUSDZIfNeeded(_ url: URL) -> SCNNode? {
+            if let importedModelNode, loadedModelURL == url {
+                return importedModelNode
+            }
+            importedModelNode?.removeFromParentNode()
+            importedModelNode = nil
+            loadedModelURL = nil
+
+            guard let scene = try? SCNScene(url: url, options: nil) else { return nil }
             let container = SCNNode()
             for c in scene.rootNode.childNodes {
                 container.addChildNode(c)
@@ -169,6 +181,8 @@ struct PetScene3DView: UIViewRepresentable {
             container.position = SCNVector3(0, -0.55, 0)
             petRoot.addChildNode(container)
             importedModelNode = container
+            loadedModelURL = url
+            return container
         }
     }
 }

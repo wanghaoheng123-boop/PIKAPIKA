@@ -43,9 +43,9 @@ final class MockAIClientTests: XCTestCase {
         XCTAssertTrue(text.contains("mock"))
     }
 
-    func testGenerateImageReturnsEmptyData() async throws {
+    func testGenerateImageReturnsImageData() async throws {
         let client = MockAIClient()
         let data = try await client.generateImage(prompt: "a cat", size: .square256)
-        XCTAssertEqual(data.count, 0)
+        XCTAssertFalse(data.isEmpty)
     }
 }

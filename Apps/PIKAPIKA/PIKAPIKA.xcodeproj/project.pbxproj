@@ -35,6 +35,8 @@
 		B1000000000000000000644 /* PetSoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000638 /* PetSoundEngine.swift */; };
 		B1000000000000000000645 /* VoiceInputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000639 /* VoiceInputManager.swift */; };
 		B1000000000000000000646 /* PetCustomizationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000647 /* PetCustomizationSheet.swift */; };
+		B1000000000000000000648 /* AIUsagePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000649 /* AIUsagePolicy.swift */; };
+		B1000000000000000000650 /* VoiceIntentRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000651 /* VoiceIntentRouter.swift */; };
 		B1000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000006 /* Assets.xcassets */; };
 		B1000000000000000000700 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000701 /* AuthenticationServices.framework */; };
 		B1000902 /* AuthSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000901 /* AuthSessionTests.swift */; };
@@ -72,6 +74,8 @@
 		B1000000000000000000638 /* PetSoundEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetSoundEngine.swift; sourceTree = "<group>"; };
 		B1000000000000000000639 /* VoiceInputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputManager.swift; sourceTree = "<group>"; };
 		B1000000000000000000647 /* PetCustomizationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetCustomizationSheet.swift; sourceTree = "<group>"; };
+		B1000000000000000000649 /* AIUsagePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsagePolicy.swift; sourceTree = "<group>"; };
+		B1000000000000000000651 /* VoiceIntentRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceIntentRouter.swift; sourceTree = "<group>"; };
 		B1000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1000000000000000000600 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1000000000000000000601 /* PIKAPIKA.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PIKAPIKA.entitlements; sourceTree = "<group>"; };
@@ -154,6 +158,8 @@
 				B1000000000000000000638 /* PetSoundEngine.swift */,
 				B1000000000000000000639 /* VoiceInputManager.swift */,
 				B1000000000000000000647 /* PetCustomizationSheet.swift */,
+				B1000000000000000000649 /* AIUsagePolicy.swift */,
+				B1000000000000000000651 /* VoiceIntentRouter.swift */,
 				B100000000000000000050C /* ChatView.swift */,
 				B100000000000000000050E /* MockAIClient.swift */,
 				B1000000000000000000510 /* OpenAIChatClient.swift */,
@@ -296,6 +302,8 @@
 				B1000000000000000000644 /* PetSoundEngine.swift in Sources */,
 				B1000000000000000000645 /* VoiceInputManager.swift in Sources */,
 				B1000000000000000000646 /* PetCustomizationSheet.swift in Sources */,
+				B1000000000000000000648 /* AIUsagePolicy.swift in Sources */,
+				B1000000000000000000650 /* VoiceIntentRouter.swift in Sources */,
 				B100000000000000000050B /* ChatView.swift in Sources */,
 				B100000000000000000050D /* MockAIClient.swift in Sources */,
 				B100000000000000000050F /* OpenAIChatClient.swift in Sources */,

@@ -7,7 +7,7 @@ final class MockAIClient: AIClient, @unchecked Sendable {
 
     func chat(
         messages: [ChatMessage],
-        systemPrompt: String,
+        systemPrompt _: String,
         temperature: Double
     ) async throws -> AsyncThrowingStream<String, Error> {
         let lastUser = messages.last(where: { $0.role == "user" })?.content ?? ""
@@ -15,7 +15,8 @@ final class MockAIClient: AIClient, @unchecked Sendable {
         if lastUser.isEmpty {
             reply = "Hello! I'm your PIKAPIKA companion. Tell me about your day."
         } else {
-            reply = "(\(systemPrompt.prefix(40))…) You said: “\(lastUser.prefix(120))” — I'm here with you!"
+            let trimmedUser = lastUser.trimmingCharacters(in: .whitespacesAndNewlines)
+            reply = "You said: \"\(trimmedUser.prefix(120))\". I'm right here with you."
         }
         return AsyncThrowingStream { continuation in
             continuation.yield(reply)

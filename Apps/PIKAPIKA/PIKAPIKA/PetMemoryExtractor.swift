@@ -1,6 +1,5 @@
 import Foundation
 import PikaCore
-import PikaCoreBase
 import SwiftData
 
 /// After a chat turn, asks the model for 0–2 compact memory facts (only when a real API key is configured).
@@ -13,10 +12,11 @@ enum PetMemoryExtractor {
         userLine: String,
         assistantLine: String,
         modelContext: ModelContext,
-        aiClient: any AIClient
-    ) async {
-        guard KeychainHelper.load(.openAIKey) != nil else { return }
-        guard !userLine.isEmpty, !assistantLine.isEmpty else { return }
+        aiClient: any AIClient,
+        enabled: Bool
+    ) async -> Bool {
+        guard enabled else { return false }
+        guard !userLine.isEmpty, !assistantLine.isEmpty else { return false }
 
         let existingContents = pet.memoryFacts.map(\.content)
         var knownLower = Set(existingContents.map { $0.lowercased() })
@@ -48,8 +48,8 @@ enum PetMemoryExtractor {
                 raw += chunk
             }
             let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard trimmed.first == "[" else { return }
-            guard let data = trimmed.data(using: .utf8) else { return }
+            guard trimmed.first == "[" else { return false }
+            guard let data = trimmed.data(using: .utf8) else { return false }
             let decoded = try JSONDecoder().decode([FactDTO].self, from: data)
             for fact in decoded {
                 let key = fact.content.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -68,8 +68,9 @@ enum PetMemoryExtractor {
             try trimIfNeeded(pet: pet, modelContext: modelContext)
             try modelContext.save()
             PetMemoryFileStore.syncFacts(petId: pet.id, petName: pet.name, facts: pet.memoryFacts)
+            return true
         } catch {
-            // ignore extraction failures
+            return false
         }
     }
 

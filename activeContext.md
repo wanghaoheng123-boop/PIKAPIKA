@@ -1,35 +1,31 @@
 # Active context — volatile handoff state
 
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-18
 
-## ETS — Epic 1 (complete): Universal Orchestration bootstrap
+## Product milestone
 
-Done.
+**[Docs/ROADMAP.md](Docs/ROADMAP.md):** P0 scaffold complete; **P1 — AI chat MVP** shipped (2026-04-18). **Active engineering target: P2 — Bond loop.**
 
-## ETS — Epic 2 (active): Product engineering readiness
+## Canonical app targets (edit these for new UI/features)
 
-- **Task 1 — Developer experience**  
-  - *SubTask 1.1:* Root `README.md` + `.gitignore` — **done**.  
-  - *SubTask 1.2:* **Done:** `PikaCoreBase` package supports **`swift test`** (Swift Testing); `PikaCore` umbrella documented as Xcode-first for SwiftData. See `progress.md`.
+- **[Apps/iOS](Apps/iOS)** — XcodeGen (`project.yml`); run **`Scripts/generate-xcode.sh`**, open **`Apps/iOS/Pika.xcodeproj`**.
+- **[Apps/macOS](Apps/macOS)** — same flow → **`Apps/macOS/Pika.xcodeproj`**.
 
-- **Task 2 — Product slice**  
-  - *SubTask 2.1:* **iOS app shell** — **done:** [`Apps/PIKAPIKA`](Apps/PIKAPIKA) (SwiftUI + SwiftData + local `PikaCore`). Open `PIKAPIKA.xcodeproj` in Xcode.  
-  - *SubTask 2.2:* More **unit tests** / features — optional next.
+SwiftData `ModelContainer` is declared in [Apps/iOS/Sources/PikaApp.swift](Apps/iOS/Sources/PikaApp.swift) / [Apps/macOS/Sources/PikaApp.swift](Apps/macOS/Sources/PikaApp.swift) for `Pet`, `BondEvent`, `ConversationMessage`, `SeasonalEvent`.
 
-## Current focus
+## Reference-only (do not treat as default edit surface)
 
-**Status:** iOS app shell landed; add onboarding flow, pet creation UI, or expand `PikaCoreBase` tests as needed.
+- **[Apps/PIKAPIKA](Apps/PIKAPIKA)** — older iOS tree with committed **`PIKAPIKA.xcodeproj`**. Contains **SwiftData-backed** [ChatView](Apps/PIKAPIKA/PIKAPIKA/ChatView.swift) and [PetChatActions](Apps/PIKAPIKA/PIKAPIKA/PetChatActions.swift) (trim-to-50, inserts). Use as implementation reference when porting behavior to iOS/macOS Pika apps.
 
-## Last action
+## P2 — next implementation slice
 
-- Added [`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`](Apps/PIKAPIKA/PIKAPIKA.xcodeproj) with local package ref to `Packages/PikaCore`; `PIKAPIKAApp` + `ContentView` using in-memory SwiftData.
+- Daily streak, bond XP UI polish, `BondProgression.dailyCap` at call sites, `BondEvent` surfacing — see [Docs/ROADMAP.md](Docs/ROADMAP.md).
 
-## Immediate next steps
+## P1 (done) — pointers
 
-1. **CLI:** `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`, then `xcodebuild … build` from [`Apps/PIKAPIKA/README.md`](Apps/PIKAPIKA/README.md) — **BUILD SUCCEEDED** on this machine for iPhone 17 simulator.
-2. **GUI:** Open `PIKAPIKA.xcodeproj` in Xcode and **Run** (⌘R).
-3. Optional: **pet creation** UI and `modelContext.insert(Pet(...))`.
-4. Optional: more **`PikaCoreBase`** tests (e.g. `PetState`, `AppContext`).
+- Shared chat + settings: [Apps/Shared/Sources](Apps/Shared/Sources) (`PetChatScreen`, `PikaSettingsContent`, `ConversationHistoryLimits`).
+- Router fallback + tests: [Packages/PikaAI/Sources/PikaAI/AIProviderRouter.swift](Packages/PikaAI/Sources/PikaAI/AIProviderRouter.swift), [Packages/PikaAI/Tests/PikaAITests/AIProviderRouterTests.swift](Packages/PikaAI/Tests/PikaAITests/AIProviderRouterTests.swift).
+- Thin app shells: [Apps/iOS/Sources/ChatView.swift](Apps/iOS/Sources/ChatView.swift), [Apps/macOS/Sources/ChatView.swift](Apps/macOS/Sources/ChatView.swift).
 
 ## Handoff protocol (template)
 
@@ -44,4 +40,4 @@ Resume: <what the next agent should do if interrupted>
 
 ## Blockers
 
-- None.
+- None recorded.

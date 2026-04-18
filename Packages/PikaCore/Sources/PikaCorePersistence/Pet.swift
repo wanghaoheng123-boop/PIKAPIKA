@@ -40,6 +40,10 @@ public final class Pet {
 
     @Relationship(deleteRule: .cascade, inverse: \PetMemoryFact.pet)
     public var memoryFacts: [PetMemoryFact] = []
+    @Relationship(deleteRule: .cascade, inverse: \BondEvent.pet)
+    public var bondEvents: [BondEvent] = []
+    @Relationship(deleteRule: .cascade, inverse: \ConversationMessage.pet)
+    public var conversationMessages: [ConversationMessage] = []
 
     public init(
         id: UUID = UUID(),
