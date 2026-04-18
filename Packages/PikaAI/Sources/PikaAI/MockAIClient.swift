@@ -28,8 +28,9 @@ public final class MockAIClient: AIClient, @unchecked Sendable {
         let d = delay
         return AsyncThrowingStream { continuation in
             Task {
-                // Let the consumer attach before yielding (avoids empty reads on fast CI runners).
-                await Task.yield()
+                // `Task.yield()` alone can still lose the race on busy CI hosts; a tiny sleep
+                // guarantees the XCTest `for try await` consumer attaches before first `yield`.
+                try? await Task.sleep(nanoseconds: 1_000_000)
                 for word in text.split(separator: " ") {
                     if d != .zero {
                         try? await Task.sleep(for: d)

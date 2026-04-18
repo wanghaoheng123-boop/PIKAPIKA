@@ -69,5 +69,23 @@ jobs:
         run: exit 1
 
       - name: Swift test (PikaAI)
+        id: pikaai_test
+        continue-on-error: true
         working-directory: Packages/PikaAI
-        run: swift test -v --no-parallel
+        run: swift test -v 2>&1 | tee /tmp/pika-ai-test.log
+
+      - name: Swift test log (on failure)
+        if: steps.pikaai_test.outcome == 'failure'
+        run: tail -n 200 /tmp/pika-ai-test.log
+
+      - name: Upload PikaAI test log artifact
+        if: steps.pikaai_test.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pika-ai-swift-test-log
+          path: /tmp/pika-ai-test.log
+          if-no-files-found: ignore
+
+      - name: Swift test must succeed
+        if: steps.pikaai_test.outcome != 'success'
+        run: exit 1
