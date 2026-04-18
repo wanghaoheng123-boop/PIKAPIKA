@@ -4,7 +4,8 @@ import PikaCoreBase
 /// Selects an `AIClient` based on user preference and available keys.
 /// If the preferred provider fails with a recoverable error, falls back to
 /// the alternate provider when its key is present.
-public struct AIProviderRouter: Sendable {
+/// Intentionally not `Sendable`: default `*Factory` closures do not synthesize cleanly on all CI toolchains.
+public struct AIProviderRouter {
 
     public enum Preference: String, Sendable, CaseIterable {
         case anthropicPrimary
