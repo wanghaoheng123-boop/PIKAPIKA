@@ -47,11 +47,8 @@ export const aiChat = onCall(
         model: data.model ?? DEFAULT_MODELS.anthropic,
         max_tokens: 512,
         temperature: data.temperature,
-        system: [{
-          type: "text",
-          text: data.systemPrompt,
-          cache_control: { type: "ephemeral" },
-        }],
+        // Plain string: current `@anthropic-ai/sdk` typings omit `cache_control` on text blocks.
+        system: data.systemPrompt,
         messages: data.messages
           .filter((m) => m.role !== "system")
           .map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
