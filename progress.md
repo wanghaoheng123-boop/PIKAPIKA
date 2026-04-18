@@ -107,5 +107,6 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 
 - **Pika CI:** The **PikaAI swift test** job still failed after PikaCoreBase went green because **`swift test` for `PikaAI` pulled `PikaCore`**, which compiles **SwiftData `@Model`** code (`PikaCorePersistence`)—unreliable under plain SPM on hosted runners.
 - **Change:** [Packages/PikaAI/Package.swift](Packages/PikaAI/Package.swift) now depends on **`../PikaCoreBase`** only; sources/tests use `import PikaCoreBase`. Apps that need SwiftData models still link **`PikaCore`** separately.
+- **Follow-up:** `OpenAIClient` / `AnthropicClient` declare **`@unchecked Sendable`** so they satisfy `AIClient: Sendable` under **StrictConcurrency** (same pattern as `MockAIClient`).
 
 ---

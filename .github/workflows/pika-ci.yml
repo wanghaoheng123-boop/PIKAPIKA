@@ -45,6 +45,10 @@ jobs:
           swift --version
           xcodebuild -version
 
+      - name: Swift build (PikaAI)
+        working-directory: Packages/PikaAI
+        run: swift build -v
+
       - name: Swift test (PikaAI)
         working-directory: Packages/PikaAI
         run: swift test -v

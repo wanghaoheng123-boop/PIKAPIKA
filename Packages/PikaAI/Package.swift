@@ -17,10 +17,7 @@ let package = Package(
     targets: [
         .target(
             name: "PikaAI",
-            dependencies: [.product(name: "PikaCoreBase", package: "PikaCoreBase")],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            dependencies: [.product(name: "PikaCoreBase", package: "PikaCoreBase")]
         ),
         .testTarget(
             name: "PikaAITests",
