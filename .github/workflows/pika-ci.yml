@@ -7,6 +7,27 @@ on:
     branches: [main, master]
 
 jobs:
+  # No SwiftData macros — stable on hosted runners.
+  pika-core-base-swift-test:
+    name: PikaCoreBase swift test
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          set -eo pipefail
+          if [ -d "/Applications/Xcode.app" ]; then
+            sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+          fi
+          swift --version
+
+      - name: Swift test (PikaCoreBase)
+        working-directory: Packages/PikaCoreBase
+        run: swift test -v
+
   pikaai-swift-test:
     name: PikaAI swift test
     runs-on: macos-14
@@ -20,15 +41,9 @@ jobs:
             sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
           elif [ -d "/Applications/Xcode_16.app" ]; then
             sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
-          else
-            echo "Using runner default toolchain:" && xcode-select -p
           fi
           swift --version
           xcodebuild -version
-
-      - name: Build PikaAI (compile all tests)
-        working-directory: Packages/PikaAI
-        run: swift build --build-tests -v
 
       - name: Swift test (PikaAI)
         working-directory: Packages/PikaAI
