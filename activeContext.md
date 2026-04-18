@@ -4,7 +4,7 @@
 
 ## Product milestone
 
-**[Docs/ROADMAP.md](Docs/ROADMAP.md):** P0 scaffold complete. **Active engineering target: P1 — AI chat MVP.**
+**[Docs/ROADMAP.md](Docs/ROADMAP.md):** P0 scaffold complete; **P1 — AI chat MVP** shipped (2026-04-18). **Active engineering target: P2 — Bond loop.**
 
 ## Canonical app targets (edit these for new UI/features)
 
@@ -17,10 +17,15 @@ SwiftData `ModelContainer` is declared in [Apps/iOS/Sources/PikaApp.swift](Apps/
 
 - **[Apps/PIKAPIKA](Apps/PIKAPIKA)** — older iOS tree with committed **`PIKAPIKA.xcodeproj`**. Contains **SwiftData-backed** [ChatView](Apps/PIKAPIKA/PIKAPIKA/ChatView.swift) and [PetChatActions](Apps/PIKAPIKA/PIKAPIKA/PetChatActions.swift) (trim-to-50, inserts). Use as implementation reference when porting behavior to iOS/macOS Pika apps.
 
-## P1 — next implementation slice (see Cursor plan / ROADMAP)
+## P2 — next implementation slice
 
-1. Replace in-memory chat in [Apps/iOS/Sources/ChatView.swift](Apps/iOS/Sources/ChatView.swift) and [Apps/macOS/Sources/ChatView.swift](Apps/macOS/Sources/ChatView.swift) with `@Query` + `ConversationMessage` persistence (align with architecture + PIKAPIKA reference).
-2. Prune to last 50 messages per pet; router fallback on 5xx / rate-limit; Settings provider + test connection; ChatView retry UX.
+- Daily streak, bond XP UI polish, `BondProgression.dailyCap` at call sites, `BondEvent` surfacing — see [Docs/ROADMAP.md](Docs/ROADMAP.md).
+
+## P1 (done) — pointers
+
+- Shared chat + settings: [Apps/Shared/Sources](Apps/Shared/Sources) (`PetChatScreen`, `PikaSettingsContent`, `ConversationHistoryLimits`).
+- Router fallback + tests: [Packages/PikaAI/Sources/PikaAI/AIProviderRouter.swift](Packages/PikaAI/Sources/PikaAI/AIProviderRouter.swift), [Packages/PikaAI/Tests/PikaAITests/AIProviderRouterTests.swift](Packages/PikaAI/Tests/PikaAITests/AIProviderRouterTests.swift).
+- Thin app shells: [Apps/iOS/Sources/ChatView.swift](Apps/iOS/Sources/ChatView.swift), [Apps/macOS/Sources/ChatView.swift](Apps/macOS/Sources/ChatView.swift).
 
 ## Handoff protocol (template)
 

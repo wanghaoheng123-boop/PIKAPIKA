@@ -73,7 +73,8 @@ User types ─▶ ChatView ─▶ AIProviderRouter ─▶ AnthropicClient (with 
 - CloudKit sync rides SwiftData's automatic integration for `Pet`; custom
   record types use `PikaSync.CloudKitSyncCoordinator`.
 - Only the last 50 `ConversationMessage` rows per pet are retained; older
-  rows get purged by a background task (TODO: implement in P1).
+  rows are deleted after each save in the Pika apps (`ConversationHistoryLimits`);
+  a scheduled `BackgroundTasks` purge remains optional polish.
 
 ## AI integration
 

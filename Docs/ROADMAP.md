@@ -7,12 +7,12 @@
 - Firebase project (functions, rules, schema docs)
 - Docs
 
-## P1 — AI chat MVP
-- [ ] Persist `ConversationMessage` through SwiftData instead of in-memory `@State`
-- [ ] Prune to last 50 messages per pet (background task)
-- [ ] Wire AIProviderRouter fallback on 5xx / rate-limit
-- [ ] Settings: pick preferred provider, test connection
-- [ ] Error surface in `ChatView` with a retry affordance
+## P1 — AI chat MVP ✅ (2026-04-18)
+- [x] Persist `ConversationMessage` through SwiftData instead of in-memory `@State` ([Apps/Shared/Sources/PetChatScreen.swift](Apps/Shared/Sources/PetChatScreen.swift))
+- [x] Prune to last 50 messages per pet (after each save; optional `BackgroundTasks` polish later)
+- [x] Wire `AIProviderRouter` fallback on 5xx / rate-limit / network-ish `URLError`
+- [x] Settings: preferred provider + test connection ([Apps/Shared/Sources/PikaSettingsContent.swift](Apps/Shared/Sources/PikaSettingsContent.swift))
+- [x] Error surface + Retry in shared chat when the assistant stream fails after the user line was saved
 
 ## P2 — Bond loop
 - [ ] Daily check-in streak logic

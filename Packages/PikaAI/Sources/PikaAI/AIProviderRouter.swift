@@ -11,6 +11,11 @@ public struct AIProviderRouter: Sendable {
         case openAIPrimary
     }
 
+    enum ProviderKind: Sendable {
+        case anthropic
+        case openAI
+    }
+
     public let preference: Preference
     private let openAIFactory: @Sendable (String) -> AIClient
     private let anthropicFactory: @Sendable (String) -> AIClient
@@ -25,25 +30,109 @@ public struct AIProviderRouter: Sendable {
         self.anthropicFactory = anthropicFactory
     }
 
-    /// Resolve the primary client, or throw `missingAPIKey` if none is available.
-    public func primaryClient() throws -> AIClient {
+    private func preferredKinds() -> [ProviderKind] {
         switch preference {
-        case .anthropicPrimary:
-            if let key = KeychainHelper.load(.anthropicKey), !key.isEmpty {
-                return anthropicFactory(key)
-            }
-            if let key = KeychainHelper.load(.openAIKey), !key.isEmpty {
-                return openAIFactory(key)
-            }
-        case .openAIPrimary:
-            if let key = KeychainHelper.load(.openAIKey), !key.isEmpty {
-                return openAIFactory(key)
-            }
-            if let key = KeychainHelper.load(.anthropicKey), !key.isEmpty {
-                return anthropicFactory(key)
+        case .anthropicPrimary: return [.anthropic, .openAI]
+        case .openAIPrimary: return [.openAI, .anthropic]
+        }
+    }
+
+    /// First available client in preference order, with which vendor backs it.
+    public func primaryClientWithKind() throws -> (AIClient, ProviderKind) {
+        for kind in preferredKinds() {
+            switch kind {
+            case .anthropic:
+                if let key = KeychainHelper.load(.anthropicKey), !key.isEmpty {
+                    return (anthropicFactory(key), .anthropic)
+                }
+            case .openAI:
+                if let key = KeychainHelper.load(.openAIKey), !key.isEmpty {
+                    return (openAIFactory(key), .openAI)
+                }
             }
         }
         throw AIClientError.missingAPIKey
+    }
+
+    /// Resolve the primary client, or throw `missingAPIKey` if none is available.
+    public func primaryClient() throws -> AIClient {
+        try primaryClientWithKind().0
+    }
+
+    /// Client for the vendor that is *not* `used`, when a key exists.
+    func alternateClient(after used: ProviderKind) -> AIClient? {
+        switch used {
+        case .anthropic:
+            guard let key = KeychainHelper.load(.openAIKey), !key.isEmpty else { return nil }
+            return openAIFactory(key)
+        case .openAI:
+            guard let key = KeychainHelper.load(.anthropicKey), !key.isEmpty else { return nil }
+            return anthropicFactory(key)
+        }
+    }
+
+    /// Stream chat; on rate limit, 5xx, network-ish `URLError`, or `networkUnavailable`,
+    /// retry once using the other provider when its key is present.
+    /// - Note: Marked `@MainActor` so chunk callbacks can update SwiftUI without cross-actor hops; non-UI callers should hop to the main actor before invoking.
+    @MainActor
+    public func runChatWithFallback(
+        messages: [ChatMessage],
+        systemPrompt: String,
+        temperature: Double,
+        onChunk: @escaping (String) -> Void
+    ) async throws {
+        let (primary, kind) = try primaryClientWithKind()
+        do {
+            let stream = try await primary.chat(
+                messages: messages,
+                systemPrompt: systemPrompt,
+                temperature: temperature
+            )
+            try await Self.drain(stream, onChunk: onChunk)
+        } catch {
+            guard Self.shouldFallback(for: error),
+                  let alt = alternateClient(after: kind)
+            else { throw error }
+            let stream = try await alt.chat(
+                messages: messages,
+                systemPrompt: systemPrompt,
+                temperature: temperature
+            )
+            try await Self.drain(stream, onChunk: onChunk)
+        }
+    }
+
+    @MainActor
+    private static func drain(
+        _ stream: AsyncThrowingStream<String, Error>,
+        onChunk: @escaping (String) -> Void
+    ) async throws {
+        for try await chunk in stream {
+            onChunk(chunk)
+        }
+    }
+
+    private static func shouldFallback(for error: Error) -> Bool {
+        if let e = error as? AIClientError {
+            switch e {
+            case .rateLimited, .networkUnavailable:
+                return true
+            case .serverError(let code, _):
+                return (500...599).contains(code)
+            default:
+                return false
+            }
+        }
+        if let url = error as? URLError {
+            switch url.code {
+            case .notConnectedToInternet, .networkConnectionLost, .timedOut,
+                    .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed:
+                return true
+            default:
+                return false
+            }
+        }
+        return false
     }
 
     /// Return a client specifically for image generation (OpenAI-only today).

@@ -2,16 +2,28 @@
 
 **GitHub:** [https://github.com/wanghaoheng123-boop/PIKAPIKA](https://github.com/wanghaoheng123-boop/PIKAPIKA)
 
-### Clone for Xcode
+### Clone for Xcode (smooth first run)
 
-1. **Xcode:** **File → Clone Repository…** → paste `https://github.com/wanghaoheng123-boop/PIKAPIKA.git` → choose a folder → **Clone**.
-2. **Terminal:** `git clone https://github.com/wanghaoheng123-boop/PIKAPIKA.git`
+1. **Clone**
+   - **Xcode:** **File → Clone Repository…** → `https://github.com/wanghaoheng123-boop/PIKAPIKA.git` → pick a local folder (avoid cloud-synced folders if builds feel flaky).
+   - **Terminal:** `git clone https://github.com/wanghaoheng123-boop/PIKAPIKA.git` then `cd PIKAPIKA`.
 
-**Primary (canonical) apps:** from repo root run **`bash Scripts/generate-xcode.sh`** (requires [XcodeGen](https://github.com/yonaskolb/XcodeGen)), then open **`Apps/iOS/Pika.xcodeproj`** or **`Apps/macOS/Pika.xcodeproj`** and **⌘R**.
+2. **Generate the Pika Xcode projects (required once per clone)**  
+   The canonical **iOS** and **macOS** apps are produced by [XcodeGen](https://github.com/yonaskolb/XcodeGen). From the repo root on a **Mac**:
+   - **Easiest:** `bash Scripts/bootstrap.sh` — installs XcodeGen via **Homebrew** if missing, then runs `Scripts/generate-xcode.sh`.
+   - **Manual:** install XcodeGen (`brew install xcodegen`), then `bash Scripts/generate-xcode.sh`.
 
-**Legacy iOS app:** open **`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`** (committed project; reference implementation for SwiftData chat and related flows).
+3. **Open and run**
+   - Open **`Apps/iOS/Pika.xcodeproj`** or **`Apps/macOS/Pika.xcodeproj`**.
+   - Select the **Pika** scheme, choose an **iOS Simulator** or **My Mac**, press **⌘R**.
+   - **Signing:** `DEVELOPMENT_TEAM` is blank in `project.yml`; for a real device, set your **Team** under the target’s **Signing & Capabilities** in Xcode.
 
-After cloning, run **`swift test`** inside `Packages/PikaCoreBase` if you want to verify packages without SwiftData macros.
+4. **Before chat works**  
+   Open **Settings** in the app, unlock with Face ID / Touch ID / password, and save at least one vendor API key (Anthropic and/or OpenAI).
+
+**Legacy iOS app (optional):** open **`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`** — committed project; see **[`Apps/PIKAPIKA/README.md`](Apps/PIKAPIKA/README.md)**.
+
+**Quick package check (no SwiftData macros):** `cd Packages/PikaCoreBase && swift test`.
 
 ---
 

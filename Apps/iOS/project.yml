@@ -23,7 +23,8 @@ targets:
     type: application
     platform: iOS
     sources:
-      - Sources
+      - path: Sources
+      - path: ../Shared/Sources
     resources:
       - Resources
     dependencies:

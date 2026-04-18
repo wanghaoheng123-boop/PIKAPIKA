@@ -60,3 +60,23 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 - **Corrected:** Marked **iOS/macOS Pika** as the **canonical** forward edit surface for new work; **PIKAPIKA** as **reference** (SwiftData chat patterns). Pointed active milestone to **[Docs/ROADMAP.md](Docs/ROADMAP.md) P1**. Updated [systemPatterns.md](systemPatterns.md), [activeContext.md](activeContext.md), [README.md](README.md), and [Docs/ARCHITECTURE.md](Docs/ARCHITECTURE.md) so any agent/tooling sees the same layout.
 
 ---
+
+## 2026-04-18 — P1 AI chat MVP (canonical iOS/macOS apps)
+
+- **Completed:** [Apps/Shared/Sources/PetChatScreen.swift](Apps/Shared/Sources/PetChatScreen.swift) — SwiftData `@Query` for `ConversationMessage`, `PromptLibrary` system prompt, `AIProviderRouter.runChatWithFallback`, trim via [ConversationHistoryLimits.swift](Apps/Shared/Sources/ConversationHistoryLimits.swift), error + **Retry** when the assistant stream fails after the user row was saved.
+- **Completed:** [Apps/Shared/Sources/PikaSettingsContent.swift](Apps/Shared/Sources/PikaSettingsContent.swift) — `@AppStorage` provider preference, **Test connection** probe, existing keychain sections.
+- **Completed:** [Packages/PikaAI/Sources/PikaAI/AIProviderRouter.swift](Packages/PikaAI/Sources/PikaAI/AIProviderRouter.swift) — `primaryClientWithKind()`, one-shot fallback after rate limit / 5xx / `networkUnavailable` / selected `URLError` codes; [Packages/PikaAI/Tests/PikaAITests/AIProviderRouterTests.swift](Packages/PikaAI/Tests/PikaAITests/AIProviderRouterTests.swift) (requires Apple toolchain + keychain for `swift test`).
+- **Completed:** XcodeGen [Apps/iOS/project.yml](Apps/iOS/project.yml) and [Apps/macOS/project.yml](Apps/macOS/project.yml) include `../Shared/Sources`; macOS [PetHomeView](Apps/macOS/Sources/PetHomeView.swift) exposes Settings (gear + sheet).
+- **Verification:** `swift test` for **PikaAI** not executed in this Windows workspace (Swift not on PATH); run on macOS with Xcode-selected toolchain.
+
+---
+
+## 2026-04-18 — QA/QC remediation loop (post-P1)
+
+- **P0 — PetChatScreen:** If `save()` fails after inserting the user line, the pending row is **deleted** and the context re-saved; if `save()` succeeds but **trim** fails, **`awaitingAssistantRetry`** is set so **Retry** appears. Documented in-file policy comment in [PetChatScreen.swift](Apps/Shared/Sources/PetChatScreen.swift).
+- **P1 — Chat UX / a11y:** `ScrollViewReader` auto-scroll on new messages and streaming text; inline `ProgressView` while sending; `accessibilityLabel` / `accessibilityHint` on Send, Retry, and message field.
+- **P1 — Settings probe:** Footer text explains **billed** minimal chat probe; **15s cooldown** only after a probe that reached the network (`primaryClient()` succeeded); missing-key errors do not trigger cooldown. Test button a11y strings added.
+- **P2 — CI:** Added [.github/workflows/pika-ci.yml](.github/workflows/pika-ci.yml) — `swift test --package-path Packages/PikaAI` on `macos-latest` (push/PR to `main` or `master`).
+- **Verify (local):** This session’s host had **no Swift/Xcode on PATH**; full checklist remains: `Scripts/generate-xcode.sh`, Xcode build **Pika** iOS + macOS, `swift test` in `Packages/PikaAI`, manual chat + Settings probe. Use GitHub Actions run for PikaAI on next push.
+
+---
