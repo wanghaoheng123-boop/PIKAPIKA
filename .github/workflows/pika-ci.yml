@@ -30,7 +30,8 @@ jobs:
 
   pikaai-swift-test:
     name: PikaAI swift test
-    runs-on: macos-14
+    # Needs a newer default Xcode / Swift than macos-14 for URLSession async bytes + concurrency.
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
 

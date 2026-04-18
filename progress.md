@@ -109,5 +109,6 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 - **Change:** [Packages/PikaAI/Package.swift](Packages/PikaAI/Package.swift) now depends on **`../PikaCoreBase`** only; sources/tests use `import PikaCoreBase`. Apps that need SwiftData models still link **`PikaCore`** separately.
 - **Follow-up:** `OpenAIClient` / `AnthropicClient` declare **`@unchecked Sendable`** so they satisfy `AIClient: Sendable` under **StrictConcurrency** (same pattern as `MockAIClient`).
 - **PikaAI `swift build` on CI:** Failed at compile (not tests). **Cause:** `AIProviderRouter: Sendable` did not synthesize with default `*Factory` closures on the hosted toolchain. **Fix:** Dropped `Sendable` from `AIProviderRouter` ([AIProviderRouter.swift](Packages/PikaAI/Sources/PikaAI/AIProviderRouter.swift)); added explicit **`swift build`** step before **`swift test`** in [pika-ci.yml](.github/workflows/pika-ci.yml).
+- **Still failing `swift build` on `macos-14`:** After JSON literal splits, build still exited 1. **Mitigation:** Run the **PikaAI** CI job on **`macos-15`** (newer Xcode); keep **PikaCoreBase** on **`macos-14`**.
 
 ---

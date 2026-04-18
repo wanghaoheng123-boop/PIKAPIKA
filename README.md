@@ -67,7 +67,7 @@ Tests use **XCTest** (no extra packages; runs on GitHub Actions `macos-14` with 
 
 ### `PikaAI` (providers + prompts)
 
-The package depends on **`PikaCoreBase` only** (not `PikaCore`), so **`swift test` works from the command line** without SwiftData macro plugins—the same layout **Pika CI** uses.
+The package depends on **`PikaCoreBase` only** (not `PikaCore`), so **`swift test` works from the command line** without SwiftData macro plugins—the same layout **Pika CI** uses (PikaAI job runs on **`macos-15`**; PikaCoreBase stays on **`macos-14`**).
 
 ```bash
 cd Packages/PikaAI
