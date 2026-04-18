@@ -70,4 +70,4 @@ jobs:
 
       - name: Swift test (PikaAI)
         working-directory: Packages/PikaAI
-        run: swift test -v --parallel=false
+        run: swift test -v --no-parallel
