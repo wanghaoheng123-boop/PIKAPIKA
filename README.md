@@ -53,6 +53,8 @@ Orchestration and project state live in Markdown at the repo root:
 | [`activeContext.md`](activeContext.md) | Current focus and handoffs |
 | [`AGENTS.md`](AGENTS.md) | Sub-agent routing (`CLAUDE.md` points here) |
 | [`Docs/ROADMAP.md`](Docs/ROADMAP.md) | Product milestones (P0, P1, …) — canonical checklist |
+| [`Docs/SOUL_AND_SUBSCRIPTION.md`](Docs/SOUL_AND_SUBSCRIPTION.md) | Pet export (“SOUL”), backup, annual plan policy sketch |
+| [`Docs/APP_STORE_PREFLIGHT.md`](Docs/APP_STORE_PREFLIGHT.md) | TestFlight / App Store review checklist |
 
 ## Building and testing
 

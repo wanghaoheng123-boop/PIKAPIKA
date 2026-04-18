@@ -4,7 +4,7 @@ import PikaCoreBase
 /// Selects an `AIClient` based on user preference and available keys.
 /// If the preferred provider fails with a recoverable error, falls back to
 /// the alternate provider when its key is present.
-/// Intentionally not `Sendable`: default `*Factory` closures do not synthesize cleanly on all CI toolchains.
+/// Factory closures are not forced `@Sendable` so defaults compile cleanly on CI toolchains (Swift 5/6).
 public struct AIProviderRouter {
 
     public enum Preference: String, Sendable, CaseIterable {
@@ -18,13 +18,29 @@ public struct AIProviderRouter {
     }
 
     public let preference: Preference
-    private let openAIFactory: @Sendable (String) -> AIClient
-    private let anthropicFactory: @Sendable (String) -> AIClient
+    private let openAIFactory: (String) -> AIClient
+    private let anthropicFactory: (String) -> AIClient
 
+    private static func defaultOpenAI(_ apiKey: String) -> AIClient {
+        OpenAIClient(apiKey: apiKey)
+    }
+
+    private static func defaultAnthropic(_ apiKey: String) -> AIClient {
+        AnthropicClient(apiKey: apiKey)
+    }
+
+    /// Default OpenAI + Anthropic client factories (real network clients).
+    public init(preference: Preference = .anthropicPrimary) {
+        self.preference = preference
+        self.openAIFactory = Self.defaultOpenAI
+        self.anthropicFactory = Self.defaultAnthropic
+    }
+
+    /// Custom factories (tests, previews, injected mocks).
     public init(
-        preference: Preference = .anthropicPrimary,
-        openAIFactory: @escaping @Sendable (String) -> AIClient = { OpenAIClient(apiKey: $0) },
-        anthropicFactory: @escaping @Sendable (String) -> AIClient = { AnthropicClient(apiKey: $0) }
+        preference: Preference,
+        openAIFactory: @escaping (String) -> AIClient,
+        anthropicFactory: @escaping (String) -> AIClient
     ) {
         self.preference = preference
         self.openAIFactory = openAIFactory

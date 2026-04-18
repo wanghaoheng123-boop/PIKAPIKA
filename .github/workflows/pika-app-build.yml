@@ -1,0 +1,34 @@
+# Optional: full iOS app compile (SwiftData + strict app settings). Run manually — slower than package CI.
+name: Pika iOS app build (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  pika-ios-xcodebuild:
+    name: XcodeGen + xcodebuild (iOS)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          set -eo pipefail
+          if [ -d "/Applications/Xcode.app" ]; then
+            sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+          fi
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew list xcodegen &>/dev/null || brew install xcodegen
+
+      - name: Generate Xcode project
+        run: bash Scripts/generate-xcode.sh
+
+      - name: Build iOS app (no code signing)
+        working-directory: Apps/iOS
+        run: |
+          set -eo pipefail
+          xcodebuild -project Pika.xcodeproj -scheme Pika -destination 'generic/platform=iOS' -configuration Debug CODE_SIGNING_ALLOWED=NO build

@@ -26,6 +26,6 @@ On **Windows**, symlinks may require Developer Mode or Git `core.symlinks=true`.
 
 ## Tooling
 
-- **CLI CI:** `cd Packages/PikaCoreBase && swift test` — exercises domain logic without SwiftData. **`PikaAI`** depends on **`PikaCoreBase` only** so `cd Packages/PikaAI && swift test` also avoids SwiftData. **Pika CI** runs PikaCoreBase on **`macos-14`** and PikaAI on **`macos-15`** (newer default Xcode for async `URLSession` APIs).
+- **CLI CI:** `cd Packages/PikaCoreBase && swift test` — exercises domain logic without SwiftData. **`PikaAI`** depends on **`PikaCoreBase` only** so `cd Packages/PikaAI && swift test` also avoids SwiftData. **Pika CI** runs PikaCoreBase on **`macos-14`** and PikaAI on **`macos-15`**. If **PikaAI `swift build`** fails, the workflow uploads **`pika-ai-swift-build-log`** as an artifact and prints the log tail—download from the failed run for the exact compiler error.
 - **Full library:** `PikaCore` — **SwiftData `@Model`:** macro expansion needs the **SwiftDataMacros** plugin; command-line `swift build` may fail with `SwiftDataMacros` not found; build **from Xcode** or a toolchain that loads SwiftData macros.
 - **XcodeGen apps:** Canonical **Pika** iOS/macOS projects live under **`Apps/iOS`** and **`Apps/macOS`**. Regenerate Xcode with **`bash Scripts/generate-xcode.sh`** (requires XcodeGen on `PATH`), then open **`Apps/iOS/Pika.xcodeproj`** or **`Apps/macOS/Pika.xcodeproj`**. Legacy **`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`** remains a separate, committed iOS target.

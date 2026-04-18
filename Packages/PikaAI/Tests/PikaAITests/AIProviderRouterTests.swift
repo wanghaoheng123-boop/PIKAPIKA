@@ -93,30 +93,31 @@ private enum AIProviderRouterTestHarness {
 
 final class AIProviderRouterTests: XCTestCase {
 
-    override func setUp() async throws {
-        // Skip before super.setUp: some XCTest builds invoke async setUp inconsistently on CI.
-        if ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true" {
-            throw XCTSkip("AIProviderRouter keychain tests are for local Mac runs; CI uses PromptLibraryTests + MockAIClientTests.")
-        }
-        try await super.setUp()
-    }
-
     override func tearDown() {
         KeychainHelper.delete(.anthropicKey)
         KeychainHelper.delete(.openAIKey)
         super.tearDown()
     }
 
+    private func skipOnGitHubActions() throws {
+        if ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true" {
+            throw XCTSkip("AIProviderRouter keychain tests are for local Mac runs; CI uses PromptLibraryTests + MockAIClientTests.")
+        }
+    }
+
     func testFallbackOnRateLimitUsesAlternateProvider() async throws {
+        try skipOnGitHubActions()
         let out = try await AIProviderRouterTestHarness.fallbackOnRateLimit()
         XCTAssertTrue(out.contains("fallback"))
     }
 
     func testNoFallbackOnMissingKeyAlternate() async throws {
+        try skipOnGitHubActions()
         try await AIProviderRouterTestHarness.noFallbackOnMissingKeyAlternate()
     }
 
     func testFallbackOnServerError5xx() async throws {
+        try skipOnGitHubActions()
         let out = try await AIProviderRouterTestHarness.fallbackOnServerError5xx()
         XCTAssertTrue(out.contains("anthropic"))
     }
