@@ -94,12 +94,11 @@ private enum AIProviderRouterTestHarness {
 final class AIProviderRouterTests: XCTestCase {
 
     override func setUp() async throws {
-        try await super.setUp()
-        // GitHub Actions runners often cannot use the login keychain the same way as a dev Mac;
-        // `KeychainHelper.save` may fail and assertions would flake. Run these tests locally.
+        // Skip before super.setUp: some XCTest builds invoke async setUp inconsistently on CI.
         if ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true" {
-            throw XCTSkip("AIProviderRouter keychain tests are for local Mac runs; CI builds PikaAI via PromptLibraryTests.")
+            throw XCTSkip("AIProviderRouter keychain tests are for local Mac runs; CI uses PromptLibraryTests + MockAIClientTests.")
         }
+        try await super.setUp()
     }
 
     override func tearDown() {
