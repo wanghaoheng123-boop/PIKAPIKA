@@ -28,3 +28,4 @@ On **Windows**, symlinks may require Developer Mode or Git `core.symlinks=true`.
 
 - **CLI CI:** `cd Packages/PikaCoreBase && swift test` — exercises domain logic without SwiftData.
 - **Full library:** `PikaCore` — **SwiftData `@Model`:** macro expansion needs the **SwiftDataMacros** plugin; command-line `swift build` may fail with `SwiftDataMacros` not found; build **from Xcode** or a toolchain that loads SwiftData macros.
+- **XcodeGen apps:** Canonical **Pika** iOS/macOS projects live under **`Apps/iOS`** and **`Apps/macOS`**. Regenerate Xcode with **`bash Scripts/generate-xcode.sh`** (requires XcodeGen on `PATH`), then open **`Apps/iOS/Pika.xcodeproj`** or **`Apps/macOS/Pika.xcodeproj`**. Legacy **`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`** remains a separate, committed iOS target.

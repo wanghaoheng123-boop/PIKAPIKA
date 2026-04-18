@@ -12,9 +12,21 @@
 
 ```
 PIKAPIKA/
-├── Apps/PIKAPIKA/              # iOS SwiftUI app shell (`.xcodeproj`; local SPM link to PikaCore)
-├── Packages/PikaCoreBase/      # Swift package: domain, protocols, utilities; `swift test` (Swift Testing)
-├── Packages/PikaCore/          # Swift package: path-dep on PikaCoreBase; SwiftData `@Model` + umbrella `PikaCore`
+├── Apps/
+│   ├── iOS/                    # XcodeGen → `Pika.xcodeproj` (see Scripts/generate-xcode.sh)
+│   ├── macOS/                  # XcodeGen → `Pika.xcodeproj`
+│   └── PIKAPIKA/               # Legacy iOS app: committed `PIKAPIKA.xcodeproj`; richer UI + SwiftData chat reference
+├── Backend/                    # Firebase functions, rules, schema docs
+├── Docs/                       # ROADMAP, ARCHITECTURE, AI_INTEGRATION, …
+├── Packages/
+│   ├── PikaCoreBase/           # Domain + protocols; CLI-safe `swift test`
+│   ├── PikaCore/               # SwiftData `@Model` + umbrella `PikaCore`
+│   ├── PikaAI/
+│   ├── PetEngine/
+│   ├── PikaSync/
+│   ├── PikaSubscription/
+│   └── SharedUI/
+├── Scripts/                    # bootstrap, generate-xcode, …
 ├── projectbrief.md
 ├── productContext.md
 ├── systemPatterns.md
@@ -25,9 +37,18 @@ PIKAPIKA/
 └── CLAUDE.md -> AGENTS.md
 ```
 
+### Which app should agents edit?
+
+| Path | Role |
+|------|------|
+| **`Apps/iOS`**, **`Apps/macOS`** | **Canonical forward targets** for new product work. SwiftUI sources under `Sources/`; regenerate Xcode with **`Scripts/generate-xcode.sh`**. Chat here is still **in-memory** in `ChatView` until [Docs/ROADMAP.md](Docs/ROADMAP.md) P1 ships. |
+| **`Apps/PIKAPIKA`** | **Reference** iOS app with committed `.xcodeproj`, `PetChatActions`, voice, SwiftData-backed chat. Use for patterns; do not assume new work lands here unless the task says so. |
+
+Product milestones and checklists: **[Docs/ROADMAP.md](Docs/ROADMAP.md)** (not duplicated in Memory Bank).
+
 ## Dependency map (logical)
 
-- **App (future) / consumers** → **`import PikaCore`** (umbrella re-exports `PikaCoreBase` + `PikaCorePersistence`).
+- **App targets** (`Apps/iOS`, `Apps/macOS`, `Apps/PIKAPIKA`, …) → **`import PikaCore`** (umbrella re-exports `PikaCoreBase` + `PikaCorePersistence`).
 - **`PikaCoreBase`** → Apple frameworks only (Foundation, Security, LocalAuthentication, Combine; no SwiftData).
 - **`PikaCorePersistence`** → SwiftData (`@Model` types); no dependency on `PikaCoreBase` (models are standalone).
 - **`PikaCore` (umbrella)** → depends on `PikaCoreBase` + `PikaCorePersistence`; `@_exported import` both modules.

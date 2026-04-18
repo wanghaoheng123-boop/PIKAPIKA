@@ -53,3 +53,10 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 - **Recommendation:** Run `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer` so default `swift`/`xcodebuild` use the full Xcode toolchain (was Command Line Tools before).
 
 ---
+
+## 2026-04-18 — Memory Bank + docs aligned to dual app layout
+
+- **Issue:** `activeContext.md`, `systemPatterns.md`, and root `README.md` described only **`Apps/PIKAPIKA`** as the app, while the repo also contains **XcodeGen** apps under **`Apps/iOS`** and **`Apps/macOS`** (see [Scripts/generate-xcode.sh](Scripts/generate-xcode.sh)) and [Docs/ARCHITECTURE.md](Docs/ARCHITECTURE.md) already showed the package graph for those targets.
+- **Corrected:** Marked **iOS/macOS Pika** as the **canonical** forward edit surface for new work; **PIKAPIKA** as **reference** (SwiftData chat patterns). Pointed active milestone to **[Docs/ROADMAP.md](Docs/ROADMAP.md) P1**. Updated [systemPatterns.md](systemPatterns.md), [activeContext.md](activeContext.md), [README.md](README.md), and [Docs/ARCHITECTURE.md](Docs/ARCHITECTURE.md) so any agent/tooling sees the same layout.
+
+---

@@ -1,0 +1,52 @@
+name: Pika
+options:
+  bundleIdPrefix: com.pikapika
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    SWIFT_STRICT_CONCURRENCY: complete
+packages:
+  PikaCore:         { path: ../../Packages/PikaCore }
+  PikaAI:           { path: ../../Packages/PikaAI }
+  PetEngine:        { path: ../../Packages/PetEngine }
+  PikaSync:         { path: ../../Packages/PikaSync }
+  PikaSubscription: { path: ../../Packages/PikaSubscription }
+  SharedUI:         { path: ../../Packages/SharedUI }
+targets:
+  Pika:
+    type: application
+    platform: macOS
+    sources:
+      - Sources
+    resources:
+      - Resources
+    dependencies:
+      - package: PikaCore
+      - package: PikaAI
+      - package: PetEngine
+      - package: PikaSync
+      - package: PikaSubscription
+      - package: SharedUI
+    info:
+      path: Resources/Info.plist
+      properties:
+        LSUIElement: false
+        NSSupportsAutomaticTermination: true
+        NSFaceIDUsageDescription: "Unlock reveals your saved API keys."
+    entitlements:
+      path: Resources/Pika.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.device.audio-input: false
+        keychain-access-groups: ["$(AppIdentifierPrefix)com.pikapika.app"]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.pikapika.app
+        ENABLE_PREVIEWS: "YES"

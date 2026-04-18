@@ -4,10 +4,14 @@
 
 ### Clone for Xcode
 
-1. **Xcode:** **File → Clone Repository…** → paste `https://github.com/wanghaoheng123-boop/PIKAPIKA.git` → choose a folder → **Clone**. When it finishes, open **`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`**.
-2. **Terminal:** `git clone https://github.com/wanghaoheng123-boop/PIKAPIKA.git` then open the same `.xcodeproj`.
+1. **Xcode:** **File → Clone Repository…** → paste `https://github.com/wanghaoheng123-boop/PIKAPIKA.git` → choose a folder → **Clone**.
+2. **Terminal:** `git clone https://github.com/wanghaoheng123-boop/PIKAPIKA.git`
 
-After cloning, run **`swift test`** inside `Packages/PikaCoreBase` if you want to verify packages; open the app project in Xcode and **⌘R** on a simulator.
+**Primary (canonical) apps:** from repo root run **`bash Scripts/generate-xcode.sh`** (requires [XcodeGen](https://github.com/yonaskolb/XcodeGen)), then open **`Apps/iOS/Pika.xcodeproj`** or **`Apps/macOS/Pika.xcodeproj`** and **⌘R**.
+
+**Legacy iOS app:** open **`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`** (committed project; reference implementation for SwiftData chat and related flows).
+
+After cloning, run **`swift test`** inside `Packages/PikaCoreBase` if you want to verify packages without SwiftData macros.
 
 ---
 
@@ -16,9 +20,12 @@ Shared workspace for the **PIKAPIKA** product. Core Swift code is split into:
 - **`PikaCoreBase`** ([`Packages/PikaCoreBase`](Packages/PikaCoreBase)) — domain types, protocols, utilities (no SwiftData). **CLI-safe:** run `swift test` here for CI.
 - **`PikaCore`** ([`Packages/PikaCore`](Packages/PikaCore)) — depends on `PikaCoreBase` + **SwiftData** persistence (`@Model`). Build the full library in **Xcode** (SwiftData macros are unreliable with bare command-line Swift on some setups).
 
-### Run the iOS app (Xcode)
+### Run the apps (Xcode)
 
-The app project is already created: open **[`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`](Apps/PIKAPIKA/PIKAPIKA.xcodeproj)** in Xcode (do **not** use *File → New → Project*). You must keep **`Apps/`** and **`Packages/`** together when copying or uploading. Step-by-step: **[`Apps/PIKAPIKA/README.md`](Apps/PIKAPIKA/README.md)**.
+- **Pika (iOS / macOS):** generate with **[`Scripts/generate-xcode.sh`](Scripts/generate-xcode.sh)**, then open **`Apps/iOS/Pika.xcodeproj`** or **`Apps/macOS/Pika.xcodeproj`**.
+- **PIKAPIKA (legacy iOS):** open **[`Apps/PIKAPIKA/PIKAPIKA.xcodeproj`](Apps/PIKAPIKA/PIKAPIKA.xcodeproj)** — details in **[`Apps/PIKAPIKA/README.md`](Apps/PIKAPIKA/README.md)**.
+
+Keep **`Apps/`**, **`Packages/`**, and **`Scripts/`** together when copying or syncing the tree.
 
 ## Memory Bank (agent continuity)
 
@@ -33,6 +40,7 @@ Orchestration and project state live in Markdown at the repo root:
 | [`progress.md`](progress.md) | Append-only history |
 | [`activeContext.md`](activeContext.md) | Current focus and handoffs |
 | [`AGENTS.md`](AGENTS.md) | Sub-agent routing (`CLAUDE.md` points here) |
+| [`Docs/ROADMAP.md`](Docs/ROADMAP.md) | Product milestones (P0, P1, …) — canonical checklist |
 
 ## Building and testing
 
@@ -57,9 +65,14 @@ Tests use **Swift Testing** (`swift-testing` package) so they run without full *
 
 ```
 PIKAPIKA/
-├── Apps/PIKAPIKA/         # iOS SwiftUI app (Xcode project; depends on local PikaCore)
-├── Packages/PikaCoreBase/ # Swift package: domain + tests (no SwiftData)
-├── Packages/PikaCore/     # Swift package: SwiftData models + umbrella `import PikaCore`
+├── Apps/
+│   ├── iOS/               # XcodeGen → Pika.xcodeproj (canonical iOS app sources)
+│   ├── macOS/             # XcodeGen → Pika.xcodeproj
+│   └── PIKAPIKA/          # Legacy iOS: PIKAPIKA.xcodeproj + reference SwiftData chat
+├── Backend/               # Firebase (functions, rules)
+├── Docs/                  # ROADMAP, ARCHITECTURE, …
+├── Packages/              # PikaCore, PikaAI, PetEngine, PikaSync, PikaSubscription, SharedUI
+├── Scripts/               # generate-xcode.sh, bootstrap, …
 ├── AGENTS.md
 ├── CLAUDE.md              # symlink → AGENTS.md (see techContext if on Windows)
 └── … Memory Bank files …

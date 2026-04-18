@@ -35,11 +35,12 @@ Canonical skills: `~/.cursor/skills/<name>/SKILL.md` — use for domain workflow
 |------|------|
 | `projectbrief.md` | Mandate, audience, objectives |
 | `productContext.md` | UX, domain, functional goals |
-| `systemPatterns.md` | Architecture, patterns, dependency map |
+| `systemPatterns.md` | Architecture, patterns, dependency map, **which `Apps/*` tree is canonical** |
 | `techContext.md` | Stack, tooling, env constraints |
 | `progress.md` | Append-only history |
 | `activeContext.md` | Current task, handoff, next steps |
 | `AGENTS.md` | This file |
+| `Docs/ROADMAP.md` | Product milestones (P0–P6); checklist for what to build next |
 
 ## Anti-patterns
 

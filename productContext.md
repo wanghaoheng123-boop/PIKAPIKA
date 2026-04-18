@@ -15,6 +15,11 @@ A **virtual pet companion** with bond progression (XP, levels, streaks), **work-
 - Represent **pets**, **bond events**, **activity** streams, and **pet state** in a testable, migration-friendly way.
 - Expose **protocols** (e.g. activity sources, AI client) so app layers can plug implementations without forking core types.
 
+## App surfaces (where UX ships)
+
+- **Forward targets:** **`Apps/iOS`** and **`Apps/macOS`** (XcodeGen). These are the default places to implement new UI and wiring described in **[Docs/ROADMAP.md](Docs/ROADMAP.md)**.
+- **Reference iOS app:** **`Apps/PIKAPIKA`** — richer existing flows (e.g. SwiftData-backed chat); use for patterns when parity is needed.
+
 ## Non-goals (for this repo root)
 
 - The Memory Bank does **not** replace version control history; it summarizes **intent**, **constraints**, and **current focus** for agents and humans.
