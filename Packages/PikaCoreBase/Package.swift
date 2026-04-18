@@ -15,10 +15,7 @@ let package = Package(
         .target(
             name: "PikaCoreBase",
             dependencies: [],
-            path: "Sources/PikaCoreBase",
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            path: "Sources/PikaCoreBase"
         ),
         .testTarget(
             name: "PikaCoreTests",

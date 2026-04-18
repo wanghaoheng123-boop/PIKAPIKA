@@ -47,14 +47,18 @@ jobs:
           xcodebuild -version
 
       - name: Swift build (PikaAI)
+        id: pikaai_build
+        continue-on-error: true
         working-directory: Packages/PikaAI
-        run: |
-          set -o pipefail
-          if ! swift build -v 2>&1 | tee /tmp/pika-ai-build.log; then
-            echo "::error::swift build failed — last 120 lines:"
-            tail -n 120 /tmp/pika-ai-build.log
-            exit 1
-          fi
+        run: swift build -v 2>&1 | tee /tmp/pika-ai-build.log
+
+      - name: Swift build log (on failure)
+        if: steps.pikaai_build.outcome == 'failure'
+        run: tail -n 200 /tmp/pika-ai-build.log
+
+      - name: Swift build must succeed
+        if: steps.pikaai_build.outcome != 'success'
+        run: exit 1
 
       - name: Swift test (PikaAI)
         working-directory: Packages/PikaAI
