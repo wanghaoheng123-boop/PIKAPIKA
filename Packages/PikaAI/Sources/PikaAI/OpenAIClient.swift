@@ -4,7 +4,7 @@ import PikaCoreBase
 /// OpenAI implementation of `AIClient`. Uses `/v1/chat/completions` with SSE
 /// streaming, `/v1/images/generations` for sprites, and vision via the chat
 /// endpoint's multimodal content array.
-public final class OpenAIClient: AIClient, @unchecked Sendable {
+public final class OpenAIClient: AIClient {
 
     private let apiKey: String
     private let model: String
@@ -55,27 +55,27 @@ public final class OpenAIClient: AIClient, @unchecked Sendable {
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let (bytes, response) = try await session.bytes(for: request)
-        try Self.validate(response)
+        // Buffered SSE: avoids `URLSession.bytes(for:)` / `AsyncBytes` (fragile across hosted toolchains).
+        let (data, response) = try await session.data(for: request)
+        try Self.validate(response, body: data)
+
+        let payloadText = String(data: data, encoding: .utf8) ?? ""
+        let lines = payloadText.components(separatedBy: .newlines)
 
         return AsyncThrowingStream { continuation in
             Task {
-                do {
-                    for try await line in bytes.lines {
-                        guard line.hasPrefix("data:") else { continue }
-                        let payload = line.dropFirst(5).trimmingCharacters(in: .whitespaces)
-                        if payload == "[DONE]" { break }
-                        guard let data = payload.data(using: .utf8),
-                              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                              let choices = json["choices"] as? [[String: Any]],
-                              let delta = choices.first?["delta"] as? [String: Any],
-                              let content = delta["content"] as? String else { continue }
-                        continuation.yield(content)
-                    }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
+                for line in lines {
+                    guard line.hasPrefix("data:") else { continue }
+                    let payload = line.dropFirst(5).trimmingCharacters(in: .whitespaces)
+                    if payload == "[DONE]" { break }
+                    guard let lineData = payload.data(using: .utf8),
+                          let json = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
+                          let choices = json["choices"] as? [[String: Any]],
+                          let delta = choices.first?["delta"] as? [String: Any],
+                          let content = delta["content"] as? String else { continue }
+                    continuation.yield(content)
                 }
+                continuation.finish()
             }
         }
     }

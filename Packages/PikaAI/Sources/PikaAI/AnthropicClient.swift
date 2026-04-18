@@ -4,7 +4,7 @@ import PikaCoreBase
 /// Anthropic implementation of `AIClient`. Uses `/v1/messages` with SSE
 /// streaming. The system prompt is marked `cache_control: ephemeral` so
 /// repeated chat turns with the same pet personality hit the prompt cache.
-public final class AnthropicClient: AIClient, @unchecked Sendable {
+public final class AnthropicClient: AIClient {
 
     private let apiKey: String
     private let model: String
@@ -66,32 +66,31 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let (bytes, response) = try await session.bytes(for: request)
-        try Self.validate(response)
+        let (data, response) = try await session.data(for: request)
+        try Self.validate(response, body: data)
+
+        let payloadText = String(data: data, encoding: .utf8) ?? ""
+        let lines = payloadText.components(separatedBy: .newlines)
 
         return AsyncThrowingStream { continuation in
             Task {
-                do {
-                    for try await line in bytes.lines {
-                        guard line.hasPrefix("data:") else { continue }
-                        let payload = line.dropFirst(5).trimmingCharacters(in: .whitespaces)
-                        guard let data = payload.data(using: .utf8),
-                              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-                        else { continue }
+                for line in lines {
+                    guard line.hasPrefix("data:") else { continue }
+                    let payload = line.dropFirst(5).trimmingCharacters(in: .whitespaces)
+                    guard let lineData = payload.data(using: .utf8),
+                          let json = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any]
+                    else { continue }
 
-                        let type = json["type"] as? String
-                        if type == "content_block_delta",
-                           let delta = json["delta"] as? [String: Any],
-                           let text = delta["text"] as? String {
-                            continuation.yield(text)
-                        } else if type == "message_stop" {
-                            break
-                        }
+                    let type = json["type"] as? String
+                    if type == "content_block_delta",
+                       let delta = json["delta"] as? [String: Any],
+                       let text = delta["text"] as? String {
+                        continuation.yield(text)
+                    } else if type == "message_stop" {
+                        break
                     }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
                 }
+                continuation.finish()
             }
         }
     }
