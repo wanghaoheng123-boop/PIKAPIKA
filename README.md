@@ -76,6 +76,8 @@ swift test
 
 App targets that need SwiftData models still add **`PikaCore`** as a separate dependency in Xcode.
 
+**Router tests:** `AIProviderRouterTests.swift` is **excluded** from the `PikaAITests` SPM target so `swift test` stays green on GitHub Actions (keychain). For local coverage, temporarily remove the `exclude:` entry in [`Packages/PikaAI/Package.swift`](Packages/PikaAI/Package.swift) and run `swift test` on a Mac.
+
 ### `PikaCore` (SwiftData umbrella)
 
 `PikaCore` uses **SwiftData** (`@Model`). Command-line `swift build` / `swift test` may fail with `SwiftDataMacros` / `PersistentModelMacro` not found if SwiftData macro plugins are not loaded.
