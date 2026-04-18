@@ -38,14 +38,15 @@ public final class OpenAIClient: AIClient, @unchecked Sendable {
     ) async throws -> AsyncThrowingStream<String, Error> {
         guard !apiKey.isEmpty else { throw AIClientError.missingAPIKey }
 
-        var body: [String: Any] = [
+        let systemRow: [String: Any] = ["role": "system", "content": systemPrompt]
+        let chatRows: [[String: Any]] = messages.map { ["role": $0.role, "content": $0.content] as [String: Any] }
+        let messageRows: [[String: Any]] = [systemRow] + chatRows
+        let body: [String: Any] = [
             "model": model,
             "temperature": temperature,
             "stream": true,
-            "messages": [["role": "system", "content": systemPrompt]] +
-                messages.map { ["role": $0.role, "content": $0.content] }
+            "messages": messageRows
         ]
-        _ = body  // silence if mutated later
 
         var request = URLRequest(url: baseURL.appendingPathComponent("/v1/chat/completions"))
         request.httpMethod = "POST"
@@ -116,15 +117,14 @@ public final class OpenAIClient: AIClient, @unchecked Sendable {
         guard !apiKey.isEmpty else { throw AIClientError.missingAPIKey }
 
         let b64 = imageData.base64EncodedString()
+        let imageURL: [String: Any] = ["url": "data:image/png;base64,\(b64)"]
+        let textPart: [String: Any] = ["type": "text", "text": prompt]
+        let imagePart: [String: Any] = ["type": "image_url", "image_url": imageURL]
+        let contentParts: [Any] = [textPart, imagePart]
+        let userMessage: [String: Any] = ["role": "user", "content": contentParts]
         let body: [String: Any] = [
             "model": visionModel,
-            "messages": [[
-                "role": "user",
-                "content": [
-                    ["type": "text", "text": prompt],
-                    ["type": "image_url", "image_url": ["url": "data:image/png;base64,\(b64)"]]
-                ]
-            ]]
+            "messages": [userMessage]
         ]
 
         var request = URLRequest(url: baseURL.appendingPathComponent("/v1/chat/completions"))

@@ -36,20 +36,25 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
     ) async throws -> AsyncThrowingStream<String, Error> {
         guard !apiKey.isEmpty else { throw AIClientError.missingAPIKey }
 
-        let userMessages = messages
+        let userMessages: [[String: Any]] = messages
             .filter { $0.role != "system" }
-            .map { ["role": $0.role == "assistant" ? "assistant" : "user", "content": $0.content] }
+            .map { [
+                "role": $0.role == "assistant" ? "assistant" : "user",
+                "content": $0.content
+            ] as [String: Any] }
 
+        let cacheControl: [String: Any] = ["type": "ephemeral"]
+        let systemBlock: [String: Any] = [
+            "type": "text",
+            "text": systemPrompt,
+            "cache_control": cacheControl
+        ]
         let body: [String: Any] = [
             "model": model,
             "max_tokens": maxTokens,
             "temperature": temperature,
             "stream": true,
-            "system": [[
-                "type": "text",
-                "text": systemPrompt,
-                "cache_control": ["type": "ephemeral"]
-            ]],
+            "system": [systemBlock],
             "messages": userMessages
         ]
 
@@ -101,20 +106,19 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
         guard !apiKey.isEmpty else { throw AIClientError.missingAPIKey }
 
         let b64 = imageData.base64EncodedString()
+        let source: [String: Any] = [
+            "type": "base64",
+            "media_type": "image/png",
+            "data": b64
+        ]
+        let imagePart: [String: Any] = ["type": "image", "source": source]
+        let textPart: [String: Any] = ["type": "text", "text": prompt]
+        let contentParts: [Any] = [imagePart, textPart]
+        let userMessage: [String: Any] = ["role": "user", "content": contentParts]
         let body: [String: Any] = [
             "model": model,
             "max_tokens": maxTokens,
-            "messages": [[
-                "role": "user",
-                "content": [
-                    ["type": "image", "source": [
-                        "type": "base64",
-                        "media_type": "image/png",
-                        "data": b64
-                    ]],
-                    ["type": "text", "text": prompt]
-                ]
-            ]]
+            "messages": [userMessage]
         ]
 
         var request = URLRequest(url: baseURL.appendingPathComponent("/v1/messages"))
