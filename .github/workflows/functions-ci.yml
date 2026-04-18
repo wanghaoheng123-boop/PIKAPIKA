@@ -1,0 +1,36 @@
+name: Functions CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "Backend/functions/**"
+      - ".github/workflows/functions-ci.yml"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - "Backend/functions/**"
+      - ".github/workflows/functions-ci.yml"
+
+jobs:
+  lint-and-build:
+    name: Lint and compile (Firebase functions)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend/functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: TypeScript compile
+        run: npm run build

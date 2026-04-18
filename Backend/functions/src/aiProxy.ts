@@ -8,7 +8,7 @@ import { z } from "zod";
 const ANTHROPIC_KEY = defineSecret("ANTHROPIC_API_KEY");
 const OPENAI_KEY = defineSecret("OPENAI_API_KEY");
 
-const Request = z.object({
+const AiChatRequestSchema = z.object({
   provider: z.enum(["anthropic", "openai"]).default("anthropic"),
   model: z.string().optional(),
   systemPrompt: z.string().min(1).max(8000),
@@ -33,7 +33,7 @@ export const aiChat = onCall(
     if (!req.auth?.uid) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
-    const parsed = Request.safeParse(req.data);
+    const parsed = AiChatRequestSchema.safeParse(req.data);
     if (!parsed.success) {
       throw new HttpsError("invalid-argument", parsed.error.message);
     }
