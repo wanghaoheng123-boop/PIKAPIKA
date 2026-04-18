@@ -28,6 +28,8 @@ public final class MockAIClient: AIClient, @unchecked Sendable {
         let d = delay
         return AsyncThrowingStream { continuation in
             Task {
+                // Let the consumer attach before yielding (avoids empty reads on fast CI runners).
+                await Task.yield()
                 for word in text.split(separator: " ") {
                     if d != .zero {
                         try? await Task.sleep(for: d)
