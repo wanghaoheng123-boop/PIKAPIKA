@@ -4,7 +4,7 @@ import PikaCoreBase
 /// Anthropic implementation of `AIClient`. Uses `/v1/messages` with SSE
 /// streaming. The system prompt is marked `cache_control: ephemeral` so
 /// repeated chat turns with the same pet personality hit the prompt cache.
-public final class AnthropicClient: AIClient {
+public final class AnthropicClient: AIClient, @unchecked Sendable {
 
     private let apiKey: String
     private let model: String

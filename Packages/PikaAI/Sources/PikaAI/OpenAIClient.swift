@@ -4,7 +4,7 @@ import PikaCoreBase
 /// OpenAI implementation of `AIClient`. Uses `/v1/chat/completions` with SSE
 /// streaming, `/v1/images/generations` for sprites, and vision via the chat
 /// endpoint's multimodal content array.
-public final class OpenAIClient: AIClient {
+public final class OpenAIClient: AIClient, @unchecked Sendable {
 
     private let apiKey: String
     private let model: String
