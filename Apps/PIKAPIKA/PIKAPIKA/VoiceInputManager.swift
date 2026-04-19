@@ -94,11 +94,8 @@ final class VoiceInputManager: ObservableObject {
                 continuation.resume(returning: status == .authorized)
             }
         }
-        let mic = await withCheckedContinuation { continuation in
-            AVAudioApplication.requestRecordPermission { ok in
-                continuation.resume(returning: ok)
-            }
-        }
+        // iOS 17+: async API (completion-handler `requestRecordPermission` is deprecated).
+        let mic = await AVAudioApplication.requestRecordPermission()
         return speech && mic
     }
 }
