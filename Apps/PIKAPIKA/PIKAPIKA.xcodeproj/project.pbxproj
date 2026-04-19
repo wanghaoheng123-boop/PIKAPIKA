@@ -38,6 +38,10 @@
 		B1000000000000000000648 /* AIUsagePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000649 /* AIUsagePolicy.swift */; };
 		B1000000000000000000650 /* VoiceIntentRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000651 /* VoiceIntentRouter.swift */; };
 		B1000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000006 /* Assets.xcassets */; };
+		B1000B01 /* PikaSampleCat.usdz in Resources */ = {isa = PBXBuildFile; fileRef = B1000B11 /* PikaSampleCat.usdz */; };
+		B1000B02 /* PikaSampleDog.usdz in Resources */ = {isa = PBXBuildFile; fileRef = B1000B12 /* PikaSampleDog.usdz */; };
+		B1000B03 /* PikaSampleSpark.usdz in Resources */ = {isa = PBXBuildFile; fileRef = B1000B13 /* PikaSampleSpark.usdz */; };
+		B1000B04 /* BundledSampleUSDZ.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000B14 /* BundledSampleUSDZ.swift */; };
 		B1000000000000000000700 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000701 /* AuthenticationServices.framework */; };
 		B1000902 /* AuthSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000901 /* AuthSessionTests.swift */; };
 		B1000904 /* MockAIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000903 /* MockAIClientTests.swift */; };
@@ -84,6 +88,10 @@
 		B1000901 /* AuthSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSessionTests.swift; sourceTree = "<group>"; };
 		B1000903 /* MockAIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIClientTests.swift; sourceTree = "<group>"; };
 		B100090C /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
+		B1000B11 /* PikaSampleCat.usdz */ = {isa = PBXFileReference; lastKnownFileType = file; path = PikaSampleCat.usdz; sourceTree = "<group>"; };
+		B1000B12 /* PikaSampleDog.usdz */ = {isa = PBXFileReference; lastKnownFileType = file; path = PikaSampleDog.usdz; sourceTree = "<group>"; };
+		B1000B13 /* PikaSampleSpark.usdz */ = {isa = PBXFileReference; lastKnownFileType = file; path = PikaSampleSpark.usdz; sourceTree = "<group>"; };
+		B1000B14 /* BundledSampleUSDZ.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundledSampleUSDZ.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -166,11 +174,23 @@
 				B1000000000000000000512 /* AIClientProvider.swift */,
 				B1000000000000000000514 /* AIClientHolder.swift */,
 				B1000000000000000000516 /* SettingsView.swift */,
+				B1000B14 /* BundledSampleUSDZ.swift */,
+				B1000B20 /* SamplePets */,
 				B1000000000000000000006 /* Assets.xcassets */,
 				B1000000000000000000600 /* Info.plist */,
 				B1000000000000000000601 /* PIKAPIKA.entitlements */,
 			);
 			path = PIKAPIKA;
+			sourceTree = "<group>";
+		};
+		B1000B20 /* SamplePets */ = {
+			isa = PBXGroup;
+			children = (
+				B1000B11 /* PikaSampleCat.usdz */,
+				B1000B12 /* PikaSampleDog.usdz */,
+				B1000B13 /* PikaSampleSpark.usdz */,
+			);
+			path = SamplePets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,6 +285,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				B1000000000000000000005 /* Assets.xcassets in Resources */,
+				B1000B01 /* PikaSampleCat.usdz in Resources */,
+				B1000B02 /* PikaSampleDog.usdz in Resources */,
+				B1000B03 /* PikaSampleSpark.usdz in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,6 +328,7 @@
 				B1000000000000000000645 /* VoiceInputManager.swift in Sources */,
 				B1000000000000000000646 /* PetCustomizationSheet.swift in Sources */,
 				B1000000000000000000648 /* AIUsagePolicy.swift in Sources */,
+				B1000B04 /* BundledSampleUSDZ.swift in Sources */,
 				B1000000000000000000650 /* VoiceIntentRouter.swift in Sources */,
 				B100000000000000000050B /* ChatView.swift in Sources */,
 				B100000000000000000050D /* MockAIClient.swift in Sources */,

@@ -18,13 +18,20 @@ struct PetCustomizationSheet: View {
             Form {
                 Section("3D model (USDZ)") {
                     if pet.modelUSDZPath.isEmpty {
-                        Text("No custom model yet. The app uses card-avatar mode.")
+                        Text("No custom model yet. Use a built-in sample or import your own file.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
                         Text(pet.modelUSDZPath)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
+                    }
+                    ForEach(BundledSampleUSDZ.allCases) { sample in
+                        Button {
+                            applyBundledSample(sample)
+                        } label: {
+                            Text(sample.title)
+                        }
                     }
                     Button("Import USDZ model") { showImporter = true }
                 }
@@ -100,6 +107,17 @@ struct PetCustomizationSheet: View {
                     errorText = error.localizedDescription
                 }
             }
+        }
+    }
+
+    private func applyBundledSample(_ sample: BundledSampleUSDZ) {
+        do {
+            let relative = try sample.install(for: pet.id)
+            pet.modelUSDZPath = relative
+            errorText = nil
+            onModelImported(relative)
+        } catch {
+            errorText = error.localizedDescription
         }
     }
 }
