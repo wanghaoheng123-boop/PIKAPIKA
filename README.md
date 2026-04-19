@@ -56,6 +56,8 @@ Orchestration and project state live in Markdown at the repo root:
 | [`Docs/ROADMAP.md`](Docs/ROADMAP.md) | Product milestones (P0, P1, …) — canonical checklist |
 | [`Docs/SOUL_AND_SUBSCRIPTION.md`](Docs/SOUL_AND_SUBSCRIPTION.md) | Pet export (“SOUL”), backup, annual plan policy sketch |
 | [`Docs/APP_STORE_PREFLIGHT.md`](Docs/APP_STORE_PREFLIGHT.md) | TestFlight / App Store review checklist |
+| [`Docs/ASSETS_AND_IP.md`](Docs/ASSETS_AND_IP.md) | 3D asset licensing; no third-party character IP |
+| [`Docs/VERIFY_AI_MATRIX.md`](Docs/VERIFY_AI_MATRIX.md) | Manual matrix for AI keys and both apps |
 
 ## Building and testing
 

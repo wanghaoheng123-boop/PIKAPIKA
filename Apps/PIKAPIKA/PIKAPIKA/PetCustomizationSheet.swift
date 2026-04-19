@@ -29,6 +29,18 @@ struct PetCustomizationSheet: View {
                     Button("Import USDZ model") { showImporter = true }
                 }
 
+                Section("3D preset (no file)") {
+                    Picker("Look", selection: $pet.visualModelPreset) {
+                        Text("Auto").tag("auto")
+                        Text("Cat").tag("cat")
+                        Text("Dog").tag("dog")
+                        Text("Spark mascot").tag("spark")
+                    }
+                    Text("Used when no USDZ is imported. “Spark” is an original electric-mascot style.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 Section("Character sound") {
                     Toggle("Enable pet sounds", isOn: $pet.soundEnabled)
                     Picker("Sound style", selection: $pet.soundProfileKey) {

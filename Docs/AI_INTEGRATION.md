@@ -10,6 +10,8 @@
 Routing is handled by `PikaAI.AIProviderRouter`. Default preference is
 Anthropic for chat; OpenAI is the mandatory fallback for image generation.
 
+The legacy **PIKAPIKA** target uses `PikaAI.RoutedAIClient` (same routing) once any vendor key exists, so **Anthropic-only** setups still get real chat instead of the old OpenAI-only gate.
+
 ## Models (as of 2026-04)
 
 - Chat default: `claude-sonnet-4-6`

@@ -3,11 +3,13 @@ import SceneKit
 import SwiftUI
 import UIKit
 
-/// Lightweight 3D “stage”: textured card avatar that can roam and play named actions from `PetActionCatalog`.
+/// Lightweight 3D “stage”: optional USDZ import, procedural cat/dog/spark mascot, or textured card / emoji.
 struct PetScene3DView: UIViewRepresentable {
     var image: UIImage?
     var modelURL: URL?
     var speciesEmoji: String
+    /// `auto`, `cat`, `dog`, or `spark` (original mascot — not third-party IP).
+    var visualPreset: String
     var actionName: String
     var actionTick: Int
 
@@ -22,12 +24,23 @@ struct PetScene3DView: UIViewRepresentable {
         view.antialiasingMode = .multisampling4X
         view.backgroundColor = .clear
         view.allowsCameraControl = false
-        context.coordinator.bind(view: view, image: image, modelURL: modelURL, emoji: speciesEmoji)
+        context.coordinator.bind(
+            view: view,
+            image: image,
+            modelURL: modelURL,
+            emoji: speciesEmoji,
+            visualPreset: visualPreset
+        )
         return view
     }
 
     func updateUIView(_ uiView: SCNView, context: Context) {
-        context.coordinator.updateVisual(image: image, modelURL: modelURL, emoji: speciesEmoji)
+        context.coordinator.updateVisual(
+            image: image,
+            modelURL: modelURL,
+            emoji: speciesEmoji,
+            visualPreset: visualPreset
+        )
         if context.coordinator.lastActionTick != actionTick {
             context.coordinator.lastActionTick = actionTick
             context.coordinator.play(actionName: actionName)
@@ -38,12 +51,14 @@ struct PetScene3DView: UIViewRepresentable {
         private weak var view: SCNView?
         private var petRoot: SCNNode!
         private var importedModelNode: SCNNode?
+        private var proceduralNode: SCNNode?
         private var avatarPlaneNode: SCNNode?
         private var material: SCNMaterial!
         private var loadedModelURL: URL?
         private let basePosition = SCNVector3(0, 0.85, 0)
         private var link: CADisplayLink?
         private var startRef = CACurrentMediaTime()
+        private var proceduralKind: String = ""
 
         var lastActionTick: Int = -1
 
@@ -63,6 +78,12 @@ struct PetScene3DView: UIViewRepresentable {
             light.light?.intensity = 650
             light.position = SCNVector3(3, 6, 5)
             scene.rootNode.addChildNode(light)
+
+            let fill = SCNNode()
+            fill.light = SCNLight()
+            fill.light?.type = .ambient
+            fill.light?.intensity = 120
+            scene.rootNode.addChildNode(fill)
 
             let floor = SCNNode(geometry: SCNPlane(width: 8, height: 8))
             floor.geometry?.firstMaterial?.diffuse.contents = UIColor.secondarySystemBackground
@@ -91,9 +112,9 @@ struct PetScene3DView: UIViewRepresentable {
             return scene
         }
 
-        func bind(view: SCNView, image: UIImage?, modelURL: URL?, emoji: String) {
+        func bind(view: SCNView, image: UIImage?, modelURL: URL?, emoji: String, visualPreset: String) {
             self.view = view
-            updateVisual(image: image, modelURL: modelURL, emoji: emoji)
+            updateVisual(image: image, modelURL: modelURL, emoji: emoji, visualPreset: visualPreset)
             startIdleMotion()
         }
 
@@ -101,23 +122,122 @@ struct PetScene3DView: UIViewRepresentable {
             link?.invalidate()
         }
 
-        func updateVisual(image: UIImage?, modelURL: URL?, emoji: String) {
-            if let modelURL {
-                if let modelNode = loadUSDZIfNeeded(modelURL) {
-                    avatarPlaneNode?.isHidden = true
-                    modelNode.isHidden = false
-                    return
-                }
-                avatarPlaneNode?.isHidden = false
-                importedModelNode?.isHidden = true
-            } else {
-                importedModelNode?.removeFromParentNode()
-                importedModelNode = nil
-                loadedModelURL = nil
-                avatarPlaneNode?.isHidden = false
+        func updateVisual(image: UIImage?, modelURL: URL?, emoji: String, visualPreset: String) {
+            proceduralKind = visualPreset.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+            if let modelURL, let modelNode = loadUSDZIfNeeded(modelURL) {
+                clearProcedural()
+                avatarPlaneNode?.isHidden = true
+                modelNode.isHidden = false
+                return
             }
+            clearProcedural()
+
+            importedModelNode?.removeFromParentNode()
+            importedModelNode = nil
+            loadedModelURL = nil
+
+            if let kind = activeProceduralKind() {
+                attachProcedural(kind: kind)
+                avatarPlaneNode?.isHidden = true
+                return
+            }
+
+            avatarPlaneNode?.isHidden = false
             let resolved = image ?? Self.emojiImage(emoji)
             material.diffuse.contents = resolved
+        }
+
+        private func activeProceduralKind() -> String? {
+            switch proceduralKind {
+            case "cat", "dog", "spark":
+                return proceduralKind
+            default:
+                return nil
+            }
+        }
+
+        private func clearProcedural() {
+            proceduralNode?.removeFromParentNode()
+            proceduralNode = nil
+        }
+
+        private func attachProcedural(kind: String) {
+            if proceduralNode != nil, proceduralNode?.name == "proc_\(kind)" { return }
+            clearProcedural()
+            let node = Self.buildProceduralPet(kind: kind)
+            node.name = "proc_\(kind)"
+            node.position = SCNVector3(0, -0.35, 0)
+            petRoot.addChildNode(node)
+            proceduralNode = node
+        }
+
+        /// Simple high-contrast procedural meshes (not photo-derived geometry).
+        private static func buildProceduralPet(kind: String) -> SCNNode {
+            let root = SCNNode()
+            switch kind {
+            case "cat":
+                let body = SCNCapsule(capRadius: 0.22, height: 0.55)
+                body.firstMaterial?.diffuse.contents = UIColor.systemOrange
+                let bodyNode = SCNNode(geometry: body)
+                bodyNode.position = SCNVector3(0, 0.2, 0)
+                root.addChildNode(bodyNode)
+                let head = SCNSphere(radius: 0.2)
+                head.firstMaterial?.diffuse.contents = UIColor.systemOrange
+                let headNode = SCNNode(geometry: head)
+                headNode.position = SCNVector3(0, 0.55, 0.12)
+                root.addChildNode(headNode)
+                addEar(root, x: -0.14, y: 0.62, z: 0.1)
+                addEar(root, x: 0.14, y: 0.62, z: 0.1)
+            case "dog":
+                let body = SCNCapsule(capRadius: 0.24, height: 0.62)
+                body.firstMaterial?.diffuse.contents = UIColor.systemBrown
+                let bodyNode = SCNNode(geometry: body)
+                bodyNode.position = SCNVector3(0, 0.22, 0)
+                root.addChildNode(bodyNode)
+                let snout = SCNBox(width: 0.2, height: 0.14, length: 0.22, chamferRadius: 0.02)
+                snout.firstMaterial?.diffuse.contents = UIColor.systemBrown
+                let snoutNode = SCNNode(geometry: snout)
+                snoutNode.position = SCNVector3(0, 0.38, 0.28)
+                root.addChildNode(snoutNode)
+            default:
+                // “Spark” — original electric-mascot silhouette (yellow body, red cheeks, not licensed IP).
+                let body = SCNCapsule(capRadius: 0.2, height: 0.48)
+                body.firstMaterial?.diffuse.contents = UIColor.systemYellow
+                let bodyNode = SCNNode(geometry: body)
+                bodyNode.position = SCNVector3(0, 0.18, 0)
+                root.addChildNode(bodyNode)
+                let cheekL = SCNSphere(radius: 0.07)
+                cheekL.firstMaterial?.diffuse.contents = UIColor.systemRed
+                let cl = SCNNode(geometry: cheekL)
+                cl.position = SCNVector3(-0.16, 0.22, 0.14)
+                root.addChildNode(cl)
+                let cheekR = SCNSphere(radius: 0.07)
+                cheekR.firstMaterial?.diffuse.contents = UIColor.systemRed
+                let cr = SCNNode(geometry: cheekR)
+                cr.position = SCNVector3(0.16, 0.22, 0.14)
+                root.addChildNode(cr)
+                let ear = SCNCone(topRadius: 0, bottomRadius: 0.08, height: 0.18)
+                ear.firstMaterial?.diffuse.contents = UIColor.systemYellow
+                let el = SCNNode(geometry: ear)
+                el.position = SCNVector3(-0.12, 0.52, 0)
+                el.eulerAngles.z = 0.35
+                root.addChildNode(el)
+                let er = SCNNode(geometry: ear)
+                er.position = SCNVector3(0.12, 0.52, 0)
+                er.eulerAngles.z = -0.35
+                root.addChildNode(er)
+            }
+            return root
+        }
+
+        private static func addEar(_ root: SCNNode, x: Float, y: Float, z: Float) {
+            let ear = SCNCone(topRadius: 0, bottomRadius: 0.06, height: 0.16)
+            ear.firstMaterial?.diffuse.contents = UIColor.systemOrange
+            let n = SCNNode(geometry: ear)
+            n.position = SCNVector3(x, y, z)
+            n.eulerAngles.x = -0.4
+            root.addChildNode(n)
         }
 
         func play(actionName: String) {
@@ -150,6 +270,9 @@ struct PetScene3DView: UIViewRepresentable {
             let dz = Float(cos(t * 0.95)) * 0.22
             petRoot.position = SCNVector3(basePosition.x + dx, basePosition.y + Float(sin(t * 2.4)) * 0.04, basePosition.z + dz)
             petRoot.eulerAngles.y = Float(sin(t * 0.8)) * 0.35
+            if proceduralNode != nil {
+                proceduralNode?.eulerAngles.y = Float(sin(t * 1.6)) * 0.12
+            }
         }
 
         private static func emojiImage(_ s: String) -> UIImage {

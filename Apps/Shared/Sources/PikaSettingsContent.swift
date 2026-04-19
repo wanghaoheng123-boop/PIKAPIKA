@@ -1,5 +1,6 @@
 import SwiftUI
 import PikaCore
+import PikaCoreBase
 import PikaAI
 import SharedUI
 
@@ -26,8 +27,30 @@ public struct PikaSettingsContent: View {
         AIProviderRouter.Preference(rawValue: preferenceRaw) ?? .anthropicPrimary
     }
 
+    private var hasOpenAIKey: Bool {
+        !(KeychainHelper.load(.openAIKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var hasAnthropicKey: Bool {
+        !(KeychainHelper.load(.anthropicKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     public var body: some View {
         Form {
+            Section("AI readiness") {
+                LabeledContent("Chat") {
+                    Text(hasOpenAIKey || hasAnthropicKey ? "Keys on device" : "Add a key below")
+                        .foregroundStyle(hasOpenAIKey || hasAnthropicKey ? .green : .secondary)
+                }
+                LabeledContent("Portraits / DALL·E") {
+                    Text(hasOpenAIKey ? "OpenAI ready" : "Needs OpenAI key")
+                        .foregroundStyle(hasOpenAIKey ? .green : .orange)
+                }
+                Text("Anthropic powers chat when chosen first; OpenAI is required for generated images today.")
+                    .font(PikaTheme.Typography.caption)
+                    .foregroundStyle(PikaTheme.Palette.textMuted)
+            }
+
             Section("Chat provider") {
                 Picker("Preferred provider", selection: Binding(
                     get: { resolvedPreference },

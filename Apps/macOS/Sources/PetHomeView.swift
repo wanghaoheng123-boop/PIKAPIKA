@@ -6,6 +6,7 @@ struct PetHomeView: View {
     let pet: Pet
 
     @State private var showSettings = false
+    @State private var showPetEditor = false
 
     var body: some View {
         NavigationStack {
@@ -22,6 +23,9 @@ struct PetHomeView: View {
             .frame(minWidth: 720, minHeight: 480)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
+                    Button("Edit pet") { showPetEditor = true }
+                }
+                ToolbarItem(placement: .primaryAction) {
                     Button {
                         showSettings = true
                     } label: {
@@ -35,6 +39,12 @@ struct PetHomeView: View {
                     SettingsView()
                 }
                 .frame(minWidth: 420, minHeight: 400)
+            }
+            .sheet(isPresented: $showPetEditor) {
+                NavigationStack {
+                    PetProfileEditorView(pet: pet)
+                }
+                .frame(minWidth: 420, minHeight: 480)
             }
         }
     }

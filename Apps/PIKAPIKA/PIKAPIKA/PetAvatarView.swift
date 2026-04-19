@@ -48,6 +48,7 @@ struct PetAvatarView: View {
                 image: avatarImage,
                 modelURL: PetImageStore.localURL(relativePath: pet.modelUSDZPath),
                 speciesEmoji: Self.speciesEmoji(pet.species),
+                visualPreset: pet.visualModelPreset.isEmpty ? "auto" : pet.visualModelPreset,
                 actionName: actionName,
                 actionTick: actionTick
             )

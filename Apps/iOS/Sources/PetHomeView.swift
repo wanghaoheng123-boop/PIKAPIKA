@@ -4,6 +4,7 @@ import SharedUI
 
 struct PetHomeView: View {
     let pet: Pet
+    @State private var showPetEditor = false
 
     var body: some View {
         VStack(spacing: PikaTheme.Spacing.lg) {
@@ -28,5 +29,15 @@ struct PetHomeView: View {
             Spacer()
         }
         .padding()
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button("Edit") { showPetEditor = true }
+            }
+        }
+        .sheet(isPresented: $showPetEditor) {
+            NavigationStack {
+                PetProfileEditorView(pet: pet)
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import PikaCore
+import PikaCoreBase
 import PikaAI
 import SharedUI
 
@@ -42,8 +43,25 @@ public struct PetChatScreen: View {
         awaitingAssistantRetry && persistedMessages.last?.role == "user"
     }
 
+    private var hasAnyAPIKey: Bool {
+        let o = (KeychainHelper.load(.openAIKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let a = (KeychainHelper.load(.anthropicKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return !o.isEmpty || !a.isEmpty
+    }
+
     public var body: some View {
         VStack(spacing: 0) {
+            if !hasAnyAPIKey {
+                Label(
+                    "Cloud chat needs an API key. Open Settings from the home screen and add Anthropic and/or OpenAI.",
+                    systemImage: "key.horizontal"
+                )
+                .font(PikaTheme.Typography.caption)
+                .foregroundStyle(PikaTheme.Palette.textMuted)
+                .padding(PikaTheme.Spacing.sm)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(PikaTheme.Palette.accent.opacity(0.12))
+            }
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: PikaTheme.Spacing.sm) {
