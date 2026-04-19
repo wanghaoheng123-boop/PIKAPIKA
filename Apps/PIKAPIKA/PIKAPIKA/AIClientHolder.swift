@@ -19,7 +19,9 @@ final class AIClientHolder {
     }
 
     var hasRemoteAI: Bool {
-        !(client is MockAIClient)
+        let open = (KeychainHelper.load(.openAIKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let ant = (KeychainHelper.load(.anthropicKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return !open.isEmpty || !ant.isEmpty
     }
 
     func saveUsagePolicy(_ policy: AIUsagePolicy) {

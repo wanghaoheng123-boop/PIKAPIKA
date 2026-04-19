@@ -1,12 +1,17 @@
 import Foundation
+import PikaAI
 import PikaCoreBase
 
-/// Chooses OpenAI when a key exists in Keychain; otherwise mock.
+/// Uses [`RoutedAIClient`] when any vendor key exists (Anthropic and/or OpenAI); otherwise [`MockAIClient`].
 enum AIClientProvider {
     static func currentClient() -> any AIClient {
-        if let key = KeychainHelper.load(.openAIKey), !key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return OpenAIChatClient(apiKey: key)
+        let open = (KeychainHelper.load(.openAIKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let ant = (KeychainHelper.load(.anthropicKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !open.isEmpty || !ant.isEmpty else {
+            return MockAIClient()
         }
-        return MockAIClient()
+        let raw = UserDefaults.standard.string(forKey: PikaUserDefaultsKeys.aiProviderPreference)
+        let pref = AIProviderRouter.Preference(rawValue: raw ?? "") ?? .anthropicPrimary
+        return RoutedAIClient(preference: pref)
     }
 }

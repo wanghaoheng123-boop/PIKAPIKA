@@ -30,7 +30,8 @@ struct PetOnboardingView: View {
                         personalityTraits: traits
                             .split(separator: ",")
                             .map { $0.trimmingCharacters(in: .whitespaces) }
-                            .filter { !$0.isEmpty }
+                            .filter { !$0.isEmpty },
+                        visualModelPreset: Pet.defaultVisualModelPreset(forSpecies: species)
                     )
                     onCreate(pet)
                 }

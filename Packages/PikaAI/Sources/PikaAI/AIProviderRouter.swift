@@ -159,4 +159,44 @@ public struct AIProviderRouter {
         }
         throw AIClientError.missingAPIKey
     }
+
+    // MARK: - Non-MainActor streaming (for `AIClient` adapters)
+
+    /// Primary chat stream, or the alternate vendor if the primary fails **before** streaming begins (same recoverability rules as `runChatWithFallback`).
+    public func chatStreamResolvingPrimary(
+        messages: [ChatMessage],
+        systemPrompt: String,
+        temperature: Double
+    ) async throws -> AsyncThrowingStream<String, Error> {
+        let (primary, kind) = try primaryClientWithKind()
+        do {
+            return try await primary.chat(
+                messages: messages,
+                systemPrompt: systemPrompt,
+                temperature: temperature
+            )
+        } catch {
+            guard Self.shouldFallback(for: error),
+                  let alt = alternateClient(after: kind)
+            else { throw error }
+            return try await alt.chat(
+                messages: messages,
+                systemPrompt: systemPrompt,
+                temperature: temperature
+            )
+        }
+    }
+
+    /// Vision / image captioning with one fallback attempt when recoverable.
+    public func describeImageResolvingPrimary(_ imageData: Data, prompt: String) async throws -> String {
+        let (primary, kind) = try primaryClientWithKind()
+        do {
+            return try await primary.describeImage(imageData, prompt: prompt)
+        } catch {
+            guard Self.shouldFallback(for: error),
+                  let alt = alternateClient(after: kind)
+            else { throw error }
+            return try await alt.describeImage(imageData, prompt: prompt)
+        }
+    }
 }

@@ -32,6 +32,8 @@ public final class Pet {
 
     /// Optional custom USDZ 3D model path relative to Documents.
     public var modelUSDZPath: String
+    /// Built-in procedural / preset 3D look when no USDZ is set: `auto`, `cat`, `dog`, `spark` (original mascot, not third-party IP).
+    public var visualModelPreset: String
 
     /// Local sound profile key (cute/chirpy, soft, playful...) used by on-device synthesizer.
     public var soundProfileKey: String
@@ -65,6 +67,7 @@ public final class Pet {
         avatarImagePath: String = "",
         lastImagePrompt: String? = nil,
         modelUSDZPath: String = "",
+        visualModelPreset: String = "auto",
         soundProfileKey: String = "cute",
         soundEnabled: Bool = true
     ) {
@@ -87,8 +90,21 @@ public final class Pet {
         self.avatarImagePath = avatarImagePath
         self.lastImagePrompt = lastImagePrompt
         self.modelUSDZPath = modelUSDZPath
+        self.visualModelPreset = visualModelPreset
         self.soundProfileKey = soundProfileKey
         self.soundEnabled = soundEnabled
+    }
+}
+
+public extension Pet {
+    /// Default procedural 3D preset from species (`spark` = original electric-mascot style, not third-party IP).
+    static func defaultVisualModelPreset(forSpecies species: String) -> String {
+        switch species.lowercased() {
+        case "cat": return "cat"
+        case "dog": return "dog"
+        case "hamster": return "spark"
+        default: return "auto"
+        }
     }
 }
 

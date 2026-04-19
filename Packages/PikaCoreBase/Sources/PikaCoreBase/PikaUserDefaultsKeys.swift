@@ -1,6 +1,6 @@
 import Foundation
 
-/// Keys shared by iOS/macOS app targets (SwiftUI `@AppStorage` / `UserDefaults`).
+/// `UserDefaults` / `@AppStorage` keys shared across Pika and PIKAPIKA targets.
 public enum PikaUserDefaultsKeys {
     public static let aiProviderPreference = "aiProviderPreference"
 }

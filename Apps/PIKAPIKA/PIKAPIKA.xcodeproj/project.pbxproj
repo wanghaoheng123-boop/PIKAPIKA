@@ -191,6 +191,7 @@
 			name = PIKAPIKA;
 			packageProductDependencies = (
 				B1000000000000000000010 /* PikaCore */,
+				B1000000000000000000015 /* PikaAI */,
 				B1000000000000000000801 /* GoogleSignIn */,
 			);
 			productName = PIKAPIKA;
@@ -245,6 +246,7 @@
 			mainGroup = B1000000000000000000009;
 			packageReferences = (
 				B1000000000000000000013 /* XCLocalSwiftPackageReference */,
+				B1000000000000000000014 /* XCLocalSwiftPackageReference */,
 				B1000000000000000000800 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			productRefGroup = B100000000000000000000B /* Products */;
@@ -513,6 +515,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../Packages/PikaCore;
 		};
+		B1000000000000000000014 /* XCLocalSwiftPackageReference */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/PikaAI;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -531,6 +537,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B1000000000000000000013 /* XCLocalSwiftPackageReference */;
 			productName = PikaCore;
+		};
+		B1000000000000000000015 /* PikaAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1000000000000000000014 /* XCLocalSwiftPackageReference */;
+			productName = PikaAI;
 		};
 		B1000000000000000000801 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;

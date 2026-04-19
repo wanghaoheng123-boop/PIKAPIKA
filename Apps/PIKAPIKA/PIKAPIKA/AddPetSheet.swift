@@ -208,7 +208,8 @@ struct AddPetSheet: View {
             bondLevel: BondLevel.stranger.rawValue,
             creatureDescription: creatureDescription.trimmingCharacters(in: .whitespacesAndNewlines),
             avatarImagePath: "",
-            lastImagePrompt: nil
+            lastImagePrompt: nil,
+            visualModelPreset: Pet.defaultVisualModelPreset(forSpecies: resolvedSpecies)
         )
         modelContext.insert(pet)
         do {
