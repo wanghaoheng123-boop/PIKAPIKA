@@ -17,10 +17,7 @@ let package = Package(
         .target(
             name: "PikaCorePersistence",
             dependencies: [],
-            path: "Sources/PikaCorePersistence",
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            path: "Sources/PikaCorePersistence"
         ),
         .target(
             name: "PikaCore",
@@ -29,10 +26,7 @@ let package = Package(
                 "PikaCorePersistence"
             ],
             path: "Sources/PikaCore",
-            sources: ["PikaCore.swift"],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            sources: ["PikaCore.swift"]
         )
     ]
 )

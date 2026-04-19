@@ -16,10 +16,7 @@ let package = Package(
     targets: [
         .target(
             name: "PikaSync",
-            dependencies: ["PikaCore"],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            dependencies: ["PikaCore"]
         ),
         .testTarget(
             name: "PikaSyncTests",

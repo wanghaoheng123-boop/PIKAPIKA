@@ -8,6 +8,6 @@ struct PikaApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [Pet.self, BondEvent.self, ConversationMessage.self, SeasonalEvent.self])
+        .modelContainer(for: [Pet.self, BondEvent.self, ConversationMessage.self, SeasonalEvent.self, PetMemoryFact.self])
     }
 }

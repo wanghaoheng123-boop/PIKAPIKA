@@ -116,6 +116,15 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 
 ---
 
+## 2026-04-18 — Xcode: shared SwiftData on macOS, schema + concurrency
+
+- **macOS `PikaApp`:** Single `ModelContainer` passed to both `WindowGroup` and `MenuBarExtra` so `@Query` in the menu bar sees the same store as the main window (avoids empty / broken menu bar data).
+- **SwiftData schema:** `PetMemoryFact.self` added to the iOS `modelContainer` list and to the macOS store types.
+- **Xcode builds:** `SWIFT_STRICT_CONCURRENCY` set to **`minimal`** in `Apps/iOS/project.yml` and `Apps/macOS/project.yml`; removed experimental **`StrictConcurrency`** SPM flags from `PikaCore`, `SharedUI`, `PetEngine`, `PikaSync`, and `PikaSubscription` packages.
+- **Docs:** [README.md](README.md) macOS note; [techContext.md](techContext.md) concurrency section updated.
+
+---
+
 ## 2026-04-18 — Plan: CI hygiene, SOUL spec, App Store preflight
 
 - **PikaAI router:** Split [AIProviderRouter.swift](Packages/PikaAI/Sources/PikaAI/AIProviderRouter.swift) into **`init(preference:)`** (default factories) and **`init(preference:openAIFactory:anthropicFactory:)`** (injection); removed **`@Sendable`** from stored factory function types.

@@ -5,7 +5,7 @@
 - **Language:** Swift (Swift tools 5.9 per `Package.swift`).
 - **Packages:** `PikaCoreBase` (`Packages/PikaCoreBase/`) and aggregate `PikaCore` (`Packages/PikaCore/`; local path dependency on `PikaCoreBase`).
 - **Platforms:** macOS 14+, iOS 17+.
-- **Concurrency:** `StrictConcurrency` is **not** enabled on `PikaCoreBase` (experimental flag broke downstream `swift build` for `PikaAI` on GitHub Actions); re-enable locally when the toolchain story is stable.
+- **Concurrency:** `PikaCoreBase` does not opt into experimental **StrictConcurrency** in SPM. **Pika** app targets use **`SWIFT_STRICT_CONCURRENCY: minimal`** in XcodeGen `project.yml` so SwiftData + SwiftUI build cleanly in Xcode; packages no longer enable the experimental flag on `PikaCore` / `SharedUI` / engine targets for the same reason.
 - **Persistence:** SwiftData (`@Model`) in `PikaCorePersistence` (inside `PikaCore` package); CloudKit mentioned in comments as optional sync path.
 - **Unit tests:** `PikaCoreBase` uses **XCTest** only (removed `swift-testing` so `swift test` works on Xcode 15 / Swift 5.10 CI images without a Swift 6-only dependency graph).
 

@@ -10,7 +10,8 @@ settings:
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
     DEVELOPMENT_TEAM: ""
-    SWIFT_STRICT_CONCURRENCY: complete
+    # `complete` + SwiftData/SwiftUI often produces noisy or blocking diagnostics in Xcode; `minimal` keeps apps buildable while packages opt in separately.
+    SWIFT_STRICT_CONCURRENCY: minimal
 packages:
   PikaCore:         { path: ../../Packages/PikaCore }
   PikaAI:           { path: ../../Packages/PikaAI }

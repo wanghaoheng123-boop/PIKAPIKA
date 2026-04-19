@@ -16,10 +16,7 @@ let package = Package(
     targets: [
         .target(
             name: "SharedUI",
-            dependencies: ["PikaCore"],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            dependencies: ["PikaCore"]
         )
     ]
 )

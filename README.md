@@ -16,6 +16,7 @@
 3. **Open and run**
    - Open **`Apps/iOS/Pika.xcodeproj`** or **`Apps/macOS/Pika.xcodeproj`**.
    - Select the **Pika** scheme, choose an **iOS Simulator** or **My Mac**, press **⌘R**.
+   - **macOS:** the **menu bar** window and the main **Pika** window share one SwiftData store; regenerate the project after pulling so `MenuBarExtra` picks up the same `ModelContainer` as `WindowGroup`.
    - **Signing:** `DEVELOPMENT_TEAM` is blank in `project.yml`; for a real device, set your **Team** under the target’s **Signing & Capabilities** in Xcode.
 
 4. **Before chat works**  

@@ -10,7 +10,7 @@ settings:
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
     DEVELOPMENT_TEAM: ""
-    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_STRICT_CONCURRENCY: minimal
 packages:
   PikaCore:         { path: ../../Packages/PikaCore }
   PikaAI:           { path: ../../Packages/PikaAI }

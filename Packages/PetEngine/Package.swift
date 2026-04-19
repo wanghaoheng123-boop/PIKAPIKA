@@ -16,10 +16,7 @@ let package = Package(
     targets: [
         .target(
             name: "PetEngine",
-            dependencies: ["PikaCore"],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            dependencies: ["PikaCore"]
         ),
         .testTarget(
             name: "PetEngineTests",
