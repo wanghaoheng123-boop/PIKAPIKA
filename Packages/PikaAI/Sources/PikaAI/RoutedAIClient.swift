@@ -13,13 +13,13 @@ public struct RoutedAIClient: AIClient, Sendable {
 
     public func chat(
         messages: [ChatMessage],
-        systemPrompt: String,
+        systemPrompt: String?,
         temperature: Double
     ) async throws -> AsyncThrowingStream<String, Error> {
         let router = AIProviderRouter(preference: preference)
         return try await router.chatStreamResolvingPrimary(
             messages: messages,
-            systemPrompt: systemPrompt,
+            systemPrompt: systemPrompt ?? "",
             temperature: temperature
         )
     }

@@ -27,7 +27,7 @@ public struct PetAvatarView: View {
                 Circle().stroke(PikaTheme.Palette.accent, lineWidth: 2)
             )
             .scaleEffect(scaleForState)
-            .animation(.spring(duration: 0.4), value: state.animationKey)
+            .animation(.interpolatingSpring(stiffness: 170, damping: 15), value: state.animationKey)
             .accessibilityLabel("\(pet.name), \(state.displayName)")
     }
 

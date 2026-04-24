@@ -33,14 +33,17 @@ public final class OpenAIClient: AIClient, @unchecked Sendable {
 
     public func chat(
         messages: [ChatMessage],
-        systemPrompt: String,
+        systemPrompt: String?,
         temperature: Double
     ) async throws -> AsyncThrowingStream<String, Error> {
         guard !apiKey.isEmpty else { throw AIClientError.missingAPIKey }
 
-        let systemRow: [String: Any] = ["role": "system", "content": systemPrompt]
+        var messageRows: [[String: Any]] = []
+        if let prompt = systemPrompt, !prompt.isEmpty {
+            messageRows.append(["role": "system", "content": prompt])
+        }
         let chatRows: [[String: Any]] = messages.map { ["role": $0.role, "content": $0.content] as [String: Any] }
-        let messageRows: [[String: Any]] = [systemRow] + chatRows
+        messageRows.append(contentsOf: chatRows)
         let body: [String: Any] = [
             "model": model,
             "temperature": temperature,

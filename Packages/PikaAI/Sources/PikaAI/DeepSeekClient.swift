@@ -14,26 +14,36 @@ public final class DeepSeekClient: AIClient, @unchecked Sendable {
         apiKey: String,
         model: String = "deepseek-v4-pro",
         baseURL: URL = URL(string: "https://api.deepseek.com")!,
-        session: URLSession = .shared
+        session: URLSession? = nil
     ) {
         self.apiKey = apiKey
         self.model = model
         self.baseURL = baseURL
-        self.session = session
+        self.session = session ?? {
+            let config = URLSessionConfiguration.ephemeral
+            config.httpCookieAcceptPolicy = .never
+            config.httpShouldSetCookies = false
+            config.urlCache = nil
+            config.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+            return URLSession(configuration: config)
+        }()
     }
 
     // MARK: - Chat (streaming)
 
     public func chat(
         messages: [ChatMessage],
-        systemPrompt: String,
+        systemPrompt: String?,
         temperature: Double
     ) async throws -> AsyncThrowingStream<String, Error> {
         guard !apiKey.isEmpty else { throw AIClientError.missingAPIKey }
 
-        let systemRow: [String: Any] = ["role": "system", "content": systemPrompt]
+        var messageRows: [[String: Any]] = []
+        if let prompt = systemPrompt, !prompt.isEmpty {
+            messageRows.append(["role": "system", "content": prompt])
+        }
         let chatRows: [[String: Any]] = messages.map { ["role": $0.role, "content": $0.content] as [String: Any] }
-        let messageRows: [[String: Any]] = [systemRow] + chatRows
+        messageRows.append(contentsOf: chatRows)
         let body: [String: Any] = [
             "model": model,
             "temperature": temperature,
@@ -76,10 +86,19 @@ public final class DeepSeekClient: AIClient, @unchecked Sendable {
         }
     }
 
-    /// Extracts user-visible assistant text from a chat completion `delta`, ignoring reasoning-only fields.
+    /// Extracts user-visible assistant text from a chat completion `delta`.
+    /// When a delta contains both `reasoning_content` and `content`, only the visible
+    /// `content` is returned — `reasoning_content` is silently dropped.
+    /// Empty content deltas (reasoning-only) return `""` so callers can suppress them.
     private static func visibleAssistantText(from delta: [String: Any]) -> String {
-        if let s = delta["reasoning_content"] as? String, !s.isEmpty { return "" }
-        if let s = delta["content"] as? String, !s.isEmpty { return s }
+        let reasoning = delta["reasoning_content"] as? String ?? ""
+        let content = delta["content"] as? String ?? ""
+
+        // Suppress reasoning-only deltas (no visible content)
+        if content.isEmpty && !reasoning.isEmpty { return "" }
+        if !content.isEmpty { return content }
+
+        // Handle content parts array (multimodal deltas)
         if let parts = delta["content"] as? [[String: Any]] {
             var out = ""
             for part in parts {

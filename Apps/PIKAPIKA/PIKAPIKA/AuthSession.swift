@@ -22,6 +22,7 @@ final class AuthSession: ObservableObject {
         restoreFromKeychain()
     }
 
+    @MainActor
     private func restoreFromKeychain() {
         if let id = KeychainHelper.load(.appleUserId), !id.isEmpty {
             provider = .apple

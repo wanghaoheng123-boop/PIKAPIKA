@@ -18,12 +18,21 @@ public enum PikaTheme {
     }
 
     public enum Palette {
-        public static let accent       = Color(red: 1.00, green: 0.62, blue: 0.77)
-        public static let accentDeep   = Color(red: 0.93, green: 0.36, blue: 0.55)
-        public static let warmBg       = Color(red: 1.00, green: 0.97, blue: 0.94)
-        public static let textPrimary  = Color.primary
-        public static let textMuted    = Color.secondary
-        public static let xpTrack      = Color.secondary.opacity(0.15)
+        // TODO (Medium): Replace with Color("Accent") from Assets.xcassets Color Set
+        // with Light variant: #FA6B73, Dark variant: #FF8A92
+        public static let accent = Color(red: 1.00, green: 0.62, blue: 0.77)
+
+        // TODO (Medium): Replace with Color("AccentDeep") from asset catalog
+        // with Light variant: #ED5C8D, Dark variant: #FF7BA5
+        public static let accentDeep = Color(red: 0.93, green: 0.36, blue: 0.55)
+
+        // TODO (Medium): Replace with Color("WarmBg") from asset catalog
+        // with Light variant: #FFF7F0, Dark variant: #2A1F1A
+        public static let warmBg = Color(red: 1.00, green: 0.97, blue: 0.94)
+
+        public static let textPrimary = Color.primary
+        public static let textMuted = Color.secondary
+        public static let xpTrack = Color.secondary.opacity(0.15)
     }
 
     public enum Typography {

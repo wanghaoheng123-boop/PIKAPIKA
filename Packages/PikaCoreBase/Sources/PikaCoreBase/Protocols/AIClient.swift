@@ -3,9 +3,13 @@ import Foundation
 /// Protocol for any AI provider client (OpenAI, Anthropic, mock for tests).
 public protocol AIClient: Sendable {
     /// Send a conversation turn and receive a streamed response.
+    /// - Parameters:
+    ///   - messages: conversation history (no system message included)
+    ///   - systemPrompt: optional system-level instruction. Pass `nil` to omit the system message entirely.
+    ///   - temperature: sampling temperature
     func chat(
         messages: [ChatMessage],
-        systemPrompt: String,
+        systemPrompt: String?,
         temperature: Double
     ) async throws -> AsyncThrowingStream<String, Error>
 

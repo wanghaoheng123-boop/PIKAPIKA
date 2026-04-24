@@ -21,7 +21,7 @@ public final class MockAIClient: AIClient, @unchecked Sendable {
 
     public func chat(
         messages: [ChatMessage],
-        systemPrompt: String,
+        systemPrompt: String?,
         temperature: Double
     ) async throws -> AsyncThrowingStream<String, Error> {
         let text = scriptedReplies[messages.count % scriptedReplies.count]

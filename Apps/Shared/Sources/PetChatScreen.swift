@@ -210,7 +210,11 @@ public struct PetChatScreen: View {
         do {
             try modelContext.save()
             userCommittedToStore = true
-            try ConversationHistoryLimits.trimOldestIfNeeded(for: pet, modelContext: modelContext)
+            do {
+                try ConversationHistoryLimits.trimOldestIfNeeded(for: pet, modelContext: modelContext)
+            } catch {
+                print("Failed to trim conversation history: \(error)")
+            }
         } catch {
             errorText = error.localizedDescription
             if userCommittedToStore {
@@ -269,12 +273,20 @@ public struct PetChatScreen: View {
             let assistantRow = ConversationMessage(pet: pet, role: "assistant", content: clean)
             modelContext.insert(assistantRow)
             try modelContext.save()
-            try ConversationHistoryLimits.trimOldestIfNeeded(for: pet, modelContext: modelContext)
+            do {
+                try ConversationHistoryLimits.trimOldestIfNeeded(for: pet, modelContext: modelContext)
+            } catch {
+                print("Failed to trim conversation history: \(error)")
+            }
 
             // Record daily streak and update last-interaction time
-            PetInteractionStreak.recordInteraction(pet: pet)
+            PetInteractionStreak.recordStreak(pet: pet)
             pet.lastInteractedAt = Date()
-            try modelContext.save()
+            do {
+                try modelContext.save()
+            } catch {
+                print("Failed to save streak update: \(error)")
+            }
 
             // Attempt memory extraction from this exchange
             if let lastUserMsg = persistedMessages.last {

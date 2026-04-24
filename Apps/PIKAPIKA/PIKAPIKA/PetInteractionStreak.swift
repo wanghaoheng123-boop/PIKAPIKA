@@ -9,6 +9,7 @@ enum PetInteractionStreak {
         let lastDay = cal.startOfDay(for: pet.lastInteractedAt)
         guard today != lastDay else { return }
         let diff = cal.dateComponents([.day], from: lastDay, to: today).day ?? 0
+        guard diff > 0 else { return }
         if diff == 1 {
             pet.streakCount += 1
         } else {

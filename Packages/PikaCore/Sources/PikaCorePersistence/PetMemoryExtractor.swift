@@ -46,7 +46,7 @@ public enum PetMemoryExtractor {
                 ChatMessage(role: "user", content: extractionPrompt)
             ]
             var result = ""
-            let stream = try await aiClient.chat(messages: messages, systemPrompt: "", temperature: 0.3)
+            let stream = try await aiClient.chat(messages: messages, systemPrompt: nil, temperature: 0.3)
             for try await chunk in stream {
                 result += chunk
             }

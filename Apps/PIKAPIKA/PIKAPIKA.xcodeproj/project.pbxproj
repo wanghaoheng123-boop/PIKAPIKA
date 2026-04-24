@@ -16,7 +16,6 @@
 		B1000000000000000000509 /* PetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000000000050A /* PetDetailView.swift */; };
 		B100000000000000000050B /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000000000050C /* ChatView.swift */; };
 		B100000000000000000050D /* MockAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000000000000000050E /* MockAIClient.swift */; };
-		B100000000000000000050F /* OpenAIChatClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000510 /* OpenAIChatClient.swift */; };
 		B1000000000000000000511 /* AIClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000512 /* AIClientProvider.swift */; };
 		B1000000000000000000513 /* AIClientHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000514 /* AIClientHolder.swift */; };
 		B1000000000000000000515 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000516 /* SettingsView.swift */; };
@@ -59,7 +58,6 @@
 		B100000000000000000050A /* PetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDetailView.swift; sourceTree = "<group>"; };
 		B100000000000000000050C /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		B100000000000000000050E /* MockAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIClient.swift; sourceTree = "<group>"; };
-		B1000000000000000000510 /* OpenAIChatClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIChatClient.swift; sourceTree = "<group>"; };
 		B1000000000000000000512 /* AIClientProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIClientProvider.swift; sourceTree = "<group>"; };
 		B1000000000000000000514 /* AIClientHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIClientHolder.swift; sourceTree = "<group>"; };
 		B1000000000000000000516 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -170,7 +168,6 @@
 				B1000000000000000000651 /* VoiceIntentRouter.swift */,
 				B100000000000000000050C /* ChatView.swift */,
 				B100000000000000000050E /* MockAIClient.swift */,
-				B1000000000000000000510 /* OpenAIChatClient.swift */,
 				B1000000000000000000512 /* AIClientProvider.swift */,
 				B1000000000000000000514 /* AIClientHolder.swift */,
 				B1000000000000000000516 /* SettingsView.swift */,
@@ -332,7 +329,6 @@
 				B1000000000000000000650 /* VoiceIntentRouter.swift in Sources */,
 				B100000000000000000050B /* ChatView.swift in Sources */,
 				B100000000000000000050D /* MockAIClient.swift in Sources */,
-				B100000000000000000050F /* OpenAIChatClient.swift in Sources */,
 				B1000000000000000000511 /* AIClientProvider.swift in Sources */,
 				B1000000000000000000513 /* AIClientHolder.swift in Sources */,
 				B1000000000000000000515 /* SettingsView.swift in Sources */,

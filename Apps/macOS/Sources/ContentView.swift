@@ -25,6 +25,11 @@ struct ContentView: View {
         .sheet(isPresented: $showOnboarding) {
             PetOnboardingView { newPet in
                 context.insert(newPet)
+                do {
+                    try context.save()
+                } catch {
+                    print("Failed to save new pet: \(error.localizedDescription)")
+                }
                 showOnboarding = false
             }
         }

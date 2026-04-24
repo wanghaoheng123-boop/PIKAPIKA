@@ -64,11 +64,11 @@ struct PetAvatarView: View {
     private func handleTap() {
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         onTapPet()
-        withAnimation(.spring(response: 0.32, dampingFraction: 0.45)) {
+        withAnimation(.interpolatingSpring(stiffness: 200, damping: 15)) {
             bounceOffset = -22
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) {
+            withAnimation(.interpolatingSpring(stiffness: 170, damping: 15)) {
                 bounceOffset = 0
             }
         }

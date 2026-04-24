@@ -192,16 +192,15 @@ struct PetHomeView: View {
 
     private func awardBond(_ event: BondProgression.Event) {
         let award = BondProgression.xp(for: event)
-        let (newXP, _) = BondProgression.apply(currentXP: pet.bondXP, award: award)
         let todayXP = pet.bondEvents
             .filter { Calendar.current.isDateInToday($0.timestamp) }
             .reduce(0) { $0 + $1.xpAwarded }
         guard todayXP < BondProgression.dailyCap else { return }
         let cappedXP = min(award.xp, BondProgression.dailyCap - todayXP)
         guard cappedXP > 0 else { return }
-        pet.bondXP = newXP - award.xp + cappedXP
+        pet.bondXP += cappedXP
         pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
-        PetInteractionStreak.recordInteraction(pet: pet)
+        PetInteractionStreak.recordStreak(pet: pet)
         pet.lastInteractedAt = Date()
         modelContext.insert(BondEvent(
             pet: pet,
@@ -209,7 +208,11 @@ struct PetHomeView: View {
             xpAwarded: cappedXP,
             metadata: award.metadata
         ))
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save bond event: \(error)")
+        }
     }
 
 

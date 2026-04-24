@@ -3,9 +3,11 @@ import Security
 
 /// Thread-safe Keychain wrapper for storing sensitive values (API keys, tokens).
 /// Uses kSecClassGenericPassword. Keys are stored per-device only (not iCloud Keychain).
+/// All operations are serialised via a dedicated `NSLock` to prevent race conditions
+/// in the Security framework's CADirectoryServer daemon.
 public enum KeychainHelper {
 
-    public enum Key: String {
+    public enum Key: String, Sendable {
         case openAIKey      = "openai_api_key"
         case anthropicKey   = "anthropic_api_key"
         case deepSeekKey    = "deepseek_api_key"
@@ -15,11 +17,16 @@ public enum KeychainHelper {
     }
 
     private static let service = "com.pikapika.app"
+    /// Serialises all Keychain operations to prevent concurrent CADirectoryServer errors.
+    private static let lock = NSLock()
 
     /// Save or update a string value in the Keychain.
     @discardableResult
     public static func save(_ value: String, for key: Key) -> Bool {
         guard let data = value.data(using: .utf8) else { return false }
+
+        lock.lock()
+        defer { lock.unlock() }
 
         let query: [String: Any] = [
             kSecClass as String:           kSecClassGenericPassword,
@@ -28,20 +35,22 @@ public enum KeychainHelper {
             kSecAttrAccessible as String:  kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         ]
 
-        // Try to update first; if not found, add.
         let updateAttributes: [String: Any] = [kSecValueData as String: data]
-        let status = SecItemUpdate(query as CFDictionary, updateAttributes as CFDictionary)
+        var status = SecItemUpdate(query as CFDictionary, updateAttributes as CFDictionary)
 
         if status == errSecItemNotFound {
             var addQuery = query
             addQuery[kSecValueData as String] = data
-            return SecItemAdd(addQuery as CFDictionary, nil) == errSecSuccess
+            status = SecItemAdd(addQuery as CFDictionary, nil)
         }
         return status == errSecSuccess
     }
 
     /// Retrieve a string value from the Keychain. Returns nil if not found.
     public static func load(_ key: Key) -> String? {
+        lock.lock()
+        defer { lock.unlock() }
+
         let query: [String: Any] = [
             kSecClass as String:       kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -59,6 +68,9 @@ public enum KeychainHelper {
     /// Delete a key from the Keychain.
     @discardableResult
     public static func delete(_ key: Key) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+
         let query: [String: Any] = [
             kSecClass as String:       kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -68,8 +80,20 @@ public enum KeychainHelper {
         return status == errSecSuccess || status == errSecItemNotFound
     }
 
-    /// Check whether a key exists in the Keychain.
+    /// Check whether a key exists in the Keychain without loading its data.
     public static func exists(_ key: Key) -> Bool {
-        load(key) != nil
+        lock.lock()
+        defer { lock.unlock() }
+
+        let query: [String: Any] = [
+            kSecClass as String:       kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key.rawValue,
+            kSecReturnData as String:  false,
+            kSecMatchLimit as String:  kSecMatchLimitOne
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        return status == errSecSuccess
     }
 }

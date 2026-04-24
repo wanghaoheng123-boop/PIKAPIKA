@@ -51,6 +51,9 @@ struct ChatView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
+                        if messages.isEmpty && streamingAssistant.isEmpty {
+                            emptyChatState
+                        }
                         ForEach(messages, id: \.id) { msg in
                             bubble(role: msg.role, text: msg.content)
                                 .id(msg.id)
@@ -167,6 +170,24 @@ struct ChatView: View {
         }
     }
 
+    private var emptyChatState: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "bubble.left.and.bubble.right")
+                .font(.system(size: 48))
+                .foregroundStyle(PIKAPIKATheme.accent.opacity(0.6))
+            Text("Say hello to \(pet.name)!")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+            Text("Your conversations will appear here.")
+                .font(.subheadline)
+                .foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Empty chat. Say hello to your pet to start a conversation.")
+    }
+
     private func send() async {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
@@ -185,8 +206,10 @@ struct ChatView: View {
                     allowRemoteChat: aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteChat,
                     allowMemoryExtraction: aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteMemoryExtraction
                 )
-            ) { partial in
-                streamingAssistant = partial
+            ) { [weak self] partial in
+                Task { @MainActor in
+                    self?.streamingAssistant = partial
+                }
             }
             PetSoundEngine.shared.speakReplyIfEnabled(streamingAssistant, for: pet, mood: spirit)
             streamingAssistant = ""

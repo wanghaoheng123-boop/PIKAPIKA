@@ -31,7 +31,7 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
 
     public func chat(
         messages: [ChatMessage],
-        systemPrompt: String,
+        systemPrompt: String?,
         temperature: Double
     ) async throws -> AsyncThrowingStream<String, Error> {
         guard !apiKey.isEmpty else { throw AIClientError.missingAPIKey }
@@ -43,20 +43,23 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
                 "content": $0.content
             ] as [String: Any] }
 
-        let cacheControl: [String: Any] = ["type": "ephemeral"]
-        let systemBlock: [String: Any] = [
-            "type": "text",
-            "text": systemPrompt,
-            "cache_control": cacheControl
-        ]
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "model": model,
             "max_tokens": maxTokens,
             "temperature": temperature,
             "stream": true,
-            "system": [systemBlock],
             "messages": userMessages
         ]
+
+        if let prompt = systemPrompt, !prompt.isEmpty {
+            let cacheControl: [String: Any] = ["type": "ephemeral"]
+            let systemBlock: [String: Any] = [
+                "type": "text",
+                "text": prompt,
+                "cache_control": cacheControl
+            ]
+            body["system"] = [systemBlock]
+        }
 
         var request = URLRequest(url: baseURL.appendingPathComponent("/v1/messages"))
         request.httpMethod = "POST"

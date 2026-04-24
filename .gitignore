@@ -21,3 +21,7 @@ DerivedData/
 __pycache__/
 *.pyc
 *.pyo
+
+# Firebase Cloud Functions (Node)
+Backend/functions/node_modules/
+Backend/functions/lib/

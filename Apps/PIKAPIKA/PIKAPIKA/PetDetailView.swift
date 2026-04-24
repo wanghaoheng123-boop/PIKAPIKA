@@ -393,7 +393,7 @@ struct PetDetailView: View {
         case "hamster": lines = ["Squeak!", "Nom?", "Zoom!"]
         default: lines = ["Hi!", "Cute!", "♥"]
         }
-        flashReaction(lines.randomElement()!)
+        flashReaction(lines.randomElement() ?? "♥")
     }
 
     private func flashReaction(_ text: String) {

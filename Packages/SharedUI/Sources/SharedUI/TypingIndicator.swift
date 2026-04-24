@@ -1,34 +1,40 @@
 import SwiftUI
 
 public struct TypingIndicator: View {
-    @State private var animationPhase: Int = 0
-    @State private var timer: Timer?
+    @State private var isAnimating = false
 
     public init() {}
 
     public var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 4) {
             ForEach(0..<3, id: \.self) { index in
                 Circle()
                     .fill(PikaTheme.Palette.accentDeep)
-                    .frame(width: 6, height: 6)
-                    .scaleEffect(animationPhase == index ? 1.3 : 0.8)
-                    .animation(.easeInOut(duration: 0.3), value: animationPhase)
+                    .frame(width: 7, height: 7)
+                    .scaleEffect(animatingScale(for: index))
             }
         }
+        .frame(width: 32, height: 20)
         .onAppear {
-            timer = Timer.scheduledTimer(withTimeInterval: 0.45, repeats: true) { _ in
-                withAnimation {
-                    animationPhase = (animationPhase + 1) % 3
-                }
+            withAnimation(
+                Animation
+                    .easeInOut(duration: 0.6)
+                    .repeatForever(autoreverses: true)
+            ) {
+                isAnimating = true
             }
         }
-        .onDisappear {
-            timer?.invalidate()
-            timer = nil
-            animationPhase = 0
-        }
-        .frame(width: 28, height: 20)
         .accessibilityLabel("Typing indicator")
+    }
+
+    private func animatingScale(for index: Int) -> CGFloat {
+        guard isAnimating else { return 0.8 }
+        let phase = (index - 0) % 3
+        switch phase {
+        case 0: return 1.3
+        case 1: return 0.8
+        case 2: return 1.0
+        default: return 0.8
+        }
     }
 }
