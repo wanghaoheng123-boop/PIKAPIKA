@@ -13,6 +13,7 @@ struct PetDetailView: View {
 
     @State private var streamingAssistant = ""
     @State private var reactionBubble: String?
+    @State private var reactionTask: Task<Void, Never>?
     @State private var isTalking = false
     @State private var errorText: String?
     @State private var stagedAction = "idle"
@@ -20,6 +21,7 @@ struct PetDetailView: View {
     @State private var showMovesSheet = false
     @State private var showCustomize = false
     @State private var moveSearch = ""
+    @State private var levelUpInfo: BondProgression.LevelUp?
     @StateObject private var voiceInput = VoiceInputManager()
 
     init(pet: Pet) {
@@ -229,6 +231,7 @@ struct PetDetailView: View {
             }
         }
         .onDisappear {
+            reactionTask?.cancel()
             voiceInput.stop(commit: false) { _ in }
         }
         .alert("Microphone or speech permission denied", isPresented: $voiceInput.authorizationDenied) {
@@ -260,17 +263,17 @@ struct PetDetailView: View {
     private var actionBar: some View {
         HStack(spacing: 12) {
             actionButton(title: "Pet", symbol: "hand.tap.fill", tint: .pink) {
-                awardBond(event: "pet", xp: 4)
+                awardBond(event: .tapPet)
                 triggerAction("nuzzle")
                 flashReaction(["So soft!", "Hehe!", "Love that!"].randomElement()!)
             }
             actionButton(title: "Feed", symbol: "leaf.fill", tint: .green) {
-                awardBond(event: "feed", xp: 6)
+                awardBond(event: .feeding)
                 triggerAction("eat")
                 flashReaction(["Yum!", "Tasty!", "More please!"].randomElement()!)
             }
             actionButton(title: "Play", symbol: "ball.fill", tint: .orange) {
-                awardBond(event: "play", xp: 8)
+                awardBond(event: .playSession)
                 triggerAction("fetch")
                 flashReaction(["Catch!", "Zoom!", "Again!"].randomElement()!)
             }
@@ -380,7 +383,7 @@ struct PetDetailView: View {
     }
 
     private func handlePetTap() {
-        awardBond(event: "tap", xp: 3)
+        awardBond(event: .tap)
         triggerAction("boop")
         PetSoundEngine.shared.chirp(for: pet, mood: spirit)
         let lines: [String]
@@ -394,20 +397,31 @@ struct PetDetailView: View {
     }
 
     private func flashReaction(_ text: String) {
+        reactionTask?.cancel()
         reactionBubble = text
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
-            if reactionBubble == text {
-                reactionBubble = nil
-            }
+        reactionTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_200_000_000)
+            guard !Task.isCancelled else { return }
+            reactionBubble = nil
         }
     }
 
-    private func awardBond(event: String, xp: Int) {
-        pet.bondXP += xp
+    private func awardBond(event: BondProgression.Event) {
+        let award = BondProgression.xp(for: event)
+        let (newXP, levelUp) = BondProgression.apply(currentXP: pet.bondXP, award: award)
+        let todayXP = pet.bondEvents
+            .filter { Calendar.current.isDateInToday($0.timestamp) }
+            .reduce(0) { $0 + $1.xpAwarded }
+        guard todayXP < BondProgression.dailyCap else { return }
+        let cappedXP = min(award.xp, BondProgression.dailyCap - todayXP)
+        guard cappedXP > 0 else { return }
+        let finalXP = newXP - award.xp + cappedXP
+        pet.bondXP = finalXP
         pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
+        levelUpInfo = levelUp
         PetInteractionStreak.recordInteraction(pet: pet)
         pet.lastInteractedAt = Date()
-        modelContext.insert(BondEvent(pet: pet, eventType: event, xpAwarded: xp))
+        modelContext.insert(BondEvent(pet: pet, eventType: award.eventType, xpAwarded: cappedXP, timestamp: Date(), metadata: award.metadata))
         do {
             try modelContext.save()
         } catch {
@@ -421,6 +435,7 @@ struct PetDetailView: View {
         isTalking = true
         streamingAssistant = ""
         reactionBubble = nil
+        reactionTask?.cancel()
         do {
             try await PetChatActions.send(
                 pet: pet,
@@ -434,7 +449,7 @@ struct PetDetailView: View {
             ) { partial in
                 streamingAssistant = partial
             }
-            awardBond(event: "chat", xp: 2)
+            awardBond(event: .chatMessage)
             PetSoundEngine.shared.speakReplyIfEnabled(streamingAssistant, for: pet, mood: spirit)
             streamingAssistant = ""
         } catch {
@@ -452,7 +467,7 @@ struct PetDetailView: View {
         let reply = PetChatActions.localCompanionReply(for: pet, userText: phrase)
         modelContext.insert(ConversationMessage(pet: pet, role: "user", content: phrase))
         modelContext.insert(ConversationMessage(pet: pet, role: "assistant", content: reply))
-        awardBond(event: "chat_local", xp: 2)
+        awardBond(event: .localCompanion)
         PetSoundEngine.shared.speakReplyIfEnabled(reply, for: pet, mood: spirit)
         do {
             try modelContext.save()
@@ -466,17 +481,17 @@ struct PetDetailView: View {
         case .ask(let text):
             Task { await sendWithAI(text) }
         case .pet:
-            awardBond(event: "pet", xp: 4)
+            awardBond(event: .tapPet)
             triggerAction("nuzzle")
         case .feed:
-            awardBond(event: "feed", xp: 6)
+            awardBond(event: .feeding)
             triggerAction("eat")
         case .play:
-            awardBond(event: "play", xp: 8)
+            awardBond(event: .playSession)
             triggerAction("fetch")
         case .move(let name):
             triggerAction(name)
-            awardBond(event: "voice_move", xp: 2)
+            awardBond(event: .voiceMove)
         case .openMemories:
             flashReaction("Tap Heart & memory below")
         }

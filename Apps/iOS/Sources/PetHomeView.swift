@@ -4,9 +4,18 @@ import SharedUI
 
 struct PetHomeView: View {
     let pet: Pet
+    @Environment(\.modelContext) private var modelContext
     @State private var showPetEditor = false
     @State private var selectedMood: PetMood = .idle
     @State private var isActionPressed = false
+
+    private var spiritState: PetSpiritState {
+        PetSpiritState.evaluate(for: pet)
+    }
+
+    private var bondLevel: BondLevel {
+        BondLevel.from(xp: pet.bondXP)
+    }
 
     var body: some View {
         ZStack {
@@ -23,6 +32,7 @@ struct PetHomeView: View {
 
             VStack(spacing: PikaTheme.Spacing.lg) {
                 headerRow
+                spiritStateBadge
                 petAvatarSection
                 moodSelectorRow
                 statsRow
@@ -34,6 +44,7 @@ struct PetHomeView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button("Edit") { showPetEditor = true }
+                    .accessibilityLabel("Edit pet profile")
             }
         }
         .sheet(isPresented: $showPetEditor) {
@@ -67,7 +78,36 @@ struct PetHomeView: View {
                 .foregroundStyle(.white)
                 .clipShape(Capsule())
             }
+            .accessibilityLabel("Open chat with \(pet.name)")
         }
+    }
+
+    @ViewBuilder
+    private var spiritStateBadge: some View {
+        let colors = spiritState.pillColors
+        HStack(spacing: 6) {
+            Text(spiritState.emoji)
+                .font(.system(size: 14))
+            Text(spiritState.shortTitle)
+                .font(PikaTheme.Typography.caption.weight(.medium))
+            Text("·")
+            Text(spiritState.subtitle)
+                .font(PikaTheme.Typography.caption)
+                .foregroundStyle(PikaTheme.Palette.textMuted)
+                .lineLimit(1)
+        }
+        .foregroundStyle(colors.first ?? PikaTheme.Palette.accentDeep)
+        .padding(.horizontal, PikaTheme.Spacing.md)
+        .padding(.vertical, PikaTheme.Spacing.sm)
+        .background(
+            LinearGradient(
+                colors: colors.map { $0.opacity(0.15) },
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
+        .clipShape(Capsule())
+        .accessibilityLabel("\(pet.name) is \(spiritState.shortTitle): \(spiritState.subtitle)")
     }
 
     private var petAvatarSection: some View {
@@ -75,6 +115,7 @@ struct PetHomeView: View {
             PetAvatarView(pet: pet, state: PetState.from(mood: selectedMood), size: 160)
                 .scaleEffect(isActionPressed ? 0.92 : 1.0)
                 .animation(.spring(duration: 0.3), value: isActionPressed)
+                .accessibilityLabel("\(pet.name), \(selectedMood.displayName)")
 
             MoodBadge(mood: selectedMood)
         }
@@ -89,6 +130,7 @@ struct PetHomeView: View {
                         isSelected: selectedMood == mood,
                         action: { selectedMood = mood }
                     )
+                    .accessibilityLabel("\(mood.displayName) mood")
                 }
             }
             .padding(.horizontal, 2)
@@ -103,18 +145,30 @@ struct PetHomeView: View {
                 label: "Bond XP",
                 color: PikaTheme.Palette.accentDeep
             )
+            .accessibilityLabel("\(pet.bondXP) bond experience points")
             StatCard(
                 icon: "star.fill",
-                value: "\(BondLevel.from(xp: pet.bondXP).rawValue)",
-                label: "Level",
+                value: "\(bondLevel.rawValue)",
+                label: bondLevel.displayName,
                 color: .orange
             )
+            .accessibilityLabel("Level \(bondLevel.rawValue), \(bondLevel.displayName)")
+            if pet.streakCount > 0 {
+                StatCard(
+                    icon: "flame.fill",
+                    value: "\(pet.streakCount)",
+                    label: pet.streakCount == 1 ? "Day" : "Days",
+                    color: .red
+                )
+                .accessibilityLabel("\(pet.streakCount)-day interaction streak")
+            }
             StatCard(
                 icon: "sparkles",
                 value: "\(pet.personalityTraits.count)",
                 label: "Traits",
                 color: .purple
             )
+            .accessibilityLabel("\(pet.personalityTraits.count) personality traits")
         }
     }
 
@@ -126,32 +180,65 @@ struct PetHomeView: View {
                 color: .orange
             ) {
                 withAnimation { isActionPressed = true }
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                awardBond(.feeding)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     isActionPressed = false
                 }
             }
+            .accessibilityLabel("Feed \(pet.name)")
+
             QuickActionButton(
                 icon: "figure.run",
                 label: "Play",
                 color: .green
             ) {
                 withAnimation { isActionPressed = true }
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                awardBond(.playSession)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     isActionPressed = false
                 }
             }
+            .accessibilityLabel("Play with \(pet.name)")
+
             QuickActionButton(
                 icon: "moon.fill",
                 label: "Sleep",
                 color: .indigo
             ) {
                 withAnimation { isActionPressed = true }
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                selectedMood = .sleepy
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     isActionPressed = false
                 }
             }
+            .accessibilityLabel("Put \(pet.name) to sleep")
         }
         .padding(.horizontal, 4)
+    }
+
+    private func awardBond(_ event: BondProgression.Event) {
+        let award = BondProgression.xp(for: event)
+        let (newXP, _) = BondProgression.apply(currentXP: pet.bondXP, award: award)
+        let todayXP = pet.bondEvents
+            .filter { Calendar.current.isDateInToday($0.timestamp) }
+            .reduce(0) { $0 + $1.xpAwarded }
+        guard todayXP < BondProgression.dailyCap else { return }
+        let cappedXP = min(award.xp, BondProgression.dailyCap - todayXP)
+        guard cappedXP > 0 else { return }
+        pet.bondXP = newXP - award.xp + cappedXP
+        pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
+        PetInteractionStreak.recordInteraction(pet: pet)
+        pet.lastInteractedAt = Date()
+        modelContext.insert(BondEvent(
+            pet: pet,
+            eventType: award.eventType,
+            xpAwarded: cappedXP,
+            metadata: award.metadata
+        ))
+        try? modelContext.save()
     }
 }
 
@@ -251,18 +338,3 @@ private struct QuickActionButton: View {
     }
 }
 
-extension PetState {
-    static func from(mood: PetMood) -> PetState {
-        switch mood {
-        case .happy:    return .celebrating
-        case .sleepy:   return .sleeping
-        case .sad:       return .sad
-        case .excited:  return .celebrating
-        case .idle:     return .idle
-        }
-    }
-}
-
-extension PetMood: CaseIterable {
-    static var allCases: [PetMood] = [.happy, .excited, .idle, .sleepy, .sad]
-}

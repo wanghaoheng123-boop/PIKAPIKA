@@ -16,7 +16,9 @@ let package = Package(
     targets: [
         .target(
             name: "PikaCorePersistence",
-            dependencies: [],
+            dependencies: [
+                .product(name: "PikaCoreBase", package: "PikaCoreBase")
+            ],
             path: "Sources/PikaCorePersistence"
         ),
         .target(

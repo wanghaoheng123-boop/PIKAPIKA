@@ -21,6 +21,15 @@ enum PetImageStore {
         "\(rootFolder)/\(petId.uuidString)/\(filename)"
     }
 
+    /// Saves `image` as a high-quality JPEG (0.88) and returns the relative path.
+    static func saveJPEG(_ image: UIImage, petId: UUID, filename: String = "avatar.jpg", quality: CGFloat = 0.88) throws -> String {
+        guard let data = image.jpegData(compressionQuality: quality) else {
+            throw NSError(domain: "PetImageStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to create JPEG data"])
+        }
+        return try saveJPEG(data, petId: petId, filename: filename)
+    }
+
+    /// Saves raw JPEG `data` atomically and returns the relative path.
     static func saveJPEG(_ data: Data, petId: UUID, filename: String = "avatar.jpg") throws -> String {
         let dir = try petDirectoryURL(for: petId)
         let url = dir.appendingPathComponent(filename, isDirectory: false)

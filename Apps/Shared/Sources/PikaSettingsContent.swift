@@ -89,11 +89,17 @@ public struct PikaSettingsContent: View {
             if unlocked {
                 Section("OpenAI API Key") {
                     SecureField("sk-…", text: $openAIKey)
-                    Button("Save") { KeychainHelper.save(openAIKey, for: .openAIKey) }
+                    Button("Save") {
+                        guard !openAIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                        KeychainHelper.save(openAIKey, for: .openAIKey)
+                    }
                 }
                 Section("Anthropic API Key") {
                     SecureField("sk-ant-…", text: $anthropicKey)
-                    Button("Save") { KeychainHelper.save(anthropicKey, for: .anthropicKey) }
+                    Button("Save") {
+                        guard !anthropicKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                        KeychainHelper.save(anthropicKey, for: .anthropicKey)
+                    }
                 }
             } else {
                 Section {

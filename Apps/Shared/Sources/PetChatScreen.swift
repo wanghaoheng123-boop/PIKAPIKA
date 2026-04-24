@@ -232,6 +232,9 @@ public struct PetChatScreen: View {
         streamingReply = ""
         defer { isSending = false }
 
+        // Build memory facts list for system prompt
+        let memoryFacts = fetchMemoryFacts()
+
         let apiMessages: [ChatMessage] = persistedMessages.map {
             ChatMessage(role: $0.role, content: $0.content)
         }
@@ -239,7 +242,9 @@ public struct PetChatScreen: View {
             petName: pet.name,
             species: pet.species,
             traits: pet.personalityTraits,
-            bondLevel: BondLevel.from(xp: pet.bondXP)
+            bondLevel: BondLevel.from(xp: pet.bondXP),
+            creatureDescription: pet.creatureDescription,
+            memoryFacts: memoryFacts
         )
         let router = AIProviderRouter(preference: preference)
         var accumulated = ""
@@ -260,15 +265,76 @@ public struct PetChatScreen: View {
                 streamingReply = ""
                 return
             }
-            modelContext.insert(ConversationMessage(pet: pet, role: "assistant", content: clean))
+            let assistantRow = ConversationMessage(pet: pet, role: "assistant", content: clean)
+            modelContext.insert(assistantRow)
             try modelContext.save()
             try ConversationHistoryLimits.trimOldestIfNeeded(for: pet, modelContext: modelContext)
+
+            // Record daily streak and update last-interaction time
+            PetInteractionStreak.recordInteraction(pet: pet)
+            pet.lastInteractedAt = Date()
+            try modelContext.save()
+
+            // Attempt memory extraction from this exchange
+            if let lastUserMsg = persistedMessages.last {
+                await attemptMemoryExtraction(
+                    userLine: lastUserMsg.content,
+                    assistantLine: clean,
+                    router: router
+                )
+            }
+
             streamingReply = ""
             awaitingAssistantRetry = false
         } catch {
             errorText = error.localizedDescription
             awaitingAssistantRetry = true
             streamingReply = ""
+        }
+    }
+
+    @MainActor
+    private func fetchMemoryFacts() -> [String] {
+        let petId = pet.id
+        let descriptor = FetchDescriptor<PetMemoryFact>(
+            predicate: #Predicate<PetMemoryFact> { fact in
+                fact.pet?.id == petId
+            },
+            sortBy: [
+                SortDescriptor(\.importance, order: .reverse),
+                SortDescriptor(\.createdAt, order: .reverse)
+            ]
+        )
+        let rows = (try? modelContext.fetch(descriptor)) ?? []
+        return rows.prefix(12).map(\.content)
+    }
+
+    @MainActor
+    private func attemptMemoryExtraction(
+        userLine: String,
+        assistantLine: String,
+        router: AIProviderRouter
+    ) async {
+        let trimmed = userLine.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= 5 else { return }
+
+        let key = "pet_memory_extract_last_\(pet.id.uuidString)"
+        if let last = UserDefaults.standard.object(forKey: key) as? Date,
+           Date().timeIntervalSince(last) < 5 * 60 {
+            return
+        }
+
+        guard let client = try? router.primaryClient() else { return }
+        let extracted = await PetMemoryExtractor.extractAndStore(
+            pet: pet,
+            userLine: userLine,
+            assistantLine: assistantLine,
+            modelContext: modelContext,
+            aiClient: client,
+            enabled: true
+        )
+        if extracted {
+            UserDefaults.standard.set(Date(), forKey: key)
         }
     }
 }

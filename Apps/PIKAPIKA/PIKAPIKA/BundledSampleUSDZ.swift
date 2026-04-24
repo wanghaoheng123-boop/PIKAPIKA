@@ -1,5 +1,6 @@
 import Foundation
 import SceneKit
+import UIKit
 import PikaCore
 
 /// Tiny built-in USDZ models so users can preview real SceneKit USDZ loading before importing their own files.
