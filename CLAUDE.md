@@ -42,6 +42,13 @@ Canonical skills: `~/.cursor/skills/<name>/SKILL.md` — use for domain workflow
 | `AGENTS.md` | Canonical agent routing (keep `CLAUDE.md` in lockstep) |
 | `CLAUDE.md` | Same routing rules as `AGENTS.md` (for tools that only read `CLAUDE.md`) |
 | `Docs/ROADMAP.md` | Product milestones (P0–P6); checklist for what to build next |
+| `Docs/DEEPSEEK_AGENT_SETUP.md` | Use DeepSeek **v4-pro** for planning/coding in Cursor, CLI, and terminal helpers |
+
+## DeepSeek v4-pro (planning and coding support)
+
+- In **Cursor**, when the **`user-deepseek`** MCP server is enabled, **prefer MCP** for DeepSeek work: use tool **`chat_completion`** with `model` **`deepseek-v4-pro`**, `thinking` enabled, and `reasoning_effort` **`high`** (or `max` when justified) for architecture, refactors, multi-step plans, and careful code review. Use **`completion`** for fill-in-the-middle code edits; call **`list_models`** when validating model IDs. Read each tool’s schema under `mcps/user-deepseek/tools/` before the first call. Details: [`Docs/DEEPSEEK_AGENT_SETUP.md`](Docs/DEEPSEEK_AGENT_SETUP.md) and [`.cursor/rules/deepseek-mcp.mdc`](.cursor/rules/deepseek-mcp.mdc).
+- The PIKAPIKA app already routes in-app chat through DeepSeek when the user saves a key in Settings.
+- **Fallback** when MCP is unavailable: [`Scripts/deepseek_chat.sh`](Scripts/deepseek_chat.sh) / [`Scripts/deepseek_chat.py`](Scripts/deepseek_chat.py) with `DEEPSEEK_API_KEY` (name only in [`.env.template`](.env.template)) for one-shot prompts—**never** paste secrets into issues, commits, or Memory Bank files.
 
 ## Anti-patterns
 

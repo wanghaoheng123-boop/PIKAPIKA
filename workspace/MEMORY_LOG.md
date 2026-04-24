@@ -24,6 +24,20 @@ Blockers: none
 ---
 
 ### Session 3 — 2026-04-25 — GPT-5.2
+Goal: Document and script DeepSeek v4-pro for editor/terminal planning support.
+Done: Added `Docs/DEEPSEEK_AGENT_SETUP.md`, `Scripts/deepseek_chat.py` + shell wrapper, `DEEPSEEK_API_KEY` in `.env.template`, and AGENTS/CLAUDE pointers.
+Verify: A=n/a B=n/a C=n/a D=n/a E=n/a F=n/a
+Blockers: none
+---
+
+### Session 4 — 2026-04-25 — GPT-5.2
+Goal: Wire repo guidance to Cursor DeepSeek MCP (`user-deepseek`).
+Done: Expanded `Docs/DEEPSEEK_AGENT_SETUP.md` with MCP tool table; added `.cursor/rules/deepseek-mcp.mdc`; updated AGENTS/CLAUDE to prefer MCP over scripts in Cursor.
+Verify: A=n/a B=n/a C=n/a D=n/a E=n/a F=n/a
+Blockers: none
+---
+
+### Session 3 — 2026-04-25 — GPT-5.2
 Goal: Ship DeepSeek `deepseek-v4-pro` in PikaAI router, Keychain, settings, and tests.
 Done: Added `DeepSeekClient`, `KeychainHelper.Key.deepSeekKey`, extended `AIProviderRouter` (multi-hop fallback, new preferences), Shared + PIKAPIKA settings and client wiring, `DeepSeekRouterTests` + Keychain roundtrip test; ran `swift test` in PikaAI and PikaCoreBase (PASS).
 Verify: A=PASS B=n/a C=PASS D=PASS E=n/a F=n/a
