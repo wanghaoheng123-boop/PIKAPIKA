@@ -48,3 +48,10 @@ Canonical skills: `~/.cursor/skills/<name>/SKILL.md` — use for domain workflow
 - Flooding the orchestrator with raw logs—delegate and summarize.
 - Editing Memory Bank **secrets** (never store secrets here).
 - Skipping peer review for security- or persistence-sensitive changes.
+
+<!-- AGENT HOOK v1 -->
+## Agent Hook (Claude Code)
+Read AGENT.md fully before any action. All six rules are defined there.
+Hooks directory for enforcement: .claude/hooks/ (PreToolUse, PostToolUse, Stop).
+Use Stop hook to block task completion unless VERIFY A-F all pass.
+Use PreToolUse to block writes to *.env, secrets/, *credential*, *token* paths.

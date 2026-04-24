@@ -1,0 +1,469 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		177F4D85A5BF28A0885B70C4 /* PikaSync in Frameworks */ = {isa = PBXBuildFile; productRef = ED0123A5C4373A06A5124C0B /* PikaSync */; };
+		2119F341AA1A0BCFB79BDE8C /* MenuBarContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C1BC889263429FADDB69B9B /* MenuBarContent.swift */; };
+		37AA11D5CC200216A7DE2A3B /* PikaSubscription in Frameworks */ = {isa = PBXBuildFile; productRef = 886B9D1EF3B14F7840888112 /* PikaSubscription */; };
+		4486E2DC2719F40214340777 /* PikaCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7C4643A59C7C8DD1DDD1E621 /* PikaCore */; };
+		57A6982956DDD46710115E67 /* PetHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D1967E4427CA0B2F2449E0 /* PetHomeView.swift */; };
+		67E5B68EF75648B9B1496E30 /* SharedUI in Frameworks */ = {isa = PBXBuildFile; productRef = B14E2DEF3601F7099D85612B /* SharedUI */; };
+		78D2653E8BE1DC877F521108 /* PikaSettingsContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B0A5739C9568E76F4A17B5 /* PikaSettingsContent.swift */; };
+		A11212628C5C4901B7F2797A /* PetChatScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46507689BE59664653AC204E /* PetChatScreen.swift */; };
+		AE06C1C2D557C259BFB706B0 /* PetProfileEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E850090D122C65C27940AD /* PetProfileEditorView.swift */; };
+		C941FFC499E2EBFFC58BE67C /* PetOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4460878ECCDDA29DD1338882 /* PetOnboardingView.swift */; };
+		D675B894A8D7A66914571A86 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD02B5047A50FC6F69BD46FC /* SettingsView.swift */; };
+		DD553A3AC44195FC1C622511 /* PetEngine in Frameworks */ = {isa = PBXBuildFile; productRef = F6F679928EFA7EB5BB0C2907 /* PetEngine */; };
+		E3928BAF379BCDA0706DE67C /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D50FBAA9B4727A6EBC4F8FD /* ChatView.swift */; };
+		F1FC9EB496728F3E3E902986 /* PikaAI in Frameworks */ = {isa = PBXBuildFile; productRef = 7F966A949B29ECEF563F6420 /* PikaAI */; };
+		F308786C219CC1D169ABFC50 /* PikaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF35ECCAE3B37C651F88A150 /* PikaApp.swift */; };
+		FE739725B724B1944145C8EF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E962F7911EF0441F706C10 /* ContentView.swift */; };
+		FEE64FAEF3FCF598C2258E03 /* ConversationHistoryLimits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F468C32359468D3C29D9DE /* ConversationHistoryLimits.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0C1BC889263429FADDB69B9B /* MenuBarContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContent.swift; sourceTree = "<group>"; };
+		1950F894BE0ECC7DB3B8DEE3 /* PikaCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PikaCore; path = ../../Packages/PikaCore; sourceTree = SOURCE_ROOT; };
+		1D43768D9EFBFD0879111A4C /* PikaSync */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PikaSync; path = ../../Packages/PikaSync; sourceTree = SOURCE_ROOT; };
+		1D50FBAA9B4727A6EBC4F8FD /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		20D1967E4427CA0B2F2449E0 /* PetHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetHomeView.swift; sourceTree = "<group>"; };
+		35F468C32359468D3C29D9DE /* ConversationHistoryLimits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationHistoryLimits.swift; sourceTree = "<group>"; };
+		42E962F7911EF0441F706C10 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		4460878ECCDDA29DD1338882 /* PetOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetOnboardingView.swift; sourceTree = "<group>"; };
+		451EEE2778284776F908F50D /* PikaSubscription */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PikaSubscription; path = ../../Packages/PikaSubscription; sourceTree = SOURCE_ROOT; };
+		46507689BE59664653AC204E /* PetChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetChatScreen.swift; sourceTree = "<group>"; };
+		6194E75783E38A0872593125 /* SharedUI */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SharedUI; path = ../../Packages/SharedUI; sourceTree = SOURCE_ROOT; };
+		77B0A5739C9568E76F4A17B5 /* PikaSettingsContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PikaSettingsContent.swift; sourceTree = "<group>"; };
+		81F192F72A9816372E205C5F /* PetEngine */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PetEngine; path = ../../Packages/PetEngine; sourceTree = SOURCE_ROOT; };
+		97E850090D122C65C27940AD /* PetProfileEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetProfileEditorView.swift; sourceTree = "<group>"; };
+		AD02B5047A50FC6F69BD46FC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C3EE9DE7FA211C9300D5DBEF /* PikaAI */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PikaAI; path = ../../Packages/PikaAI; sourceTree = SOURCE_ROOT; };
+		EF35ECCAE3B37C651F88A150 /* PikaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PikaApp.swift; sourceTree = "<group>"; };
+		F8FB9846E26624B7638DDA90 /* Pika.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pika.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		ABCAE3B07EAD8BE4E7DBE6C1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4486E2DC2719F40214340777 /* PikaCore in Frameworks */,
+				F1FC9EB496728F3E3E902986 /* PikaAI in Frameworks */,
+				DD553A3AC44195FC1C622511 /* PetEngine in Frameworks */,
+				177F4D85A5BF28A0885B70C4 /* PikaSync in Frameworks */,
+				37AA11D5CC200216A7DE2A3B /* PikaSubscription in Frameworks */,
+				67E5B68EF75648B9B1496E30 /* SharedUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0EABA8FCDA9629FB8AF736CE /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				1D50FBAA9B4727A6EBC4F8FD /* ChatView.swift */,
+				42E962F7911EF0441F706C10 /* ContentView.swift */,
+				0C1BC889263429FADDB69B9B /* MenuBarContent.swift */,
+				20D1967E4427CA0B2F2449E0 /* PetHomeView.swift */,
+				4460878ECCDDA29DD1338882 /* PetOnboardingView.swift */,
+				EF35ECCAE3B37C651F88A150 /* PikaApp.swift */,
+				AD02B5047A50FC6F69BD46FC /* SettingsView.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		15FBA42EAE7F72462927B6FC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F8FB9846E26624B7638DDA90 /* Pika.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		456DAA0C8FAA457F47B67077 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				35F468C32359468D3C29D9DE /* ConversationHistoryLimits.swift */,
+				46507689BE59664653AC204E /* PetChatScreen.swift */,
+				97E850090D122C65C27940AD /* PetProfileEditorView.swift */,
+				77B0A5739C9568E76F4A17B5 /* PikaSettingsContent.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		4BBB9BACF657E4516B7350AD = {
+			isa = PBXGroup;
+			children = (
+				D72AA49AFE826744DE783AEF /* Apps */,
+				F01CF96ECA8E0B57AD2D8EEE /* Packages */,
+				0EABA8FCDA9629FB8AF736CE /* Sources */,
+				15FBA42EAE7F72462927B6FC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6ECF804C169E5094309E1EB0 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				456DAA0C8FAA457F47B67077 /* Sources */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		D72AA49AFE826744DE783AEF /* Apps */ = {
+			isa = PBXGroup;
+			children = (
+				6ECF804C169E5094309E1EB0 /* Shared */,
+			);
+			name = Apps;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		F01CF96ECA8E0B57AD2D8EEE /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				81F192F72A9816372E205C5F /* PetEngine */,
+				C3EE9DE7FA211C9300D5DBEF /* PikaAI */,
+				1950F894BE0ECC7DB3B8DEE3 /* PikaCore */,
+				451EEE2778284776F908F50D /* PikaSubscription */,
+				1D43768D9EFBFD0879111A4C /* PikaSync */,
+				6194E75783E38A0872593125 /* SharedUI */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2D0071299F035AA1EAC2CE97 /* Pika */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1141B84504AC4499E3BFA395 /* Build configuration list for PBXNativeTarget "Pika" */;
+			buildPhases = (
+				8BB42A814838B8F723B2587E /* Sources */,
+				ABCAE3B07EAD8BE4E7DBE6C1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Pika;
+			packageProductDependencies = (
+				7C4643A59C7C8DD1DDD1E621 /* PikaCore */,
+				7F966A949B29ECEF563F6420 /* PikaAI */,
+				F6F679928EFA7EB5BB0C2907 /* PetEngine */,
+				ED0123A5C4373A06A5124C0B /* PikaSync */,
+				886B9D1EF3B14F7840888112 /* PikaSubscription */,
+				B14E2DEF3601F7099D85612B /* SharedUI */,
+			);
+			productName = Pika;
+			productReference = F8FB9846E26624B7638DDA90 /* Pika.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B1881FA49A49A0E38D54E33D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					2D0071299F035AA1EAC2CE97 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = EA4A2EAD13AEC1D3E51E7BCC /* Build configuration list for PBXProject "Pika" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 4BBB9BACF657E4516B7350AD;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				418004E81400541286C8CEA2 /* XCLocalSwiftPackageReference "../../Packages/PetEngine" */,
+				D808CFF54ED2CAABDEC16686 /* XCLocalSwiftPackageReference "../../Packages/PikaAI" */,
+				4286459574B5A036402CF310 /* XCLocalSwiftPackageReference "../../Packages/PikaCore" */,
+				E28C162DD924B23C28231551 /* XCLocalSwiftPackageReference "../../Packages/PikaSubscription" */,
+				6C34A60D4A47159A708E7F05 /* XCLocalSwiftPackageReference "../../Packages/PikaSync" */,
+				415A310F817F05613C64871F /* XCLocalSwiftPackageReference "../../Packages/SharedUI" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 15FBA42EAE7F72462927B6FC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2D0071299F035AA1EAC2CE97 /* Pika */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8BB42A814838B8F723B2587E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E3928BAF379BCDA0706DE67C /* ChatView.swift in Sources */,
+				FE739725B724B1944145C8EF /* ContentView.swift in Sources */,
+				FEE64FAEF3FCF598C2258E03 /* ConversationHistoryLimits.swift in Sources */,
+				2119F341AA1A0BCFB79BDE8C /* MenuBarContent.swift in Sources */,
+				A11212628C5C4901B7F2797A /* PetChatScreen.swift in Sources */,
+				57A6982956DDD46710115E67 /* PetHomeView.swift in Sources */,
+				C941FFC499E2EBFFC58BE67C /* PetOnboardingView.swift in Sources */,
+				AE06C1C2D557C259BFB706B0 /* PetProfileEditorView.swift in Sources */,
+				F308786C219CC1D169ABFC50 /* PikaApp.swift in Sources */,
+				78D2653E8BE1DC877F521108 /* PikaSettingsContent.swift in Sources */,
+				D675B894A8D7A66914571A86 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		27C4480534ED35A5AC0E9819 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		4A74CAEB00421F778BF1C026 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/Pika.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.pikapika.app;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		BF2578637802091049530134 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		C89710F1EAB626E3BF0F8BF5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/Pika.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.pikapika.app;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1141B84504AC4499E3BFA395 /* Build configuration list for PBXNativeTarget "Pika" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C89710F1EAB626E3BF0F8BF5 /* Debug */,
+				4A74CAEB00421F778BF1C026 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EA4A2EAD13AEC1D3E51E7BCC /* Build configuration list for PBXProject "Pika" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				27C4480534ED35A5AC0E9819 /* Debug */,
+				BF2578637802091049530134 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		415A310F817F05613C64871F /* XCLocalSwiftPackageReference "../../Packages/SharedUI" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/SharedUI;
+		};
+		418004E81400541286C8CEA2 /* XCLocalSwiftPackageReference "../../Packages/PetEngine" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/PetEngine;
+		};
+		4286459574B5A036402CF310 /* XCLocalSwiftPackageReference "../../Packages/PikaCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/PikaCore;
+		};
+		6C34A60D4A47159A708E7F05 /* XCLocalSwiftPackageReference "../../Packages/PikaSync" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/PikaSync;
+		};
+		D808CFF54ED2CAABDEC16686 /* XCLocalSwiftPackageReference "../../Packages/PikaAI" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/PikaAI;
+		};
+		E28C162DD924B23C28231551 /* XCLocalSwiftPackageReference "../../Packages/PikaSubscription" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/PikaSubscription;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7C4643A59C7C8DD1DDD1E621 /* PikaCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PikaCore;
+		};
+		7F966A949B29ECEF563F6420 /* PikaAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PikaAI;
+		};
+		886B9D1EF3B14F7840888112 /* PikaSubscription */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PikaSubscription;
+		};
+		B14E2DEF3601F7099D85612B /* SharedUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SharedUI;
+		};
+		ED0123A5C4373A06A5124C0B /* PikaSync */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PikaSync;
+		};
+		F6F679928EFA7EB5BB0C2907 /* PetEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PetEngine;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = B1881FA49A49A0E38D54E33D /* Project object */;
+}

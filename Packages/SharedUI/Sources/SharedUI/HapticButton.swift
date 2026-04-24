@@ -25,11 +25,18 @@ public struct HapticButton<Label: View>: View {
             label
                 .font(PikaTheme.Typography.body.weight(.semibold))
                 .padding(.horizontal, PikaTheme.Spacing.lg)
-                .padding(.vertical, PikaTheme.Spacing.sm)
+                .padding(.vertical, PikaTheme.Spacing.sm + 2)
                 .frame(maxWidth: .infinity)
-                .background(PikaTheme.Palette.accentDeep)
+                .background(
+                    LinearGradient(
+                        colors: [PikaTheme.Palette.accentDeep, PikaTheme.Palette.accentDeep.opacity(0.85)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: PikaTheme.Radius.card, style: .continuous))
+                .shadow(color: PikaTheme.Palette.accentDeep.opacity(0.35), radius: 8, y: 4)
         }
         .buttonStyle(.plain)
     }

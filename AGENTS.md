@@ -48,3 +48,8 @@ Canonical skills: `~/.cursor/skills/<name>/SKILL.md` — use for domain workflow
 - Flooding the orchestrator with raw logs—delegate and summarize.
 - Editing Memory Bank **secrets** (never store secrets here).
 - Skipping peer review for security- or persistence-sensitive changes.
+
+<!-- AGENT HOOK v1 -->
+## Agent Hook (Codex CLI)
+Read AGENT.md fully before any action. All six rules are defined there.
+Session continuity: workspace/SESSION_STATE.json is the source of truth.

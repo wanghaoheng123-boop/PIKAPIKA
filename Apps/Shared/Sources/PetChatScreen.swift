@@ -68,7 +68,8 @@ public struct PetChatScreen: View {
                         ForEach(persistedMessages, id: \.id) { msg in
                             ChatBubble(
                                 text: msg.content,
-                                sender: msg.role == "user" ? .user : .pet
+                                sender: msg.role == "user" ? .user : .pet,
+                                timestamp: msg.timestamp
                             )
                             .id(msg.id)
                         }
@@ -91,13 +92,13 @@ public struct PetChatScreen: View {
 
             if isSending {
                 HStack(spacing: PikaTheme.Spacing.sm) {
-                    ProgressView()
-                        .controlSize(.small)
+                    TypingIndicator()
                     Text(streamingReply.isEmpty ? "Waiting for reply…" : "Receiving…")
                         .font(PikaTheme.Typography.caption)
                         .foregroundStyle(PikaTheme.Palette.textMuted)
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, PikaTheme.Spacing.md)
                 .padding(.vertical, PikaTheme.Spacing.xs)
             }
 
@@ -139,20 +140,56 @@ public struct PetChatScreen: View {
     }
 
     private var composer: some View {
-        HStack {
+        HStack(spacing: PikaTheme.Spacing.sm) {
+            Button {
+                // Voice input placeholder — integrate VoiceInputManager when ready
+            } label: {
+                Image(systemName: "mic.fill")
+                    .font(.system(size: 16))
+                    .foregroundStyle(PikaTheme.Palette.textMuted)
+                    .frame(width: 36, height: 36)
+                    .background(PikaTheme.Palette.accent.opacity(0.12))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Voice input")
+
             TextField("Say something…", text: $input)
                 .textFieldStyle(.roundedBorder)
+                .font(PikaTheme.Typography.chat)
                 .accessibilityLabel("Message text field")
                 .onSubmit { Task { await sendNewUserMessage() } }
-            Button("Send") { Task { await sendNewUserMessage() } }
-                .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending)
-                .accessibilityLabel("Send message")
-                .accessibilityHint("Sends your message to your pet.")
-                #if os(macOS)
-                .keyboardShortcut(.return, modifiers: [.command])
-                #endif
+
+            Button { Task { await sendNewUserMessage() } } label: {
+                Group {
+                    if isSending {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.system(size: 28))
+                    }
+                }
+                .foregroundStyle(canSend ? PikaTheme.Palette.accentDeep : PikaTheme.Palette.textMuted)
+            }
+            .disabled(!canSend)
+            .accessibilityLabel("Send message")
+            .accessibilityHint("Sends your message to your pet.")
+            #if os(macOS)
+            .keyboardShortcut(.return, modifiers: [.command])
+            #endif
         }
-        .padding()
+        .padding(.horizontal, PikaTheme.Spacing.md)
+        .padding(.vertical, PikaTheme.Spacing.sm)
+        .background(
+            Rectangle()
+                .fill(PikaTheme.Palette.warmBg)
+                .shadow(color: .black.opacity(0.06), radius: 8, y: -4)
+        )
+    }
+
+    private var canSend: Bool {
+        !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isSending
     }
 
     @MainActor

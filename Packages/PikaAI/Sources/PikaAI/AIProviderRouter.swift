@@ -12,7 +12,7 @@ public struct AIProviderRouter {
         case openAIPrimary
     }
 
-    enum ProviderKind: Sendable {
+    public enum ProviderKind: Sendable {
         case anthropic
         case openAI
     }

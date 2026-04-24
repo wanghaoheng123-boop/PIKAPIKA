@@ -1,0 +1,21 @@
+{
+ "schema_version": "1.0",
+ "project": "PIKAPIKA",
+ "created": "2026-04-24T07:15:21Z",
+ "last_updated": "2026-04-24T07:15:21Z",
+ "active_agent": "Codex 5.3",
+ "last_inspection": { "timestamp": null, "results": {} },
+ "tasks": [
+  {
+   "id": "TASK-001",
+   "title": "Install universal AGENT HOOK",
+   "status": "PENDING",
+   "priority": "HIGH",
+   "files_touched": [],
+   "verify_status": {"A": null, "B": null, "C": null, "D": null, "E": null, "F": null},
+   "notes": ""
+  }
+ ],
+ "blockers": [],
+ "checkpoint": null
+}

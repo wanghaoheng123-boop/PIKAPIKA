@@ -1,0 +1,8 @@
+{
+ "schema_version": "1.0",
+ "action_count": 0,
+ "thresholds": {"warning": 0.60, "checkpoint": 0.80, "handoff": 0.90},
+ "events": [
+  {"timestamp": "2026-04-24T07:15:21Z", "level": "INFO", "context_pct": 0.0, "message": "Initialised"}
+ ]
+}

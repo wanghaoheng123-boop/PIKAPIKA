@@ -14,7 +14,12 @@ struct ContentView: View {
                 if let pet = pets.first {
                     PetHomeView(pet: pet)
                 } else {
-                    EmptyStateView { showOnboarding = true }
+                    EmptyStateView(
+                        title: "No pet yet",
+                        message: "Let's create one together.",
+                        icon: "pawprint.fill",
+                        actionTitle: "Create my pet"
+                    ) { showOnboarding = true }
                 }
             }
             .navigationTitle("Pika")
@@ -34,19 +39,5 @@ struct ContentView: View {
                 }
             }
         }
-    }
-}
-
-private struct EmptyStateView: View {
-    let onCreate: () -> Void
-    var body: some View {
-        VStack(spacing: PikaTheme.Spacing.lg) {
-            Text("🐾").font(.system(size: 80))
-            Text("No pet yet").font(PikaTheme.Typography.title)
-            Text("Let's create one together.").foregroundStyle(PikaTheme.Palette.textMuted)
-            HapticButton(action: onCreate) { Text("Create my pet") }
-                .padding(.horizontal, PikaTheme.Spacing.xl)
-        }
-        .padding()
     }
 }
