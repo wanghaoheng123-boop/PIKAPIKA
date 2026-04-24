@@ -8,6 +8,7 @@ public enum KeychainHelper {
     public enum Key: String {
         case openAIKey      = "openai_api_key"
         case anthropicKey   = "anthropic_api_key"
+        case deepSeekKey    = "deepseek_api_key"
         case userToken      = "user_auth_token"
         case appleUserId    = "apple_user_id"
         case googleUserId   = "google_user_id"

@@ -8,6 +8,7 @@ import SharedUI
 public struct PikaSettingsContent: View {
     @State private var openAIKey: String = ""
     @State private var anthropicKey: String = ""
+    @State private var deepSeekKey: String = ""
     @State private var unlocked = false
 
     @AppStorage(PikaUserDefaultsKeys.aiProviderPreference) private var preferenceRaw: String =
@@ -35,18 +36,22 @@ public struct PikaSettingsContent: View {
         !(KeychainHelper.load(.anthropicKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    private var hasDeepSeekKey: Bool {
+        !(KeychainHelper.load(.deepSeekKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     public var body: some View {
         Form {
             Section("AI readiness") {
                 LabeledContent("Chat") {
-                    Text(hasOpenAIKey || hasAnthropicKey ? "Keys on device" : "Add a key below")
-                        .foregroundStyle(hasOpenAIKey || hasAnthropicKey ? .green : .secondary)
+                    Text(hasOpenAIKey || hasAnthropicKey || hasDeepSeekKey ? "Keys on device" : "Add a key below")
+                        .foregroundStyle(hasOpenAIKey || hasAnthropicKey || hasDeepSeekKey ? .green : .secondary)
                 }
                 LabeledContent("Portraits / DALL·E") {
                     Text(hasOpenAIKey ? "OpenAI ready" : "Needs OpenAI key")
                         .foregroundStyle(hasOpenAIKey ? .green : .orange)
                 }
-                Text("Anthropic powers chat when chosen first; OpenAI is required for generated images today.")
+                Text("Pick order in Chat provider. OpenAI is still required for DALL·E portraits; DeepSeek covers chat when its key is set.")
                     .font(PikaTheme.Typography.caption)
                     .foregroundStyle(PikaTheme.Palette.textMuted)
             }
@@ -58,6 +63,8 @@ public struct PikaSettingsContent: View {
                 )) {
                     Text("Anthropic first").tag(AIProviderRouter.Preference.anthropicPrimary)
                     Text("OpenAI first").tag(AIProviderRouter.Preference.openAIPrimary)
+                    Text("DeepSeek → Anthropic → OpenAI").tag(AIProviderRouter.Preference.deepSeekAnthropicOpenAI)
+                    Text("DeepSeek → OpenAI → Anthropic").tag(AIProviderRouter.Preference.deepSeekOpenAIAnthropic)
                 }
                 .pickerStyle(.inline)
             }
@@ -101,6 +108,17 @@ public struct PikaSettingsContent: View {
                         KeychainHelper.save(anthropicKey, for: .anthropicKey)
                     }
                 }
+                Section("DeepSeek API Key") {
+                    SecureField("DeepSeek key…", text: $deepSeekKey)
+                    Button("Save") {
+                        guard !deepSeekKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                        KeychainHelper.save(deepSeekKey, for: .deepSeekKey)
+                    }
+                    Button("Remove from this device", role: .destructive) {
+                        KeychainHelper.delete(.deepSeekKey)
+                        deepSeekKey = ""
+                    }
+                }
             } else {
                 Section {
                     Button("Unlock with Face ID / Touch ID / Password") {
@@ -112,6 +130,7 @@ public struct PikaSettingsContent: View {
                                 unlocked = true
                                 openAIKey = KeychainHelper.load(.openAIKey) ?? ""
                                 anthropicKey = KeychainHelper.load(.anthropicKey) ?? ""
+                                deepSeekKey = KeychainHelper.load(.deepSeekKey) ?? ""
                             }
                         }
                     }

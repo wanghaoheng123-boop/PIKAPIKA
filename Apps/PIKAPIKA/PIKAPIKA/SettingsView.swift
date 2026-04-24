@@ -12,6 +12,7 @@ struct SettingsView: View {
 
     @State private var openAIKey = ""
     @State private var anthropicKey = ""
+    @State private var deepSeekKey = ""
     @State private var showSaveResult = false
     @State private var saveResultTitle = "Saved"
     @State private var saveResultMessage = ""
@@ -31,8 +32,12 @@ struct SettingsView: View {
         !anthropicKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    private var hasDeepSeek: Bool {
+        !deepSeekKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     private var chatRemoteReady: Bool {
-        allowRemoteChat && (hasOpenAI || hasAnthropic)
+        allowRemoteChat && (hasOpenAI || hasAnthropic || hasDeepSeek)
     }
 
     private var portraitRemoteReady: Bool {
@@ -65,7 +70,7 @@ struct SettingsView: View {
                             .foregroundStyle(portraitRemoteReady ? .green : .orange)
                     }
                     Text(
-                        "Chat can use Anthropic or OpenAI. Image generation uses OpenAI only today."
+                        "Chat can use Anthropic, OpenAI, or DeepSeek. Image generation uses OpenAI only today."
                     )
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -78,6 +83,8 @@ struct SettingsView: View {
                     )) {
                         Text("Anthropic first").tag(AIProviderRouter.Preference.anthropicPrimary)
                         Text("OpenAI first").tag(AIProviderRouter.Preference.openAIPrimary)
+                        Text("DeepSeek → Anthropic → OpenAI").tag(AIProviderRouter.Preference.deepSeekAnthropicOpenAI)
+                        Text("DeepSeek → OpenAI → Anthropic").tag(AIProviderRouter.Preference.deepSeekOpenAIAnthropic)
                     }
                     .pickerStyle(.inline)
                 }
@@ -98,6 +105,11 @@ struct SettingsView: View {
 
                 Section("OpenAI API key") {
                     SecureField("sk-…", text: $openAIKey)
+                        .textContentType(.password)
+                }
+
+                Section("DeepSeek API key") {
+                    SecureField("DeepSeek key…", text: $deepSeekKey)
                         .textContentType(.password)
                 }
 
@@ -123,6 +135,7 @@ struct SettingsView: View {
             .onAppear {
                 openAIKey = KeychainHelper.load(.openAIKey) ?? ""
                 anthropicKey = KeychainHelper.load(.anthropicKey) ?? ""
+                deepSeekKey = KeychainHelper.load(.deepSeekKey) ?? ""
                 let policy = aiHolder.usagePolicy
                 allowRemoteChat = policy.allowRemoteChat
                 allowRemoteImage = policy.allowRemoteImage
@@ -140,6 +153,7 @@ struct SettingsView: View {
     private func saveKeysAndRefresh() {
         let o = openAIKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let a = anthropicKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let d = deepSeekKey.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if o.isEmpty {
             KeychainHelper.delete(.openAIKey)
@@ -161,6 +175,16 @@ struct SettingsView: View {
                 return
             }
         }
+        if d.isEmpty {
+            KeychainHelper.delete(.deepSeekKey)
+        } else {
+            guard KeychainHelper.save(d, for: .deepSeekKey) else {
+                saveResultTitle = "Could not save"
+                saveResultMessage = "DeepSeek key could not be written to the Keychain."
+                showSaveResult = true
+                return
+            }
+        }
 
         aiHolder.saveUsagePolicy(
             AIUsagePolicy(
@@ -172,12 +196,13 @@ struct SettingsView: View {
         aiHolder.refresh()
         openAIKey = KeychainHelper.load(.openAIKey) ?? ""
         anthropicKey = KeychainHelper.load(.anthropicKey) ?? ""
+        deepSeekKey = KeychainHelper.load(.deepSeekKey) ?? ""
 
         saveResultTitle = "Saved"
         var parts: [String] = []
         if chatRemoteReady {
             parts.append("Remote chat is on.")
-        } else if !hasOpenAI && !hasAnthropic {
+        } else if !hasOpenAI && !hasAnthropic && !hasDeepSeek {
             parts.append("Add at least one API key to enable remote chat.")
         } else if !allowRemoteChat {
             parts.append("Turn on “Use remote AI for chat” to talk to cloud models.")

@@ -46,14 +46,15 @@ public struct PetChatScreen: View {
     private var hasAnyAPIKey: Bool {
         let o = (KeychainHelper.load(.openAIKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let a = (KeychainHelper.load(.anthropicKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        return !o.isEmpty || !a.isEmpty
+        let d = (KeychainHelper.load(.deepSeekKey) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return !o.isEmpty || !a.isEmpty || !d.isEmpty
     }
 
     public var body: some View {
         VStack(spacing: 0) {
             if !hasAnyAPIKey {
                 Label(
-                    "Cloud chat needs an API key. Open Settings from the home screen and add Anthropic and/or OpenAI.",
+                    "Cloud chat needs an API key. Open Settings from the home screen and add Anthropic, OpenAI, and/or DeepSeek.",
                     systemImage: "key.horizontal"
                 )
                 .font(PikaTheme.Typography.caption)
