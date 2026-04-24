@@ -16,3 +16,8 @@ DerivedData/
 
 # Local agent / worktree metadata (do not publish)
 .claude/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo

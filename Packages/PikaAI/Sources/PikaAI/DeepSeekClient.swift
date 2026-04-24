@@ -78,6 +78,7 @@ public final class DeepSeekClient: AIClient, @unchecked Sendable {
 
     /// Extracts user-visible assistant text from a chat completion `delta`, ignoring reasoning-only fields.
     private static func visibleAssistantText(from delta: [String: Any]) -> String {
+        if let s = delta["reasoning_content"] as? String, !s.isEmpty { return "" }
         if let s = delta["content"] as? String, !s.isEmpty { return s }
         if let parts = delta["content"] as? [[String: Any]] {
             var out = ""
