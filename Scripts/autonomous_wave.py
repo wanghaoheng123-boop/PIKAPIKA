@@ -56,6 +56,9 @@ class Orchestrator:
         self.failed_tasks: list[str] = []
         self.gate_failures: list[str] = []
         self.wave_index = 0
+        self.deepseek_calls = 0
+        self.deepseek_failures = 0
+        self.deepseek_model_in_use = str(self.config.get("deepseek", {}).get("model") or "deepseek-v4-pro")
 
     def run(self) -> int:
         self._ensure_workspace_files()
@@ -274,6 +277,10 @@ class Orchestrator:
 
     def _deepseek_preflight(self) -> None:
         deepseek = self.config.get("deepseek", {})
+        model = str(deepseek.get("model") or "deepseek-v4-pro")
+        require_v4_pro = bool(deepseek.get("require_v4_pro", True))
+        if require_v4_pro and model != "deepseek-v4-pro":
+            raise RuntimeError(f"DeepSeek policy violation: model must be deepseek-v4-pro, got {model}")
         list_models_cmd = str(deepseek.get("mcp_list_models_cmd") or "").strip()
         if list_models_cmd:
             code, out = self._run_shell(list_models_cmd, check=False)
@@ -298,12 +305,18 @@ class Orchestrator:
             args = base_parts + ["--model", model, "--thinking", thinking, "--reasoning-effort", reasoning, prompt]
             code, out = self._run_process(args, check=False)
             if code == 0:
+                self.deepseek_calls += 1
                 return out
             self._append_memory_log("DeepSeek MCP chat command failed; falling back to deepseek_chat.py.")
+            self.deepseek_failures += 1
 
         fallback = self.root / "Scripts" / "deepseek_chat.py"
         code, out = self._run_process(["python3", str(fallback), prompt], check=False)
-        return out if code == 0 else ""
+        if code == 0:
+            self.deepseek_calls += 1
+            return out
+        self.deepseek_failures += 1
+        return ""
 
     def _update_checkpoint(self) -> None:
         state = self._read_json(self.session_state_path)
@@ -354,6 +367,11 @@ class Orchestrator:
             "completed_tasks": self.completed_tasks,
             "failed_tasks": self.failed_tasks,
             "gate_failures": self.gate_failures,
+            "deepseek": {
+                "model": self.deepseek_model_in_use,
+                "calls": self.deepseek_calls,
+                "failures": self.deepseek_failures,
+            },
         }
         self._write_json(self.manifest_path, payload)
 

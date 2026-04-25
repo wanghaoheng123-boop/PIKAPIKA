@@ -109,6 +109,13 @@ For unattended orchestrator runs (`Scripts/autonomous_wave.py`):
  7. Abort auto-commit/auto-PR when policy gates fail or unresolved failed tasks remain.
  8. Always write a final handoff line to memory log, even if the run exits on error.
 
+## DEEPSEEK-FIRST EXECUTION POLICY
+To reduce high-cost planner token usage, default to DeepSeek whenever feasible:
+ 1. For planning, refactor design, code review, and risk analysis, call `user-deepseek` `chat_completion` with `model=deepseek-v4-pro`, `thinking=enabled`, `reasoning_effort=high`.
+ 2. Use non-DeepSeek reasoning only when DeepSeek tooling is unavailable or blocked.
+ 3. For autonomous runs, `Scripts/autonomous_wave_config.json` must keep `deepseek.model` at `deepseek-v4-pro` and `require_v4_pro=true`.
+ 4. Every autonomous run must record DeepSeek call counts in `workspace/RUN_MANIFEST.json`.
+
 ## APPENDIX — schemas for workspace files
 
 ### workspace/SESSION_STATE.json

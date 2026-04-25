@@ -11,6 +11,7 @@
   "branch_prefix": "auto/wave",
   "deepseek": {
     "model": "deepseek-v4-pro",
+    "require_v4_pro": true,
     "thinking": "enabled",
     "reasoning_effort": "high",
     "mcp_list_models_cmd": "",
