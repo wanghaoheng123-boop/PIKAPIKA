@@ -13,6 +13,8 @@ final class AuthSession: ObservableObject {
     }
 
     private static let guestUserDefaultsKey = "com.pikapika.PIKAPIKA.guestUserId"
+    private static let guestIssuedAtKey = "com.pikapika.PIKAPIKA.guestIssuedAt"
+    private static let maxGuestSessionAge: TimeInterval = 60 * 60 * 24 * 30
 
     @Published private(set) var isSignedIn = false
     @Published private(set) var provider: Provider?
@@ -24,22 +26,27 @@ final class AuthSession: ObservableObject {
 
     @MainActor
     private func restoreFromKeychain() {
-        if let id = KeychainHelper.load(.appleUserId), !id.isEmpty {
+        if let id = KeychainHelper.load(.appleUserId), isValidUserIdentifier(id) {
             provider = .apple
             userId = id
             isSignedIn = true
             return
         }
-        if let id = KeychainHelper.load(.googleUserId), !id.isEmpty {
+        if let id = KeychainHelper.load(.googleUserId), isValidUserIdentifier(id) {
             provider = .google
             userId = id
             isSignedIn = true
             return
         }
-        if let id = UserDefaults.standard.string(forKey: Self.guestUserDefaultsKey), !id.isEmpty {
+        if let id = UserDefaults.standard.string(forKey: Self.guestUserDefaultsKey),
+           isValidUserIdentifier(id),
+           guestSessionIsFresh() {
             provider = .guest
             userId = id
             isSignedIn = true
+        } else {
+            UserDefaults.standard.removeObject(forKey: Self.guestUserDefaultsKey)
+            UserDefaults.standard.removeObject(forKey: Self.guestIssuedAtKey)
         }
     }
 
@@ -49,6 +56,7 @@ final class AuthSession: ObservableObject {
         KeychainHelper.delete(.googleUserId)
         let id = UserDefaults.standard.string(forKey: Self.guestUserDefaultsKey) ?? UUID().uuidString
         UserDefaults.standard.set(id, forKey: Self.guestUserDefaultsKey)
+        UserDefaults.standard.set(Date(), forKey: Self.guestIssuedAtKey)
         provider = .guest
         userId = id
         isSignedIn = true
@@ -56,7 +64,9 @@ final class AuthSession: ObservableObject {
 
     @MainActor
     func signInApple(userIdentifier: String) {
+        guard isValidUserIdentifier(userIdentifier) else { return }
         UserDefaults.standard.removeObject(forKey: Self.guestUserDefaultsKey)
+        UserDefaults.standard.removeObject(forKey: Self.guestIssuedAtKey)
         _ = KeychainHelper.save(userIdentifier, for: .appleUserId)
         KeychainHelper.delete(.googleUserId)
         provider = .apple
@@ -66,7 +76,9 @@ final class AuthSession: ObservableObject {
 
     @MainActor
     func signInGoogle(userIdentifier: String) {
+        guard isValidUserIdentifier(userIdentifier) else { return }
         UserDefaults.standard.removeObject(forKey: Self.guestUserDefaultsKey)
+        UserDefaults.standard.removeObject(forKey: Self.guestIssuedAtKey)
         _ = KeychainHelper.save(userIdentifier, for: .googleUserId)
         KeychainHelper.delete(.appleUserId)
         provider = .google
@@ -77,10 +89,23 @@ final class AuthSession: ObservableObject {
     @MainActor
     func signOut() {
         UserDefaults.standard.removeObject(forKey: Self.guestUserDefaultsKey)
+        UserDefaults.standard.removeObject(forKey: Self.guestIssuedAtKey)
         KeychainHelper.delete(.appleUserId)
         KeychainHelper.delete(.googleUserId)
         provider = nil
         userId = nil
         isSignedIn = false
+    }
+
+    private func guestSessionIsFresh(now: Date = Date()) -> Bool {
+        guard let issuedAt = UserDefaults.standard.object(forKey: Self.guestIssuedAtKey) as? Date else {
+            return false
+        }
+        return now.timeIntervalSince(issuedAt) <= Self.maxGuestSessionAge
+    }
+
+    private func isValidUserIdentifier(_ value: String) -> Bool {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.count >= 8 && trimmed.count <= 256
     }
 }

@@ -17,6 +17,10 @@ let package = Package(
         .target(
             name: "SharedUI",
             dependencies: ["PikaCore"]
+        ),
+        .testTarget(
+            name: "SharedUITests",
+            dependencies: ["SharedUI", "PikaCore"]
         )
     ]
 )

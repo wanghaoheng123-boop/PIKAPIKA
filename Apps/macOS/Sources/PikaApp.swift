@@ -18,7 +18,20 @@ struct PikaApp: App {
                 PetMemoryFact.self
             )
         } catch {
-            fatalError("Could not open SwiftData store: \(error)")
+            // Fall back to an in-memory store so the app remains recoverable.
+            do {
+                let memoryConfig = ModelConfiguration(isStoredInMemoryOnly: true)
+                modelContainer = try ModelContainer(
+                    for: Pet.self,
+                    BondEvent.self,
+                    ConversationMessage.self,
+                    SeasonalEvent.self,
+                    PetMemoryFact.self,
+                    configurations: memoryConfig
+                )
+            } catch {
+                fatalError("Could not initialize SwiftData store (persistent + in-memory fallback failed): \(error)")
+            }
         }
     }
 

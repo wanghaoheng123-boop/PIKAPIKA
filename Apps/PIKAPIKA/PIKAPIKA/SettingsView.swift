@@ -19,6 +19,8 @@ struct SettingsView: View {
     @State private var allowRemoteChat = true
     @State private var allowRemoteImage = true
     @State private var allowRemoteMemoryExtraction = true
+    @State private var allowLocalMemoryMirror = false
+    private let memoryMirrorKey = "com.pikapika.PIKAPIKA.memoryMirrorEnabled"
 
     private var resolvedPreference: AIProviderRouter.Preference {
         AIProviderRouter.Preference(rawValue: preferenceRaw) ?? .anthropicPrimary
@@ -98,6 +100,13 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
 
+                Section("Privacy controls") {
+                    Toggle("Allow local memory mirror export", isOn: $allowLocalMemoryMirror)
+                    Text("When off, chat memory facts are not mirrored to plaintext files in Documents.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 Section("Anthropic API key") {
                     SecureField("sk-ant-api03-…", text: $anthropicKey)
                         .textContentType(.password)
@@ -140,6 +149,7 @@ struct SettingsView: View {
                 allowRemoteChat = policy.allowRemoteChat
                 allowRemoteImage = policy.allowRemoteImage
                 allowRemoteMemoryExtraction = policy.allowRemoteMemoryExtraction
+                allowLocalMemoryMirror = UserDefaults.standard.bool(forKey: memoryMirrorKey)
             }
             .alert(saveResultTitle, isPresented: $showSaveResult) {
                 Button("OK", role: .cancel) {}
@@ -151,6 +161,7 @@ struct SettingsView: View {
     }
 
     private func saveKeysAndRefresh() {
+        let previousMirrorState = UserDefaults.standard.bool(forKey: memoryMirrorKey)
         let o = openAIKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let a = anthropicKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let d = deepSeekKey.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -193,6 +204,10 @@ struct SettingsView: View {
                 allowRemoteMemoryExtraction: allowRemoteMemoryExtraction
             )
         )
+        UserDefaults.standard.set(allowLocalMemoryMirror, forKey: memoryMirrorKey)
+        if previousMirrorState && !allowLocalMemoryMirror {
+            _ = PetMemoryFileStore.purgeAllMirrors()
+        }
         aiHolder.refresh()
         openAIKey = KeychainHelper.load(.openAIKey) ?? ""
         anthropicKey = KeychainHelper.load(.anthropicKey) ?? ""

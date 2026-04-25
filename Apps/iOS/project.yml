@@ -49,3 +49,17 @@ targets:
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: "YES"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
         ENABLE_PREVIEWS: "YES"
+  PikaTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: Pika
+      - package: SharedUI
+      - package: PikaCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.pikapika.app.tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Pika.app/Pika"
+        BUNDLE_LOADER: "$(TEST_HOST)"

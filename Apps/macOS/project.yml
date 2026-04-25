@@ -51,3 +51,15 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.pikapika.app
         ENABLE_PREVIEWS: "YES"
+  PikaTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: Pika
+      - package: SharedUI
+      - package: PikaCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.pikapika.app.tests

@@ -1,7 +1,9 @@
 import SwiftUI
+import StoreKit
 import PikaCore
 import PikaCoreBase
 import PikaAI
+import PikaSubscription
 import SharedUI
 
 /// API keys, preferred chat provider, and a lightweight connectivity probe.
@@ -17,10 +19,26 @@ public struct PikaSettingsContent: View {
     @State private var probing = false
     @State private var probeResult: String?
     @State private var probeIsSuccess = false
+    @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
+    @State private var purchasingProductID: String?
     /// After a probe, block rapid re-taps to avoid repeated billed API calls.
     @State private var probeCooldownUntil: Date = .distantPast
 
     private static let probeCooldownSeconds: TimeInterval = 15
+
+    private var activePlanName: String {
+        if let active = subscriptionManager.activeProductID {
+            switch active {
+            case .proMonthly:
+                return "Pro Monthly"
+            case .proYearly:
+                return "Pro Yearly"
+            case .proLifetime:
+                return "Pro Lifetime"
+            }
+        }
+        return "Free"
+    }
 
     public init() {}
 
@@ -67,6 +85,37 @@ public struct PikaSettingsContent: View {
                     Text("DeepSeek → OpenAI → Anthropic").tag(AIProviderRouter.Preference.deepSeekOpenAIAnthropic)
                 }
                 .pickerStyle(.inline)
+            }
+
+            Section("Subscription") {
+                LabeledContent("Current plan", value: activePlanName)
+                Text(subscriptionManager.currentEntitlements == .free
+                     ? "Unlock deeper personalities, cloud sync, and unlimited pets with Pro."
+                     : "Thanks for supporting PIKAPIKA Pro.")
+                    .font(PikaTheme.Typography.caption)
+                    .foregroundStyle(PikaTheme.Palette.textMuted)
+
+                ForEach(subscriptionManager.products, id: \.id) { product in
+                    Button {
+                        Task { await purchase(product) }
+                    } label: {
+                        HStack {
+                            Text(product.displayName)
+                            Spacer()
+                            Text(product.displayPrice)
+                                .foregroundStyle(PikaTheme.Palette.textMuted)
+                        }
+                    }
+                    .disabled(purchasingProductID != nil || subscriptionManager.activeProductID?.rawValue == product.id)
+                }
+
+                Button("Restore purchases") {
+                    Task {
+                        SubscriptionAnalytics.track(.restoreTapped, source: "settings")
+                        await subscriptionManager.restorePurchases()
+                    }
+                }
+                .disabled(purchasingProductID != nil)
             }
 
             Section {
@@ -138,6 +187,9 @@ public struct PikaSettingsContent: View {
             }
         }
         .navigationTitle("Settings")
+        .task {
+            await SharedSubscriptionManager.refreshIfNeeded(minInterval: 0)
+        }
     }
 
     @MainActor
@@ -177,6 +229,24 @@ public struct PikaSettingsContent: View {
         } catch {
             probeIsSuccess = false
             probeResult = error.localizedDescription
+        }
+    }
+
+    @MainActor
+    private func purchase(_ product: Product) async {
+        purchasingProductID = product.id
+        defer { purchasingProductID = nil }
+        SubscriptionAnalytics.track(.purchaseStarted, source: "settings")
+        do {
+            let purchased = try await subscriptionManager.purchase(product)
+            if purchased {
+                SubscriptionAnalytics.track(.purchaseSucceeded, source: "settings")
+            } else {
+                SubscriptionAnalytics.track(.purchaseNotCompleted, source: "settings")
+            }
+        } catch {
+            SubscriptionAnalytics.track(.purchaseNotCompleted, source: "settings")
+            // Purchase errors are intentionally non-fatal for settings UX.
         }
     }
 }

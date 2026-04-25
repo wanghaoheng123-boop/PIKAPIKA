@@ -42,9 +42,13 @@ public struct ChatBubble: View {
         sender == .user ? .white : PikaTheme.Palette.textPrimary
     }
 
-    private func timestampText(for date: Date) -> String {
+    private static let timestampFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
-        return formatter.string(from: date)
+        return formatter
+    }()
+
+    private func timestampText(for date: Date) -> String {
+        Self.timestampFormatter.string(from: date)
     }
 }

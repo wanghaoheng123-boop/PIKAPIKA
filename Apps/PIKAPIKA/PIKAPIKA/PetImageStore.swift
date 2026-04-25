@@ -13,6 +13,7 @@ enum PetImageStore {
         let url = documentsRoot().appendingPathComponent(rootFolder, isDirectory: true)
             .appendingPathComponent(petId.uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        applyDirectoryProtection(url)
         return url
     }
 
@@ -34,6 +35,7 @@ enum PetImageStore {
         let dir = try petDirectoryURL(for: petId)
         let url = dir.appendingPathComponent(filename, isDirectory: false)
         try data.write(to: url, options: .atomic)
+        applyFileProtection(url)
         return relativePath(petId: petId, filename: filename)
     }
 
@@ -43,6 +45,7 @@ enum PetImageStore {
         let dir = try petDirectoryURL(for: petId)
         let url = dir.appendingPathComponent(filename, isDirectory: false)
         try data.write(to: url, options: .atomic)
+        applyFileProtection(url)
         return relativePath(petId: petId, filename: filename)
     }
 
@@ -62,5 +65,19 @@ enum PetImageStore {
         let url = documentsRoot().appendingPathComponent(rootFolder, isDirectory: true)
             .appendingPathComponent(petId.uuidString, isDirectory: true)
         try? FileManager.default.removeItem(at: url)
+    }
+
+    private static func applyDirectoryProtection(_ url: URL) {
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try? url.setResourceValues(values)
+        try? (url as NSURL).setResourceValue(URLFileProtection.completeUntilFirstUserAuthentication, forKey: .fileProtectionKey)
+    }
+
+    private static func applyFileProtection(_ url: URL) {
+        try? (url as NSURL).setResourceValue(URLFileProtection.completeUntilFirstUserAuthentication, forKey: .fileProtectionKey)
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try? url.setResourceValues(values)
     }
 }

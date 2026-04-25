@@ -4,6 +4,35 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 
 ---
 
+## 2026-04-25 — Enterprise publish-readiness implementation (security + gates)
+
+- **Completed:** Added secure provider network defaults and error-body sanitization in [Packages/PikaAI/Sources/PikaAI/SecureNetworkPolicy.swift](Packages/PikaAI/Sources/PikaAI/SecureNetworkPolicy.swift) and wired OpenAI/Anthropic/DeepSeek clients.
+- **Completed:** Hardened local session/privacy surfaces in [AuthSession.swift](Apps/PIKAPIKA/PIKAPIKA/AuthSession.swift), [PetMemoryFileStore.swift](Apps/PIKAPIKA/PIKAPIKA/PetMemoryFileStore.swift), [PetImageStore.swift](Apps/PIKAPIKA/PIKAPIKA/PetImageStore.swift), and [SettingsView.swift](Apps/PIKAPIKA/PIKAPIKA/SettingsView.swift).
+- **Completed:** Added baseline test foundation for enterprise gates: [Packages/SharedUI/Tests](Packages/SharedUI/Tests), `PikaTests` targets in [Apps/iOS/project.yml](Apps/iOS/project.yml) and [Apps/macOS/project.yml](Apps/macOS/project.yml), and smoke tests in app trees.
+- **Completed:** Upgraded CI/release security gates via [pika-app-build.yml](.github/workflows/pika-app-build.yml), [pika-ci.yml](.github/workflows/pika-ci.yml), [security-gates.yml](.github/workflows/security-gates.yml), [Scripts/check_release_policy.sh](Scripts/check_release_policy.sh), and [SECURITY.md](SECURITY.md).
+- **Verification note:** Local shell still lacks `swift`/Xcode execution; final readiness remains blocked pending CI and signed-build validation (see `workspace/security-verification-report.md`).
+
+---
+
+## 2026-04-25 — P2 Bond loop execution slice (shared cap + event flow)
+
+- **Completed:** Unified bond award path in [Packages/PikaCore/Sources/PikaCorePersistence/PetInteractionStreak.swift](Packages/PikaCore/Sources/PikaCorePersistence/PetInteractionStreak.swift) via `applyBondEvent(...)` (daily cap via `recordXPEarned`, XP/level update, streak update, `BondEvent` insert, save).
+- **Completed:** Replaced duplicated cap math in [Apps/iOS/Sources/PetHomeView.swift](Apps/iOS/Sources/PetHomeView.swift) and [Apps/macOS/Sources/PetHomeView.swift](Apps/macOS/Sources/PetHomeView.swift) with shared helper; added daily XP/remaining XP UI and latest-event surfacing.
+- **Completed:** Extended [Apps/Shared/Sources/PetChatScreen.swift](Apps/Shared/Sources/PetChatScreen.swift) to write chat bond events (`.chatMessage`) and show bond status header + level-up banner.
+- **Quality loop:** Ran DeepSeek v4-pro review pass and applied a low-risk thread-safety hardening (`NSLock`) around daily XP cap writes.
+- **Verification note:** `swift test` could not run in this Windows shell because `swift` is not on `PATH`; IDE lints for touched files are clean.
+
+---
+
+## 2026-04-25 — Additional optimization pass (DeepSeek-driven)
+
+- **Completed:** [Packages/SharedUI/Sources/SharedUI/TypingIndicator.swift](Packages/SharedUI/Sources/SharedUI/TypingIndicator.swift) now uses a phase-based wave scale animation for smoother visual cadence.
+- **Completed:** SSE parsing in [OpenAIClient.swift](Packages/PikaAI/Sources/PikaAI/OpenAIClient.swift), [DeepSeekClient.swift](Packages/PikaAI/Sources/PikaAI/DeepSeekClient.swift), and [AnthropicClient.swift](Packages/PikaAI/Sources/PikaAI/AnthropicClient.swift) was tightened to line-enumeration parsing with empty-payload suppression and explicit stream-stop handling.
+- **Quality loop:** Ran a second DeepSeek v4-pro MCP review focused on likely regressions and validated low-risk fixes.
+- **Verification note:** local package tests remain blocked by missing `swift` CLI in this shell; lints for touched files are clean.
+
+---
+
 ## 2026-04-17 — Memory Bank bootstrap
 
 - **Completed:** Universal Orchestration Protocol Phase 1 (retain baseline Memory Bank architecture; rationale in `systemPatterns.md`).

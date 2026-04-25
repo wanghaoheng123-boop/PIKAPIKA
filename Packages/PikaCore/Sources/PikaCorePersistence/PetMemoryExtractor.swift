@@ -5,6 +5,9 @@ import PikaCoreBase
 /// Uses an AI client to extract notable facts from a chat exchange and persist them as `PetMemoryFact`.
 public enum PetMemoryExtractor {
     private static let maxMemoryFactsPerPet = 12
+    private static let allowedCategories: Set<String> = [
+        "preference", "relationship", "schedule", "style", "goal", "fact"
+    ]
 
     /// Attempts to extract a memory fact from the given exchange and store it.
     /// Returns `true` if a fact was extracted and stored; `false` if nothing notable was found.
@@ -26,7 +29,7 @@ public enum PetMemoryExtractor {
         Return ONLY a JSON object with this shape (or return empty {}):
         {
           "content": "the fact, in the pet's voice, 1 short sentence",
-          "category": "preference|relationship|schedule|style|goal|f fact",
+          "category": "preference|relationship|schedule|style|goal|fact",
           "importance": 0
         }
 
@@ -55,10 +58,12 @@ public enum PetMemoryExtractor {
             guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
                 return false
             }
-            guard let content = json["content"] as? String,
-                  !content.isEmpty else { return false }
-            let category = json["category"] as? String ?? "fact"
-            let importance = json["importance"] as? Int ?? 1
+            guard
+                let rawContent = json["content"] as? String,
+                let content = normalizedContent(rawContent)
+            else { return false }
+            let category = normalizedCategory(json["category"] as? String)
+            let importance = normalizedImportance(json["importance"] as? Int)
 
             let fact = PetMemoryFact(
                 pet: pet,
@@ -95,5 +100,29 @@ public enum PetMemoryExtractor {
             modelContext.delete(row)
         }
         try modelContext.save()
+    }
+
+    private static func normalizedCategory(_ raw: String?) -> String {
+        guard let raw else { return "fact" }
+        let lowered = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return allowedCategories.contains(lowered) ? lowered : "fact"
+    }
+
+    private static func normalizedImportance(_ raw: Int?) -> Int {
+        let value = raw ?? 1
+        return min(2, max(0, value))
+    }
+
+    private static func normalizedContent(_ raw: String) -> String? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        // Reject control-heavy strings that can pollute UI/log surfaces.
+        if trimmed.unicodeScalars.contains(where: { $0.properties.isControl && $0 != "\n" && $0 != "\t" }) {
+            return nil
+        }
+
+        let capped = String(trimmed.prefix(240))
+        return capped
     }
 }

@@ -15,6 +15,8 @@ struct ChatView: View {
     @State private var isSending = false
     @State private var errorText: String?
     @StateObject private var voiceInput = VoiceInputManager()
+    @State private var pendingStreamingScrollTask: Task<Void, Never>?
+    private let streamScrollThrottleSeconds: TimeInterval = 0.12
 
     init(pet: Pet) {
         self.pet = pet
@@ -66,12 +68,13 @@ struct ChatView: View {
                     .padding()
                 }
                 .onChange(of: messages.count) { _, _ in
+                    pendingStreamingScrollTask?.cancel()
                     if let last = messages.last {
                         withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
                     }
                 }
                 .onChange(of: streamingAssistant) { _, _ in
-                    withAnimation { proxy.scrollTo("stream", anchor: .bottom) }
+                    scheduleStreamingScroll(proxy: proxy)
                 }
             }
 
@@ -133,6 +136,7 @@ struct ChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear {
             voiceInput.stop(commit: false) { _ in }
+            pendingStreamingScrollTask?.cancel()
         }
         .alert("Microphone or speech permission denied", isPresented: $voiceInput.authorizationDenied) {
             Button("OK", role: .cancel) {}
@@ -218,6 +222,16 @@ struct ChatView: View {
         }
 
         isSending = false
+    }
+
+    private func scheduleStreamingScroll(proxy: ScrollViewProxy) {
+        pendingStreamingScrollTask?.cancel()
+        let delay = UInt64(streamScrollThrottleSeconds * 1_000_000_000)
+        pendingStreamingScrollTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: delay)
+            guard !Task.isCancelled else { return }
+            proxy.scrollTo("stream", anchor: .bottom)
+        }
     }
 
     private func applyVoiceIntent(_ intent: VoiceIntent) {

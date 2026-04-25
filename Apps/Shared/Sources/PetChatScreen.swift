@@ -3,6 +3,7 @@ import SwiftData
 import PikaCore
 import PikaCoreBase
 import PikaAI
+import PikaSubscription
 import SharedUI
 
 /// SwiftData-backed pet chat with provider fallback, trim-to-50, and retry when the assistant stream fails after the user message was saved.
@@ -13,6 +14,7 @@ public struct PetChatScreen: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query private var persistedMessages: [ConversationMessage]
+    @Query private var bondEvents: [BondEvent]
 
     @AppStorage(PikaUserDefaultsKeys.aiProviderPreference) private var preferenceRaw: String =
         AIProviderRouter.Preference.anthropicPrimary.rawValue
@@ -23,6 +25,11 @@ public struct PetChatScreen: View {
     @State private var errorText: String?
     /// True when the last user line is in SwiftData but the assistant reply failed; Retry completes only the assistant turn.
     @State private var awaitingAssistantRetry = false
+    @State private var latestLevelUp: BondProgression.LevelUp?
+    @State private var showSubscriptionOffer = false
+    @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
+    @State private var pendingStreamScrollTask: Task<Void, Never>?
+    private let streamScrollThrottleSeconds: TimeInterval = 0.12
 
     public init(pet: Pet) {
         self.pet = pet
@@ -32,6 +39,12 @@ public struct PetChatScreen: View {
                 message.pet?.id == petId
             },
             sort: \ConversationMessage.timestamp
+        )
+        _bondEvents = Query(
+            filter: #Predicate<BondEvent> { event in
+                event.pet?.id == petId
+            },
+            sort: [SortDescriptor(\BondEvent.timestamp, order: .reverse)]
         )
     }
 
@@ -52,6 +65,7 @@ public struct PetChatScreen: View {
 
     public var body: some View {
         VStack(spacing: 0) {
+            bondStatusHeader
             if !hasAnyAPIKey {
                 Label(
                     "Cloud chat needs an API key. Open Settings from the home screen and add Anthropic, OpenAI, and/or DeepSeek.",
@@ -84,10 +98,11 @@ public struct PetChatScreen: View {
                     .padding()
                 }
                 .onChange(of: persistedMessages.count) { _, _ in
-                    scrollChatToBottom(proxy: proxy)
+                    pendingStreamScrollTask?.cancel()
+                    scrollChatToBottom(proxy: proxy, animated: true)
                 }
                 .onChange(of: streamingReply) { _, _ in
-                    scrollChatToBottom(proxy: proxy)
+                    scheduleStreamingScroll(proxy: proxy)
                 }
             }
 
@@ -106,10 +121,61 @@ public struct PetChatScreen: View {
             composer
         }
         .navigationTitle(pet.name)
+        .sheet(isPresented: $showSubscriptionOffer) {
+            SubscriptionOfferSheet(subscriptionManager: subscriptionManager, source: "chat_daily_cap") {
+                showSubscriptionOffer = false
+                PaywallPresentationGate.endPresentation(source: "chat_daily_cap")
+            }
+        }
+        .onDisappear {
+            pendingStreamScrollTask?.cancel()
+        }
+        .task {
+            await SharedSubscriptionManager.refreshIfNeeded()
+        }
+        .overlay(alignment: .top) {
+            if let levelUp = latestLevelUp {
+                Text("Level up! \(levelUp.from.displayName) → \(levelUp.to.displayName)")
+                    .font(PikaTheme.Typography.caption.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, PikaTheme.Spacing.md)
+                    .padding(.vertical, PikaTheme.Spacing.sm)
+                    .background(PikaTheme.Palette.accentDeep)
+                    .clipShape(Capsule())
+                    .padding(.top, PikaTheme.Spacing.md)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
     }
 
-    private func scrollChatToBottom(proxy: ScrollViewProxy) {
-        withAnimation(.easeOut(duration: 0.2)) {
+    private var todayXP: Int {
+        PetInteractionStreak.xpEarnedToday(petID: pet.id)
+    }
+
+    private var latestBondEvent: BondEvent? {
+        bondEvents.first
+    }
+
+    private var bondStatusHeader: some View {
+        VStack(alignment: .leading, spacing: PikaTheme.Spacing.xs) {
+            Text("Bond today: \(todayXP)/\(BondProgression.dailyCap) XP • Streak \(pet.streakCount)")
+                .font(PikaTheme.Typography.caption.weight(.semibold))
+                .foregroundStyle(PikaTheme.Palette.textMuted)
+            if let latestBondEvent {
+                Text("Latest: +\(latestBondEvent.xpAwarded) XP from \(latestBondEvent.eventType)")
+                    .font(PikaTheme.Typography.caption)
+                    .foregroundStyle(PikaTheme.Palette.textMuted)
+                    .lineLimit(1)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, PikaTheme.Spacing.md)
+        .padding(.vertical, PikaTheme.Spacing.xs)
+        .background(PikaTheme.Palette.accent.opacity(0.08))
+    }
+
+    private func scrollChatToBottom(proxy: ScrollViewProxy, animated: Bool) {
+        let scrollAction = {
             if !streamingReply.isEmpty {
                 proxy.scrollTo("stream", anchor: .bottom)
             } else if let last = persistedMessages.last {
@@ -117,6 +183,23 @@ public struct PetChatScreen: View {
             } else {
                 proxy.scrollTo("chatBottomAnchor", anchor: .bottom)
             }
+        }
+        if animated {
+            withAnimation(.easeOut(duration: 0.2)) {
+                scrollAction()
+            }
+        } else {
+            scrollAction()
+        }
+    }
+
+    private func scheduleStreamingScroll(proxy: ScrollViewProxy) {
+        pendingStreamScrollTask?.cancel()
+        let delay = UInt64(streamScrollThrottleSeconds * 1_000_000_000)
+        pendingStreamScrollTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: delay)
+            guard !Task.isCancelled else { return }
+            scrollChatToBottom(proxy: proxy, animated: false)
         }
     }
 
@@ -253,6 +336,7 @@ public struct PetChatScreen: View {
         )
         let router = AIProviderRouter(preference: preference)
         var accumulated = ""
+        let lastUserLine = persistedMessages.last(where: { $0.role == "user" })?.content
         do {
             try await router.runChatWithFallback(
                 messages: apiMessages,
@@ -279,6 +363,7 @@ public struct PetChatScreen: View {
                 print("Failed to trim conversation history: \(error)")
             }
 
+<<<<<<< HEAD
             // Record daily streak and update last-interaction time
             PetInteractionStreak.recordStreak(pet: pet)
             pet.lastInteractedAt = Date()
@@ -286,12 +371,35 @@ public struct PetChatScreen: View {
                 try modelContext.save()
             } catch {
                 print("Failed to save streak update: \(error)")
+=======
+            do {
+                let outcome = try PetInteractionStreak.applyBondEvent(.chatMessage, to: pet, modelContext: modelContext)
+                if outcome.awardedXP == 0 {
+                    await subscriptionManager.refreshEntitlements()
+                    if subscriptionManager.currentEntitlements == .free,
+                       PaywallPresentationGate.beginPresentation(source: "chat_daily_cap") {
+                        showSubscriptionOffer = true
+                    }
+                }
+                if let levelUp = outcome.levelUp {
+                    withAnimation {
+                        latestLevelUp = levelUp
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                        withAnimation {
+                            latestLevelUp = nil
+                        }
+                    }
+                }
+            } catch {
+                print("Failed to save bond event for chat: \(error)")
+>>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
             }
 
             // Attempt memory extraction from this exchange
-            if let lastUserMsg = persistedMessages.last {
+            if let lastUserLine {
                 await attemptMemoryExtraction(
-                    userLine: lastUserMsg.content,
+                    userLine: lastUserLine,
                     assistantLine: clean,
                     router: router
                 )

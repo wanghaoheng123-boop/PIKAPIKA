@@ -1,6 +1,6 @@
 # Active context — volatile handoff state
 
-**Last updated:** 2026-04-18
+**Last updated:** 2026-04-25 (later session)
 
 ## Product milestone
 
@@ -20,6 +20,13 @@ SwiftData `ModelContainer` is declared in [Apps/iOS/Sources/PikaApp.swift](Apps/
 ## P2 — next implementation slice
 
 - Daily streak, bond XP UI polish, `BondProgression.dailyCap` at call sites, `BondEvent` surfacing — see [Docs/ROADMAP.md](Docs/ROADMAP.md).
+- Implemented in current slice:
+  - Shared award helper: `PetInteractionStreak.applyBondEvent(...)` in [Packages/PikaCore/Sources/PikaCorePersistence/PetInteractionStreak.swift](Packages/PikaCore/Sources/PikaCorePersistence/PetInteractionStreak.swift)
+  - iOS/macOS home views now consume shared cap/event flow and show daily XP/event UI.
+  - Shared chat writes `.chatMessage` bond events and surfaces daily bond status.
+  - Level-up toast/banner feedback added in iOS/macOS home + shared chat.
+  - Additional optimization pass: smoother `TypingIndicator` animation and tighter SSE line parsing in `OpenAIClient`, `DeepSeekClient`, and `AnthropicClient`.
+  - Enterprise readiness hardening pass: provider network/session policy, error sanitization, privacy toggle for memory mirror, file protection on exported memory/image files, app + shared test foundations, and CI security/release gates.
 
 ## P1 (done) — pointers
 
@@ -40,4 +47,5 @@ Resume: <what the next agent should do if interrupted>
 
 ## Blockers
 
-- None recorded.
+- Local `swift` CLI unavailable in this Windows session; package tests/type-check must be run on macOS/Xcode toolchain.
+- Enterprise release gate requires configured `DEVELOPMENT_TEAM` and non-bootstrap marketing/build versions before release policy check can pass.

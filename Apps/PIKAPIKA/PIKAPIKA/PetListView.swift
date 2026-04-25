@@ -1,14 +1,32 @@
 import SwiftUI
 import SwiftData
 import PikaCore
+import PikaSubscription
 
 struct PetListView: View {
     @Query(sort: \Pet.name) private var pets: [Pet]
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showAddPet = false
     @State private var showSettings = false
+    @State private var showSubscriptionOffer = false
+    @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
+
+    private static let freePetCap = 1
 
     private var totalStreak: Int {
         pets.map(\.streakCount).max() ?? 0
+    }
+
+    private var hasUnlimitedPets: Bool {
+        subscriptionManager.currentEntitlements.contains(.unlimitedPets)
+    }
+
+    private var canCreateMorePets: Bool {
+        hasUnlimitedPets || pets.count < Self.freePetCap
+    }
+
+    private var showPetLimitBanner: Bool {
+        !hasUnlimitedPets && pets.count >= Self.freePetCap
     }
 
     var body: some View {
@@ -22,6 +40,11 @@ struct PetListView: View {
                             .padding(.top, 28)
                     } else {
                         VStack(alignment: .leading, spacing: 14) {
+                            if showPetLimitBanner {
+                                petLimitBanner
+                                    .padding(.horizontal, PikaMetrics.screenHorizontal)
+                                    .padding(.top, 20)
+                            }
                             HStack {
                                 PikaSectionHeader(
                                     title: "Your companions",
@@ -78,7 +101,7 @@ struct PetListView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showAddPet = true
+                        Task { await handleAddPetTapped() }
                     } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
@@ -91,8 +114,22 @@ struct PetListView: View {
             .sheet(isPresented: $showAddPet) {
                 AddPetSheet()
             }
+            .sheet(isPresented: $showSubscriptionOffer) {
+                SubscriptionOfferSheet(subscriptionManager: subscriptionManager, source: "pet_limit") {
+                    showSubscriptionOffer = false
+                    PaywallPresentationGate.endPresentation(source: "pet_limit")
+                }
+            }
             .sheet(isPresented: $showSettings) {
                 SettingsView()
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                guard newPhase != .active, showSubscriptionOffer else { return }
+                showSubscriptionOffer = false
+                PaywallPresentationGate.endPresentation(source: "pet_limit")
+            }
+            .task {
+                await SharedSubscriptionManager.refreshIfNeeded()
             }
         }
         .tint(PIKAPIKATheme.accent)
@@ -179,5 +216,44 @@ struct PetListView: View {
             .padding(.horizontal, PikaMetrics.screenHorizontal)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var petLimitBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "lock.open.fill")
+                .foregroundStyle(PIKAPIKATheme.accent)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Free plan limit reached")
+                    .font(.subheadline.weight(.semibold))
+                Text("Upgrade to Pro for unlimited companions and richer personalities.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button("See Pro") {
+                if PaywallPresentationGate.beginPresentation(source: "pet_limit") {
+                    showSubscriptionOffer = true
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(PIKAPIKATheme.accent)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(.ultraThinMaterial)
+        )
+    }
+
+    @MainActor
+    private func handleAddPetTapped() async {
+        await subscriptionManager.refreshEntitlements()
+        if canCreateMorePets {
+            showAddPet = true
+            return
+        }
+        if PaywallPresentationGate.beginPresentation(source: "pet_limit") {
+            showSubscriptionOffer = true
+        }
     }
 }

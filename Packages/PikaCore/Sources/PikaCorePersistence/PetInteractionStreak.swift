@@ -1,10 +1,16 @@
 import Foundation
+import SwiftData
+import PikaCoreBase
 
 /// Daily visit streak tracking and XP-cap enforcement via UserDefaults.
 public enum PetInteractionStreak {
 
     private static let dailyXPKey      = "Pika_dailyXP_%@"
     private static let dailyDateKey    = "Pika_dailyXPDate_%@"
+<<<<<<< HEAD
+=======
+    private static let dailyXPLock = NSLock()
+>>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
 
     // MARK: - Streak
 
@@ -45,6 +51,12 @@ public enum PetInteractionStreak {
     /// (capped at the remaining daily budget).
     @discardableResult
     public static func recordXPEarned(petID: UUID, amount: Int) -> Int {
+<<<<<<< HEAD
+=======
+        dailyXPLock.lock()
+        defer { dailyXPLock.unlock() }
+
+>>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         let dateKey = String(format: Self.dailyDateKey, petID.uuidString)
@@ -66,4 +78,55 @@ public enum PetInteractionStreak {
         UserDefaults.standard.set(today, forKey: dateKey)
         return awarded
     }
+<<<<<<< HEAD
+=======
+
+    /// Backward-compatible alias used by older app surfaces.
+    public static func recordInteraction(pet: Pet) {
+        recordStreak(pet: pet)
+    }
+
+    public struct BondAwardOutcome: Sendable {
+        public let awardedXP: Int
+        public let levelUp: BondProgression.LevelUp?
+    }
+
+    /// Applies a bond event with shared cap enforcement and analytics write-through.
+    @discardableResult
+    public static func applyBondEvent(
+        _ event: BondProgression.Event,
+        to pet: Pet,
+        modelContext: ModelContext,
+        now: Date = Date()
+    ) throws -> BondAwardOutcome {
+        let award = BondProgression.xp(for: event)
+        let awardedXP = recordXPEarned(petID: pet.id, amount: award.xp)
+        guard awardedXP > 0 else {
+            return BondAwardOutcome(awardedXP: 0, levelUp: nil)
+        }
+
+        let cappedAward = BondProgression.Award(
+            xp: awardedXP,
+            eventType: award.eventType,
+            metadata: award.metadata
+        )
+        let applied = BondProgression.apply(currentXP: pet.bondXP, award: cappedAward)
+        pet.bondXP = applied.newXP
+        pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
+        recordStreak(pet: pet)
+        pet.lastInteractedAt = now
+
+        modelContext.insert(
+            BondEvent(
+                pet: pet,
+                eventType: cappedAward.eventType,
+                xpAwarded: cappedAward.xp,
+                timestamp: now,
+                metadata: cappedAward.metadata
+            )
+        )
+        try modelContext.save()
+        return BondAwardOutcome(awardedXP: awardedXP, levelUp: applied.levelUp)
+    }
+>>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
 }

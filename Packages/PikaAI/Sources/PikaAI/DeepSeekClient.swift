@@ -19,6 +19,7 @@ public final class DeepSeekClient: AIClient, @unchecked Sendable {
         self.apiKey = apiKey
         self.model = model
         self.baseURL = baseURL
+<<<<<<< HEAD
         self.session = session ?? {
             let config = URLSessionConfiguration.ephemeral
             config.httpCookieAcceptPolicy = .never
@@ -27,6 +28,9 @@ public final class DeepSeekClient: AIClient, @unchecked Sendable {
             config.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
             return URLSession(configuration: config)
         }()
+=======
+        self.session = session ?? SecureNetworkPolicy.makeSession()
+>>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
     }
 
     // MARK: - Chat (streaming)
@@ -60,28 +64,46 @@ public final class DeepSeekClient: AIClient, @unchecked Sendable {
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let (data, response) = try await session.data(for: request)
-        try Self.validate(response, body: data)
-
-        let payloadText = String(data: data, encoding: .utf8) ?? ""
-        let lines = payloadText.components(separatedBy: .newlines)
-
         return AsyncThrowingStream { continuation in
             Task {
-                for line in lines {
-                    guard line.hasPrefix("data:") else { continue }
-                    let payload = line.dropFirst(5).trimmingCharacters(in: .whitespaces)
-                    if payload == "[DONE]" { break }
-                    guard let lineData = payload.data(using: .utf8),
-                          let json = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
-                          let choices = json["choices"] as? [[String: Any]],
-                          let delta = choices.first?["delta"] as? [String: Any] else { continue }
-                    let visible = Self.visibleAssistantText(from: delta)
-                    if !visible.isEmpty {
-                        continuation.yield(visible)
+                do {
+                    let (bytes, response) = try await session.bytes(for: request)
+                    guard let http = response as? HTTPURLResponse else {
+                        throw AIClientError.networkUnavailable
                     }
+                    guard (200..<300).contains(http.statusCode) else {
+                        var body = Data()
+                        for try await byte in bytes {
+                            body.append(byte)
+                        }
+                        throw Self.httpError(statusCode: http.statusCode, body: body)
+                    }
+
+                    for try await line in bytes.lines {
+                        if Task.isCancelled { break }
+                        switch SSELineParser.parseLine(line) {
+                        case .ignore:
+                            continue
+                        case .done:
+                            continuation.finish()
+                            return
+                        case .data(let payload):
+                            guard let lineData = payload.data(using: .utf8),
+                                  let json = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
+                                  let choices = json["choices"] as? [[String: Any]],
+                                  let delta = choices.first?["delta"] as? [String: Any] else {
+                                continue
+                            }
+                            let visible = Self.visibleAssistantText(from: delta)
+                            if !visible.isEmpty {
+                                continuation.yield(visible)
+                            }
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
                 }
-                continuation.finish()
             }
         }
     }
@@ -165,14 +187,18 @@ public final class DeepSeekClient: AIClient, @unchecked Sendable {
 
     private static func validate(_ response: URLResponse, body: Data = Data()) throws {
         guard let http = response as? HTTPURLResponse else { return }
-        switch http.statusCode {
-        case 200..<300: return
-        case 401:       throw AIClientError.missingAPIKey
-        case 429:       throw AIClientError.rateLimited
-        case 413:       throw AIClientError.contextTooLong
+        guard (200..<300).contains(http.statusCode) else {
+            throw httpError(statusCode: http.statusCode, body: body)
+        }
+    }
+
+    private static func httpError(statusCode: Int, body: Data) -> AIClientError {
+        switch statusCode {
+        case 401: return .missingAPIKey
+        case 429: return .rateLimited
+        case 413: return .contextTooLong
         default:
-            let text = String(data: body, encoding: .utf8) ?? ""
-            throw AIClientError.serverError(statusCode: http.statusCode, body: text)
+            return .serverError(statusCode: statusCode, body: SecureNetworkPolicy.sanitizeServerBody(body))
         }
     }
 }

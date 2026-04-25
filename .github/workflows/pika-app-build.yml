@@ -1,12 +1,16 @@
-# Optional: full iOS app compile (SwiftData + strict app settings). Run manually — slower than package CI.
-name: Pika iOS app build (manual)
+# App-level build and test gates for iOS + macOS.
+name: Pika app build and test
 
 on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
   pika-ios-xcodebuild:
-    name: XcodeGen + xcodebuild (iOS)
+    name: XcodeGen + xcodebuild + tests (iOS)
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -32,3 +36,43 @@ jobs:
         run: |
           set -eo pipefail
           xcodebuild -project Pika.xcodeproj -scheme Pika -destination 'generic/platform=iOS' -configuration Debug CODE_SIGNING_ALLOWED=NO build
+
+      - name: Test iOS app (simulator)
+        working-directory: Apps/iOS
+        run: |
+          set -eo pipefail
+          xcodebuild -project Pika.xcodeproj -scheme Pika -destination 'platform=iOS Simulator,name=iPhone 16' -configuration Debug CODE_SIGNING_ALLOWED=NO test
+
+  pika-macos-xcodebuild:
+    name: XcodeGen + xcodebuild + tests (macOS)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          set -eo pipefail
+          if [ -d "/Applications/Xcode.app" ]; then
+            sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+          fi
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew list xcodegen &>/dev/null || brew install xcodegen
+
+      - name: Generate Xcode project
+        run: bash Scripts/generate-xcode.sh
+
+      - name: Build macOS app (no code signing)
+        working-directory: Apps/macOS
+        run: |
+          set -eo pipefail
+          xcodebuild -project Pika.xcodeproj -scheme Pika -destination 'platform=macOS' -configuration Debug CODE_SIGNING_ALLOWED=NO build
+
+      - name: Test macOS app
+        working-directory: Apps/macOS
+        run: |
+          set -eo pipefail
+          xcodebuild -project Pika.xcodeproj -scheme Pika -destination 'platform=macOS' -configuration Debug CODE_SIGNING_ALLOWED=NO test

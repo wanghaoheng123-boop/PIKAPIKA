@@ -89,3 +89,23 @@ jobs:
       - name: Swift test must succeed
         if: steps.pikaai_test.outcome != 'success'
         run: exit 1
+
+  sharedui-swift-test:
+    name: SharedUI swift test
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          set -eo pipefail
+          if [ -d "/Applications/Xcode.app" ]; then
+            sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          elif [ -d "/Applications/Xcode_16.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+          fi
+          swift --version
+
+      - name: Swift test (SharedUI)
+        working-directory: Packages/SharedUI
+        run: swift test -v

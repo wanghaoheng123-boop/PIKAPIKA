@@ -98,6 +98,17 @@ Do not stop for any of these. Take the action listed and continue:
  Any agent opening this workspace must be able to resume with zero human handoff.
  The workspace/ folder is the single source of truth for all agents on all platforms.
 
+## AUTONOMOUS RUNTIME CONTRACT
+For unattended orchestrator runs (`Scripts/autonomous_wave.py`):
+ 1. Use a single active lock in `workspace/RUN_LOCK.json`; recover stale locks only after timeout.
+ 2. Update heartbeat after each phase in `workspace/RUN_HEARTBEAT.json`.
+ 3. Persist run summary to `workspace/RUN_MANIFEST.json`.
+ 4. Refresh `workspace/SESSION_STATE.json` checkpoint at least once per wave.
+ 5. Append outcomes and gate status to `workspace/MEMORY_LOG.md`.
+ 6. Increment `workspace/USAGE_MONITOR.json` events every wave and emit checkpoint when context threshold exceeds 80%.
+ 7. Abort auto-commit/auto-PR when policy gates fail or unresolved failed tasks remain.
+ 8. Always write a final handoff line to memory log, even if the run exits on error.
+
 ## APPENDIX — schemas for workspace files
 
 ### workspace/SESSION_STATE.json
