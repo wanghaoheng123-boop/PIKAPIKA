@@ -1,0 +1,58 @@
+name: Security Gates
+
+on:
+  push:
+    branches: [main, master, "release/**"]
+  pull_request:
+    branches: [main, master, "release/**"]
+  workflow_dispatch:
+    inputs:
+      release_policy_mode:
+        description: "release-policy mode (advisory or strict)"
+        required: false
+        default: advisory
+        type: choice
+        options:
+          - advisory
+          - strict
+
+jobs:
+  secret-scan:
+    name: Secret and credential scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: Fail on hardcoded credential patterns
+        run: |
+          set -eo pipefail
+          if rg -n --glob '!**/node_modules/**' --glob '!**/*.md' --glob '!**/*.mdc' "(API_KEY|SECRET|TOKEN|PASSWORD)[[:space:]]*[:=][[:space:]]*['\"][^'\"]{8,}" Apps Packages Backend; then
+            echo "Hardcoded credential-like assignment detected."
+            exit 1
+          fi
+          if rg -n --glob '!**/node_modules/**' --glob '!**/*.md' --glob '!**/*.mdc' "['\"]sk-[A-Za-z0-9._-]{16,}['\"]" Apps Packages Backend; then
+            echo "Secret-token-like literal detected."
+            exit 1
+          fi
+
+  release-policy:
+    name: Release policy checks
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_POLICY_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.release_policy_mode || (startsWith(github.ref, 'refs/heads/release/') && 'strict' || 'advisory') }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+      - name: Check release policy (mode-aware)
+        run: |
+          echo "Release policy mode: ${RELEASE_POLICY_MODE}"
+          bash Scripts/check_release_policy.sh "${RELEASE_POLICY_MODE}"

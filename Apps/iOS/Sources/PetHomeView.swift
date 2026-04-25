@@ -321,7 +321,7 @@ struct PetHomeView: View {
 
     private func maybeTriggerUpsell(source: String) {
         Task { @MainActor in
-            await subscriptionManager.refreshEntitlements()
+            await SharedSubscriptionManager.forceRefresh()
             guard subscriptionManager.currentEntitlements == .free else { return }
             guard PaywallPresentationGate.beginPresentation(source: source) else { return }
             subscriptionOfferSource = source

@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "run_minutes": 180,
+  "wave_sleep_seconds": 5,
+  "max_retries_per_task": 2,
+  "cooldown_seconds_on_failure": 20,
+  "stale_lock_minutes": 10,
+  "auto_commit": true,
+  "auto_pr": true,
+  "base_branch": "main",
+  "branch_prefix": "auto/wave",
+  "deepseek": {
+    "model": "deepseek-v4-pro",
+    "thinking": "enabled",
+    "reasoning_effort": "high",
+    "mcp_list_models_cmd": "",
+    "mcp_chat_cmd": ""
+  },
+  "gates": {
+    "release_policy_mode": "strict",
+    "required_commands": [
+      "bash Scripts/check_release_policy.sh strict"
+    ]
+  },
+  "experts": {
+    "feature": [
+      "generalPurpose",
+      "reviewer"
+    ],
+    "debug": [
+      "debugger",
+      "reviewer"
+    ],
+    "verification": [
+      "test-runner",
+      "verifier"
+    ],
+    "security": [
+      "verifier",
+      "reviewer"
+    ]
+  }
+}

@@ -7,10 +7,7 @@ public enum PetInteractionStreak {
 
     private static let dailyXPKey      = "Pika_dailyXP_%@"
     private static let dailyDateKey    = "Pika_dailyXPDate_%@"
-<<<<<<< HEAD
-=======
     private static let dailyXPLock = NSLock()
->>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
 
     // MARK: - Streak
 
@@ -51,12 +48,8 @@ public enum PetInteractionStreak {
     /// (capped at the remaining daily budget).
     @discardableResult
     public static func recordXPEarned(petID: UUID, amount: Int) -> Int {
-<<<<<<< HEAD
-=======
         dailyXPLock.lock()
         defer { dailyXPLock.unlock() }
-
->>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         let dateKey = String(format: Self.dailyDateKey, petID.uuidString)
@@ -78,8 +71,6 @@ public enum PetInteractionStreak {
         UserDefaults.standard.set(today, forKey: dateKey)
         return awarded
     }
-<<<<<<< HEAD
-=======
 
     /// Backward-compatible alias used by older app surfaces.
     public static func recordInteraction(pet: Pet) {
@@ -128,5 +119,4 @@ public enum PetInteractionStreak {
         try modelContext.save()
         return BondAwardOutcome(awardedXP: awardedXP, levelUp: applied.levelUp)
     }
->>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
 }

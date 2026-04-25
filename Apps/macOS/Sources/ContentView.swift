@@ -33,7 +33,8 @@ struct ContentView: View {
                 do {
                     try context.save()
                 } catch {
-                    print("Failed to save new pet: \(error.localizedDescription)")
+                    // Keep onboarding open if persistence fails so the user can retry safely.
+                    return
                 }
                 showOnboarding = false
                 Task { await maybeShowSubscriptionOfferAfterOnboarding() }
@@ -51,6 +52,9 @@ struct ContentView: View {
             await SharedSubscriptionManager.refreshIfNeeded()
         }
         .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                Task { await SharedSubscriptionManager.refreshIfNeeded(minInterval: 5) }
+            }
             guard newPhase != .active, showSubscriptionOffer else { return }
             showSubscriptionOffer = false
             PaywallPresentationGate.endPresentation(source: "onboarding_macos")
@@ -60,7 +64,7 @@ struct ContentView: View {
     @MainActor
     private func maybeShowSubscriptionOfferAfterOnboarding() async {
         guard !UserDefaults.standard.bool(forKey: onboardingOfferSeenKey) else { return }
-        await subscriptionManager.refreshEntitlements()
+        await SharedSubscriptionManager.forceRefresh()
         guard subscriptionManager.currentEntitlements == .free else {
             UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
             return

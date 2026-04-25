@@ -247,7 +247,7 @@ struct PetListView: View {
 
     @MainActor
     private func handleAddPetTapped() async {
-        await subscriptionManager.refreshEntitlements()
+        await SharedSubscriptionManager.forceRefresh()
         if canCreateMorePets {
             showAddPet = true
             return

@@ -61,6 +61,9 @@ struct ContentView: View {
                 await SharedSubscriptionManager.refreshIfNeeded()
             }
             .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    Task { await SharedSubscriptionManager.refreshIfNeeded(minInterval: 5) }
+                }
                 guard newPhase != .active, showSubscriptionOffer else { return }
                 showSubscriptionOffer = false
                 PaywallPresentationGate.endPresentation(source: "onboarding_ios")
@@ -71,7 +74,7 @@ struct ContentView: View {
     @MainActor
     private func maybeShowSubscriptionOfferAfterOnboarding() async {
         guard !UserDefaults.standard.bool(forKey: onboardingOfferSeenKey) else { return }
-        await subscriptionManager.refreshEntitlements()
+        await SharedSubscriptionManager.forceRefresh()
         guard subscriptionManager.currentEntitlements == .free else {
             UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
             return

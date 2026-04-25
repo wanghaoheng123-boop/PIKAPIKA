@@ -19,18 +19,7 @@ public final class DeepSeekClient: AIClient, @unchecked Sendable {
         self.apiKey = apiKey
         self.model = model
         self.baseURL = baseURL
-<<<<<<< HEAD
-        self.session = session ?? {
-            let config = URLSessionConfiguration.ephemeral
-            config.httpCookieAcceptPolicy = .never
-            config.httpShouldSetCookies = false
-            config.urlCache = nil
-            config.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-            return URLSession(configuration: config)
-        }()
-=======
         self.session = session ?? SecureNetworkPolicy.makeSession()
->>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
     }
 
     // MARK: - Chat (streaming)

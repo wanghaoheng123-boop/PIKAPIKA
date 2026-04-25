@@ -256,29 +256,6 @@ struct PetHomeView: View {
     }
 
     private func awardBond(_ event: BondProgression.Event) {
-<<<<<<< HEAD
-        let award = BondProgression.xp(for: event)
-        let todayXP = pet.bondEvents
-            .filter { Calendar.current.isDateInToday($0.timestamp) }
-            .reduce(0) { $0 + $1.xpAwarded }
-        guard todayXP < BondProgression.dailyCap else { return }
-        let cappedXP = min(award.xp, BondProgression.dailyCap - todayXP)
-        guard cappedXP > 0 else { return }
-        pet.bondXP += cappedXP
-        pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
-        PetInteractionStreak.recordStreak(pet: pet)
-        pet.lastInteractedAt = Date()
-        modelContext.insert(BondEvent(
-            pet: pet,
-            eventType: award.eventType,
-            xpAwarded: cappedXP,
-            metadata: award.metadata
-        ))
-        do {
-            try modelContext.save()
-        } catch {
-            print("Failed to save bond event: \(error)")
-=======
         do {
             let outcome = try PetInteractionStreak.applyBondEvent(event, to: pet, modelContext: modelContext)
             if outcome.awardedXP == 0 {
@@ -305,12 +282,11 @@ struct PetHomeView: View {
 
     private func maybeTriggerUpsell(source: String) {
         Task { @MainActor in
-            await subscriptionManager.refreshEntitlements()
+            await SharedSubscriptionManager.forceRefresh()
             guard subscriptionManager.currentEntitlements == .free else { return }
             guard PaywallPresentationGate.beginPresentation(source: source) else { return }
             subscriptionOfferSource = source
             showSubscriptionOffer = true
->>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
         }
     }
 

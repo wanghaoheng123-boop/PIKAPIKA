@@ -363,19 +363,10 @@ public struct PetChatScreen: View {
                 print("Failed to trim conversation history: \(error)")
             }
 
-<<<<<<< HEAD
-            // Record daily streak and update last-interaction time
-            PetInteractionStreak.recordStreak(pet: pet)
-            pet.lastInteractedAt = Date()
-            do {
-                try modelContext.save()
-            } catch {
-                print("Failed to save streak update: \(error)")
-=======
             do {
                 let outcome = try PetInteractionStreak.applyBondEvent(.chatMessage, to: pet, modelContext: modelContext)
                 if outcome.awardedXP == 0 {
-                    await subscriptionManager.refreshEntitlements()
+                    await SharedSubscriptionManager.forceRefresh()
                     if subscriptionManager.currentEntitlements == .free,
                        PaywallPresentationGate.beginPresentation(source: "chat_daily_cap") {
                         showSubscriptionOffer = true
@@ -393,7 +384,6 @@ public struct PetChatScreen: View {
                 }
             } catch {
                 print("Failed to save bond event for chat: \(error)")
->>>>>>> ec0be87 (chore: checkpoint autonomous quality and orchestration updates)
             }
 
             // Attempt memory extraction from this exchange
