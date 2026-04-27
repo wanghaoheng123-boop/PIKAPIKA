@@ -10,7 +10,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showOnboarding = false
     @State private var showSubscriptionOffer = false
-    @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
+    @StateObject private var subscriptionManager = SubscriptionManager()
     private let onboardingOfferSeenKey = "com.pikapika.PIKAPIKA.onboardingOfferSeen"
 
     var body: some View {
@@ -51,22 +51,34 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showSubscriptionOffer) {
-                SubscriptionOfferSheet(subscriptionManager: subscriptionManager, source: "onboarding_ios") {
-                    showSubscriptionOffer = false
-                    PaywallPresentationGate.endPresentation(source: "onboarding_ios")
-                    UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
+                NavigationStack {
+                    VStack(spacing: 16) {
+                        Text("Unlock Pro features")
+                            .font(.headline)
+                        Text("Upgrade to increase AI usage limits and support development.")
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.secondary)
+                        Button("Maybe later") {
+                            showSubscriptionOffer = false
+                            UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
+                        }
+                    }
+                    .padding()
                 }
             }
             .task {
-                await SharedSubscriptionManager.refreshIfNeeded()
+                await subscriptionManager.loadProducts()
+                await subscriptionManager.refreshEntitlements()
             }
             .onChange(of: scenePhase) { _, newPhase in
                 if newPhase == .active {
-                    Task { await SharedSubscriptionManager.refreshIfNeeded(minInterval: 5) }
+                    Task {
+                        await subscriptionManager.loadProducts()
+                        await subscriptionManager.refreshEntitlements()
+                    }
                 }
                 guard newPhase != .active, showSubscriptionOffer else { return }
                 showSubscriptionOffer = false
-                PaywallPresentationGate.endPresentation(source: "onboarding_ios")
             }
         }
     }
@@ -74,12 +86,9 @@ struct ContentView: View {
     @MainActor
     private func maybeShowSubscriptionOfferAfterOnboarding() async {
         guard !UserDefaults.standard.bool(forKey: onboardingOfferSeenKey) else { return }
-        await SharedSubscriptionManager.forceRefresh()
+        await subscriptionManager.loadProducts()
+        await subscriptionManager.refreshEntitlements()
         guard subscriptionManager.currentEntitlements == .free else {
-            UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
-            return
-        }
-        guard PaywallPresentationGate.beginPresentation(source: "onboarding_ios") else {
             UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
             return
         }

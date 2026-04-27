@@ -6,6 +6,19 @@
 
 **[Docs/ROADMAP.md](Docs/ROADMAP.md):** P0 scaffold complete; **P1 — AI chat MVP** shipped (2026-04-18). **Active engineering target: P2 — Bond loop.**
 
+## Scope lock (2026-04-27)
+
+- **Confirmed scope:** this execution run is **PIKAPIKA-only** (pet companion app), not a separate trading/QuantLab product.
+- **Interpretation for “analysis/backtesting”:**
+  - Backtesting = deterministic, repeatable tests/simulations over PIKAPIKA algorithms (`BondProgression`, `PetInteractionStreak`, AI routing/memory extraction).
+  - Competitive research (Moomoo/Panda/GitHub) is used only for transferable UX/process patterns, not direct broker/trading feature cloning.
+- **Future option:** if QuantLab/trading is required later, open a dedicated repo/module and reuse the same quality loop process.
+- **Execution artifacts (2026-04-27):**
+  - `workspace/competitive-research-notes.md`
+  - `workspace/mcp-review-pass-2026-04-27.md`
+  - `workspace/xcodeproj-repair-2026-04-27.md`
+  - `workspace/feedback-prioritization-loop.md`
+
 ## Canonical app targets (edit these for new UI/features)
 
 - **[Apps/iOS](Apps/iOS)** — XcodeGen (`project.yml`); run **`Scripts/generate-xcode.sh`**, open **`Apps/iOS/Pika.xcodeproj`**.

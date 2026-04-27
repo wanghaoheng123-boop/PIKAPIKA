@@ -252,11 +252,13 @@ struct ChatView: View {
     }
 
     private func localAction(event: String, xp: Int, reply: String) {
-        PetInteractionStreak.recordInteraction(pet: pet)
+        let awardedXP = PetInteractionStreak.recordXPEarned(petID: pet.id, amount: xp)
+        guard awardedXP > 0 else { return }
+        PetInteractionStreak.recordStreak(pet: pet)
         pet.lastInteractedAt = Date()
-        pet.bondXP += xp
+        pet.bondXP += awardedXP
         pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
-        modelContext.insert(BondEvent(pet: pet, eventType: event, xpAwarded: xp))
+        modelContext.insert(BondEvent(pet: pet, eventType: event, xpAwarded: awardedXP))
         modelContext.insert(ConversationMessage(pet: pet, role: "assistant", content: reply))
         do {
             try modelContext.save()

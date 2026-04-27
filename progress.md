@@ -4,6 +4,14 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 
 ---
 
+## 2026-04-27 — Scope lock for research-driven quality loop
+
+- **Scope decision captured:** PIKAPIKA-only delivery in this repo; no QuantLab/trading code exists in-source.
+- **Execution framing:** “analysis/backtesting” mapped to algorithm QA loops (bond/streak/AI routing) and testability hardening.
+- **Reference split:** External finance app research limited to transferable UX/process patterns until a dedicated finance module/repo exists.
+
+---
+
 ## 2026-04-25 — Enterprise publish-readiness implementation (security + gates)
 
 - **Completed:** Added secure provider network defaults and error-body sanitization in [Packages/PikaAI/Sources/PikaAI/SecureNetworkPolicy.swift](Packages/PikaAI/Sources/PikaAI/SecureNetworkPolicy.swift) and wired OpenAI/Anthropic/DeepSeek clients.

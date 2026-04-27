@@ -19,7 +19,7 @@ public struct PikaSettingsContent: View {
     @State private var probing = false
     @State private var probeResult: String?
     @State private var probeIsSuccess = false
-    @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
+    @StateObject private var subscriptionManager = SubscriptionManager()
     @State private var purchasingProductID: String?
     /// After a probe, block rapid re-taps to avoid repeated billed API calls.
     @State private var probeCooldownUntil: Date = .distantPast
@@ -111,7 +111,7 @@ public struct PikaSettingsContent: View {
 
                 Button("Restore purchases") {
                     Task {
-                        SubscriptionAnalytics.track(.restoreTapped, source: "settings")
+                        SettingsSubscriptionAnalytics.track(.restoreTapped, source: "settings")
                         await subscriptionManager.restorePurchases()
                     }
                 }
@@ -188,7 +188,8 @@ public struct PikaSettingsContent: View {
         }
         .navigationTitle("Settings")
         .task {
-            await SharedSubscriptionManager.refreshIfNeeded(minInterval: 0)
+            await subscriptionManager.loadProducts()
+            await subscriptionManager.refreshEntitlements()
         }
     }
 
@@ -236,17 +237,30 @@ public struct PikaSettingsContent: View {
     private func purchase(_ product: Product) async {
         purchasingProductID = product.id
         defer { purchasingProductID = nil }
-        SubscriptionAnalytics.track(.purchaseStarted, source: "settings")
+        SettingsSubscriptionAnalytics.track(.purchaseStarted, source: "settings")
         do {
             let purchased = try await subscriptionManager.purchase(product)
             if purchased {
-                SubscriptionAnalytics.track(.purchaseSucceeded, source: "settings")
+                SettingsSubscriptionAnalytics.track(.purchaseSucceeded, source: "settings")
             } else {
-                SubscriptionAnalytics.track(.purchaseNotCompleted, source: "settings")
+                SettingsSubscriptionAnalytics.track(.purchaseNotCompleted, source: "settings")
             }
         } catch {
-            SubscriptionAnalytics.track(.purchaseNotCompleted, source: "settings")
+            SettingsSubscriptionAnalytics.track(.purchaseNotCompleted, source: "settings")
             // Purchase errors are intentionally non-fatal for settings UX.
         }
+    }
+}
+
+private enum SettingsSubscriptionAnalytics {
+    enum Event {
+        case restoreTapped
+        case purchaseStarted
+        case purchaseSucceeded
+        case purchaseNotCompleted
+    }
+
+    static func track(_ event: Event, source: String) {
+        _ = (event, source)
     }
 }

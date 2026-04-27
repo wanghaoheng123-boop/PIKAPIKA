@@ -1,7 +1,7 @@
 import Foundation
 
-enum SecureNetworkPolicy {
-    static func makeSession() -> URLSession {
+public enum SecureNetworkPolicy {
+    public static func makeSession() -> URLSession {
         let config = URLSessionConfiguration.ephemeral
         config.httpCookieAcceptPolicy = .never
         config.httpShouldSetCookies = false
@@ -15,7 +15,7 @@ enum SecureNetworkPolicy {
         return URLSession(configuration: config)
     }
 
-    static func sanitizeServerBody(_ body: Data, maxLength: Int = 200) -> String {
+    public static func sanitizeServerBody(_ body: Data, maxLength: Int = 200) -> String {
         let raw = String(data: body, encoding: .utf8) ?? ""
         let compact = raw.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
         guard !compact.isEmpty else { return "Upstream server returned an error response." }

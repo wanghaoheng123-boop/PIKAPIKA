@@ -1,6 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
+import { firestore } from "firebase-admin";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { z } from "zod";
@@ -26,6 +27,10 @@ const DEFAULT_MODELS = {
   anthropic: "claude-sonnet-4-6",
   openai: "gpt-4o-mini",
 } as const;
+const ALLOWED_MODELS_BY_PROVIDER = {
+  anthropic: new Set(["claude-sonnet-4-6"]),
+  openai: new Set(["gpt-4o-mini"]),
+} as const;
 
 // Simple per-UID daily quota. Tighten before production.
 const DAILY_QUOTA = 200;
@@ -41,6 +46,9 @@ export const aiChat = onCall(
       throw new HttpsError("invalid-argument", parsed.error.message);
     }
     const data = parsed.data;
+    if (data.model && !ALLOWED_MODELS_BY_PROVIDER[data.provider].has(data.model)) {
+      throw new HttpsError("invalid-argument", `Model ${data.model} is not allowed for provider ${data.provider}.`);
+    }
 
     await enforceQuota(req.auth.uid);
 
@@ -76,7 +84,7 @@ async function enforceQuota(uid: string): Promise<void> {
   const db = admin.firestore();
   const today = new Date().toISOString().slice(0, 10);
   const ref = db.collection("rateLimits").doc(`${uid}_${today}`);
-  const delta = await db.runTransaction(async (tx) => {
+  const delta = await db.runTransaction(async (tx: firestore.Transaction) => {
     const snap = await tx.get(ref);
     const current = (snap.exists ? (snap.data()?.count ?? 0) : 0) as number;
     if (current >= DAILY_QUOTA) return -1;

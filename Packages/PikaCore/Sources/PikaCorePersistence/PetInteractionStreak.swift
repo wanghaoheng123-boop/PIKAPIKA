@@ -7,7 +7,6 @@ public enum PetInteractionStreak {
 
     private static let dailyXPKey      = "Pika_dailyXP_%@"
     private static let dailyDateKey    = "Pika_dailyXPDate_%@"
-    private static let dailyXPLock = NSLock()
 
     // MARK: - Streak
 
@@ -18,12 +17,18 @@ public enum PetInteractionStreak {
         let lastDay = cal.startOfDay(for: pet.lastInteractedAt)
         guard today != lastDay else { return }
         let diff = cal.dateComponents([.day], from: lastDay, to: today).day ?? 0
+        guard diff > 0 else { return }
         if diff == 1 {
             pet.streakCount += 1
         } else {
             pet.streakCount = 1
         }
         pet.longestStreak = max(pet.longestStreak, pet.streakCount)
+    }
+
+    /// Backward-compatible alias used in some app surfaces.
+    public static func recordInteraction(pet: Pet) {
+        recordStreak(pet: pet)
     }
 
     // MARK: - Daily XP Cap
@@ -48,8 +53,6 @@ public enum PetInteractionStreak {
     /// (capped at the remaining daily budget).
     @discardableResult
     public static func recordXPEarned(petID: UUID, amount: Int) -> Int {
-        dailyXPLock.lock()
-        defer { dailyXPLock.unlock() }
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         let dateKey = String(format: Self.dailyDateKey, petID.uuidString)
@@ -72,51 +75,55 @@ public enum PetInteractionStreak {
         return awarded
     }
 
-    /// Backward-compatible alias used by older app surfaces.
-    public static func recordInteraction(pet: Pet) {
-        recordStreak(pet: pet)
-    }
+    // MARK: - Unified bond apply path
 
-    public struct BondAwardOutcome: Sendable {
+    public struct BondApplyOutcome: Sendable {
         public let awardedXP: Int
         public let levelUp: BondProgression.LevelUp?
+
+        public init(awardedXP: Int, levelUp: BondProgression.LevelUp?) {
+            self.awardedXP = awardedXP
+            self.levelUp = levelUp
+        }
     }
 
-    /// Applies a bond event with shared cap enforcement and analytics write-through.
+    /// Applies a bond event end-to-end with streak update, daily cap enforcement,
+    /// XP/level mutation, event persistence, and save.
     @discardableResult
     public static func applyBondEvent(
         _ event: BondProgression.Event,
         to pet: Pet,
         modelContext: ModelContext,
         now: Date = Date()
-    ) throws -> BondAwardOutcome {
+    ) throws -> BondApplyOutcome {
         let award = BondProgression.xp(for: event)
-        let awardedXP = recordXPEarned(petID: pet.id, amount: award.xp)
-        guard awardedXP > 0 else {
-            return BondAwardOutcome(awardedXP: 0, levelUp: nil)
+        let awarded = recordXPEarned(petID: pet.id, amount: award.xp)
+        guard awarded > 0 else {
+            return BondApplyOutcome(awardedXP: 0, levelUp: nil)
         }
 
-        let cappedAward = BondProgression.Award(
-            xp: awardedXP,
-            eventType: award.eventType,
-            metadata: award.metadata
+        let beforeXP = pet.bondXP
+        let applied = BondProgression.apply(
+            currentXP: beforeXP,
+            award: BondProgression.Award(xp: awarded, eventType: award.eventType, metadata: award.metadata)
         )
-        let applied = BondProgression.apply(currentXP: pet.bondXP, award: cappedAward)
         pet.bondXP = applied.newXP
         pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
+
+        // Streak should be evaluated against the previous interaction date.
         recordStreak(pet: pet)
         pet.lastInteractedAt = now
 
         modelContext.insert(
             BondEvent(
                 pet: pet,
-                eventType: cappedAward.eventType,
-                xpAwarded: cappedAward.xp,
+                eventType: award.eventType,
+                xpAwarded: awarded,
                 timestamp: now,
-                metadata: cappedAward.metadata
+                metadata: award.metadata
             )
         )
         try modelContext.save()
-        return BondAwardOutcome(awardedXP: awardedXP, levelUp: applied.levelUp)
+        return BondApplyOutcome(awardedXP: awarded, levelUp: applied.levelUp)
     }
 }

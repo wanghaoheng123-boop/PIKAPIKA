@@ -29,6 +29,15 @@ let package = Package(
             ],
             path: "Sources/PikaCore",
             sources: ["PikaCore.swift"]
+        ),
+        .testTarget(
+            name: "PikaCoreTests",
+            dependencies: [
+                "PikaCore",
+                "PikaCorePersistence",
+                .product(name: "PikaCoreBase", package: "PikaCoreBase")
+            ],
+            path: "Tests/PikaCoreTests"
         )
     ]
 )

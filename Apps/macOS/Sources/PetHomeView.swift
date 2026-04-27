@@ -1,6 +1,6 @@
 import SwiftUI
+import AppKit
 import PikaCore
-import PikaSubscription
 import SharedUI
 
 struct PetHomeView: View {
@@ -12,9 +12,6 @@ struct PetHomeView: View {
     @State private var selectedMood: PetMood = .idle
     @State private var isActionPressed = false
     @State private var latestLevelUp: BondProgression.LevelUp?
-    @State private var showSubscriptionOffer = false
-    @State private var subscriptionOfferSource = "home_engagement_macos"
-    @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
 
     private var spiritState: PetSpiritState {
         PetSpiritState.evaluate(for: pet)
@@ -22,18 +19,6 @@ struct PetHomeView: View {
 
     private var bondLevel: BondLevel {
         BondLevel.from(xp: pet.bondXP)
-    }
-
-    private var dailyXP: Int {
-        PetInteractionStreak.xpEarnedToday(petID: pet.id)
-    }
-
-    private var xpRemaining: Int {
-        PetInteractionStreak.xpRemainingToday(petID: pet.id)
-    }
-
-    private var latestBondEvent: BondEvent? {
-        pet.bondEvents.max(by: { $0.timestamp < $1.timestamp })
     }
 
     var body: some View {
@@ -56,6 +41,13 @@ struct PetHomeView: View {
             ChatView(pet: pet)
                 .frame(minWidth: 360)
         }
+        .overlay(alignment: .top) {
+            if let levelUp = latestLevelUp {
+                levelUpBanner(levelUp)
+                    .padding(.top, PikaTheme.Spacing.md)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
                 SettingsView()
@@ -68,15 +60,8 @@ struct PetHomeView: View {
             }
             .frame(minWidth: 420, minHeight: 480)
         }
-        .sheet(isPresented: $showSubscriptionOffer) {
-            SubscriptionOfferSheet(subscriptionManager: subscriptionManager, source: subscriptionOfferSource) {
-                showSubscriptionOffer = false
-                PaywallPresentationGate.endPresentation(source: subscriptionOfferSource)
-            }
-            .frame(minWidth: 520, minHeight: 420)
-        }
         .task {
-            await SharedSubscriptionManager.refreshIfNeeded()
+            applyDailyCheckinIfNeeded()
         }
     }
 
@@ -87,25 +72,11 @@ struct PetHomeView: View {
                 spiritStateSection
                 moodSelectorSection
                 statsSection
-                bondActivitySection
                 quickActionsSection
                 bondSection
                 shortcutHints
             }
             .padding()
-        }
-        .overlay(alignment: .top) {
-            if let levelUp = latestLevelUp {
-                Text("Level up! \(levelUp.from.displayName) → \(levelUp.to.displayName)")
-                    .font(PikaTheme.Typography.caption.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, PikaTheme.Spacing.md)
-                    .padding(.vertical, PikaTheme.Spacing.sm)
-                    .background(PikaTheme.Palette.accentDeep)
-                    .clipShape(Capsule())
-                    .padding(.top, PikaTheme.Spacing.md)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            }
         }
         .background(
             LinearGradient(
@@ -193,8 +164,6 @@ struct PetHomeView: View {
                 }
                 StatRow(icon: "sparkles", label: "Traits", value: "\(pet.personalityTraits.count)", color: .purple)
                     .accessibilityLabel("\(pet.personalityTraits.count) personality traits")
-                StatRow(icon: "bolt.fill", label: "XP Left", value: "\(xpRemaining)", color: .blue)
-                    .accessibilityLabel("\(xpRemaining) daily bond points remaining")
             }
             .padding(PikaTheme.Spacing.sm)
             .background(PikaTheme.Palette.accent.opacity(0.08))
@@ -233,61 +202,45 @@ struct PetHomeView: View {
         }
     }
 
-    private var bondActivitySection: some View {
-        VStack(alignment: .leading, spacing: PikaTheme.Spacing.xs) {
-            Text("Today: \(dailyXP)/\(BondProgression.dailyCap) XP")
-                .font(PikaTheme.Typography.caption.weight(.semibold))
-                .foregroundStyle(PikaTheme.Palette.textMuted)
-            if let latestBondEvent {
-                Text("Latest: +\(latestBondEvent.xpAwarded) XP from \(latestBondEvent.eventType)")
-                    .font(PikaTheme.Typography.caption)
-                    .foregroundStyle(PikaTheme.Palette.textMuted)
-                    .lineLimit(1)
-            } else {
-                Text("No bond activity yet today.")
-                    .font(PikaTheme.Typography.caption)
-                    .foregroundStyle(PikaTheme.Palette.textMuted)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(PikaTheme.Spacing.sm)
-        .background(PikaTheme.Palette.accent.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: PikaTheme.Radius.card))
-    }
-
     private func awardBond(_ event: BondProgression.Event) {
         do {
             let outcome = try PetInteractionStreak.applyBondEvent(event, to: pet, modelContext: modelContext)
-            if outcome.awardedXP == 0 {
-                maybeTriggerUpsell(source: "daily_cap_macos")
-                return
-            }
             if let levelUp = outcome.levelUp {
-                withAnimation {
-                    latestLevelUp = levelUp
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                latestLevelUp = levelUp
+                NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     withAnimation {
                         latestLevelUp = nil
                     }
                 }
-            }
-            if pet.streakCount == 3 || pet.streakCount == 7 {
-                maybeTriggerUpsell(source: "streak_\(pet.streakCount)_macos")
             }
         } catch {
             print("Failed to apply bond event: \(error)")
         }
     }
 
-    private func maybeTriggerUpsell(source: String) {
-        Task { @MainActor in
-            await SharedSubscriptionManager.forceRefresh()
-            guard subscriptionManager.currentEntitlements == .free else { return }
-            guard PaywallPresentationGate.beginPresentation(source: source) else { return }
-            subscriptionOfferSource = source
-            showSubscriptionOffer = true
+    private func applyDailyCheckinIfNeeded() {
+        let alreadyCheckedInToday = pet.bondEvents.contains {
+            $0.eventType == "checkin" && Calendar.current.isDateInToday($0.timestamp)
         }
+        guard !alreadyCheckedInToday else { return }
+        do {
+            _ = try PetInteractionStreak.applyBondEvent(.dailyCheckin, to: pet, modelContext: modelContext)
+        } catch {
+            print("Failed to apply daily check-in: \(error)")
+        }
+    }
+
+    @ViewBuilder
+    private func levelUpBanner(_ levelUp: BondProgression.LevelUp) -> some View {
+        Text("Level up! \(levelUp.from.displayName) → \(levelUp.to.displayName)")
+            .font(PikaTheme.Typography.caption.weight(.semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, PikaTheme.Spacing.md)
+            .padding(.vertical, PikaTheme.Spacing.sm)
+            .background(PikaTheme.Palette.accentDeep)
+            .clipShape(Capsule())
+            .accessibilityLabel("Level up to \(levelUp.to.displayName)")
     }
 
 

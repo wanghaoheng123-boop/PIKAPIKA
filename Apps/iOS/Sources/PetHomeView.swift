@@ -13,7 +13,7 @@ struct PetHomeView: View {
     @State private var latestLevelUp: BondProgression.LevelUp?
     @State private var showSubscriptionOffer = false
     @State private var subscriptionOfferSource = "home_engagement_ios"
-    @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
+    @StateObject private var subscriptionManager = SubscriptionManager()
 
     private var spiritState: PetSpiritState {
         PetSpiritState.evaluate(for: pet)
@@ -79,13 +79,24 @@ struct PetHomeView: View {
             }
         }
         .sheet(isPresented: $showSubscriptionOffer) {
-            SubscriptionOfferSheet(subscriptionManager: subscriptionManager, source: subscriptionOfferSource) {
-                showSubscriptionOffer = false
-                PaywallPresentationGate.endPresentation(source: subscriptionOfferSource)
+            NavigationStack {
+                VStack(spacing: 16) {
+                    Text("Upgrade to Pro")
+                        .font(.headline)
+                    Text("You're out of daily XP rewards. Upgrade to unlock higher daily limits.")
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                    Button("Close") {
+                        showSubscriptionOffer = false
+                    }
+                }
+                .padding()
             }
         }
         .task {
-            await SharedSubscriptionManager.refreshIfNeeded()
+            await subscriptionManager.loadProducts()
+            await subscriptionManager.refreshEntitlements()
+            applyDailyCheckinIfNeeded()
         }
     }
 
@@ -321,11 +332,33 @@ struct PetHomeView: View {
 
     private func maybeTriggerUpsell(source: String) {
         Task { @MainActor in
-            await SharedSubscriptionManager.forceRefresh()
+            await subscriptionManager.loadProducts()
+            await subscriptionManager.refreshEntitlements()
             guard subscriptionManager.currentEntitlements == .free else { return }
-            guard PaywallPresentationGate.beginPresentation(source: source) else { return }
             subscriptionOfferSource = source
             showSubscriptionOffer = true
+        }
+    }
+
+    private func applyDailyCheckinIfNeeded() {
+        let alreadyCheckedInToday = pet.bondEvents.contains {
+            $0.eventType == "checkin" && Calendar.current.isDateInToday($0.timestamp)
+        }
+        guard !alreadyCheckedInToday else { return }
+        do {
+            let outcome = try PetInteractionStreak.applyBondEvent(.dailyCheckin, to: pet, modelContext: modelContext)
+            guard outcome.awardedXP > 0 else { return }
+            if let levelUp = outcome.levelUp {
+                latestLevelUp = levelUp
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+                    withAnimation {
+                        latestLevelUp = nil
+                    }
+                }
+            }
+        } catch {
+            print("Failed to apply daily check-in: \(error)")
         }
     }
 }

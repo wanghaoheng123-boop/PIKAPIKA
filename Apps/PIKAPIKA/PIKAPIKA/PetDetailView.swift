@@ -407,23 +407,9 @@ struct PetDetailView: View {
     }
 
     private func awardBond(event: BondProgression.Event) {
-        let award = BondProgression.xp(for: event)
-        let (newXP, levelUp) = BondProgression.apply(currentXP: pet.bondXP, award: award)
-        let todayXP = pet.bondEvents
-            .filter { Calendar.current.isDateInToday($0.timestamp) }
-            .reduce(0) { $0 + $1.xpAwarded }
-        guard todayXP < BondProgression.dailyCap else { return }
-        let cappedXP = min(award.xp, BondProgression.dailyCap - todayXP)
-        guard cappedXP > 0 else { return }
-        let finalXP = newXP - award.xp + cappedXP
-        pet.bondXP = finalXP
-        pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
-        levelUpInfo = levelUp
-        PetInteractionStreak.recordInteraction(pet: pet)
-        pet.lastInteractedAt = Date()
-        modelContext.insert(BondEvent(pet: pet, eventType: award.eventType, xpAwarded: cappedXP, timestamp: Date(), metadata: award.metadata))
         do {
-            try modelContext.save()
+            let outcome = try PetInteractionStreak.applyBondEvent(event, to: pet, modelContext: modelContext)
+            levelUpInfo = outcome.levelUp
         } catch {
             errorText = error.localizedDescription
         }

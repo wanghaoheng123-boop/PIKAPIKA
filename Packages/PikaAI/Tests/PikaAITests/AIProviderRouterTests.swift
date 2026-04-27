@@ -33,8 +33,8 @@ private enum AIProviderRouterTestHarness {
 
         let router = AIProviderRouter(
             preference: .anthropicPrimary,
-            anthropicFactory: { _ in FailingChatClient(error: .rateLimited) },
-            openAIFactory: { _ in MockAIClient(scriptedReplies: ["fallback ok"], delay: .milliseconds(1)) }
+            openAIFactory: { _ in MockAIClient(scriptedReplies: ["fallback ok"], delay: .milliseconds(1)) },
+            anthropicFactory: { _ in FailingChatClient(error: .rateLimited) }
         )
 
         var accumulated = ""
@@ -53,8 +53,8 @@ private enum AIProviderRouterTestHarness {
 
         let router = AIProviderRouter(
             preference: .anthropicPrimary,
-            anthropicFactory: { _ in FailingChatClient(error: .rateLimited) },
-            openAIFactory: { _ in MockAIClient(scriptedReplies: ["should not run"], delay: .milliseconds(1)) }
+            openAIFactory: { _ in MockAIClient(scriptedReplies: ["should not run"], delay: .milliseconds(1)) },
+            anthropicFactory: { _ in FailingChatClient(error: .rateLimited) }
         )
 
         do {
