@@ -172,3 +172,12 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 - **Repo health:** `git fsck` on workspace (dangling commits only; exit 0).
 
 ---
+
+## 2026-05-03 — Storage rules hardening + extractor compile fix
+
+- **Completed:** Tightened [Backend/storage.rules](Backend/storage.rules) with per-path upload caps (users vs gallery), image MIME restriction on `gallery/`, and owner-only user paths with delete-safe `request.resource == null` guard.
+- **Completed:** Removed stray duplicate lockfile `Backend/functions/package-lock 2.json`.
+- **Completed:** Fixed `PetMemoryExtractor` control-character rejection to use `CharacterSet` (compatible Swift toolchain API).
+- **Verify:** `npm run build` in `Backend/functions`; `swift test` for `Packages/PikaCore` and `Packages/PikaAI` (local macOS).
+
+---

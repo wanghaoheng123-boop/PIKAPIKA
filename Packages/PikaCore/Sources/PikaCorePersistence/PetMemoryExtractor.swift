@@ -118,8 +118,10 @@ public enum PetMemoryExtractor {
         guard !trimmed.isEmpty else { return nil }
 
         // Reject control-heavy strings that can pollute UI/log surfaces.
-        if trimmed.unicodeScalars.contains(where: { $0.properties.isControl && $0 != "\n" && $0 != "\t" }) {
-            return nil
+        let controls = CharacterSet.controlCharacters
+        for scalar in trimmed.unicodeScalars {
+            if scalar == "\n" || scalar == "\t" { continue }
+            if controls.contains(scalar) { return nil }
         }
 
         let capped = String(trimmed.prefix(240))

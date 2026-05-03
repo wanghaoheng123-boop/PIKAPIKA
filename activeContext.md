@@ -1,6 +1,6 @@
 # Active context — volatile handoff state
 
-**Last updated:** 2026-04-25 (later session)
+**Last updated:** 2026-05-03
 
 ## Product milestone
 
