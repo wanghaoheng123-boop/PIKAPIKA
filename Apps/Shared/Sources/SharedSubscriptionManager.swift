@@ -1,7 +1,8 @@
+import Foundation
 import PikaSubscription
 
 enum SharedSubscriptionManager {
-    static let instance = SubscriptionManager()
+    @MainActor static let instance = SubscriptionManager()
     @MainActor private static var lastSuccessfulRefreshAt: Date = .distantPast
     @MainActor private static var inFlightRefresh: Task<Void, Never>?
 

@@ -1,7 +1,6 @@
 import SwiftUI
 import UIKit
 import PikaCore
-import PikaSubscription
 import SharedUI
 
 struct PetHomeView: View {
@@ -11,9 +10,7 @@ struct PetHomeView: View {
     @State private var selectedMood: PetMood = .idle
     @State private var isActionPressed = false
     @State private var latestLevelUp: BondProgression.LevelUp?
-    @State private var showSubscriptionOffer = false
-    @State private var subscriptionOfferSource = "home_engagement_ios"
-    @StateObject private var subscriptionManager = SubscriptionManager()
+    @State private var paywallPresentation: PaywallPresentationCoordinator.ActivePresentation?
 
     private var spiritState: PetSpiritState {
         PetSpiritState.evaluate(for: pet)
@@ -78,24 +75,9 @@ struct PetHomeView: View {
                 PetProfileEditorView(pet: pet)
             }
         }
-        .sheet(isPresented: $showSubscriptionOffer) {
-            NavigationStack {
-                VStack(spacing: 16) {
-                    Text("Upgrade to Pro")
-                        .font(.headline)
-                    Text("You're out of daily XP rewards. Upgrade to unlock higher daily limits.")
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(.secondary)
-                    Button("Close") {
-                        showSubscriptionOffer = false
-                    }
-                }
-                .padding()
-            }
-        }
+        .paywallOfferSheet(presentation: $paywallPresentation)
         .task {
-            await subscriptionManager.loadProducts()
-            await subscriptionManager.refreshEntitlements()
+            await SharedSubscriptionManager.refreshIfNeeded()
             applyDailyCheckinIfNeeded()
         }
     }
@@ -332,11 +314,7 @@ struct PetHomeView: View {
 
     private func maybeTriggerUpsell(source: String) {
         Task { @MainActor in
-            await subscriptionManager.loadProducts()
-            await subscriptionManager.refreshEntitlements()
-            guard subscriptionManager.currentEntitlements == .free else { return }
-            subscriptionOfferSource = source
-            showSubscriptionOffer = true
+            paywallPresentation = await PaywallPresentationCoordinator.requestPresentation(source: source)
         }
     }
 

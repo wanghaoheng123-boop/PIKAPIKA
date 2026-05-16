@@ -26,8 +26,7 @@ public struct PetChatScreen: View {
     /// True when the last user line is in SwiftData but the assistant reply failed; Retry completes only the assistant turn.
     @State private var awaitingAssistantRetry = false
     @State private var latestLevelUp: BondProgression.LevelUp?
-    @State private var showSubscriptionOffer = false
-    @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
+    @State private var paywallPresentation: PaywallPresentationCoordinator.ActivePresentation?
     @State private var pendingStreamScrollTask: Task<Void, Never>?
     private let streamScrollThrottleSeconds: TimeInterval = 0.12
 
@@ -121,12 +120,7 @@ public struct PetChatScreen: View {
             composer
         }
         .navigationTitle(pet.name)
-        .sheet(isPresented: $showSubscriptionOffer) {
-            SubscriptionOfferSheet(subscriptionManager: subscriptionManager, source: "chat_daily_cap") {
-                showSubscriptionOffer = false
-                PaywallPresentationGate.endPresentation(source: "chat_daily_cap")
-            }
-        }
+        .paywallOfferSheet(presentation: $paywallPresentation)
         .onDisappear {
             pendingStreamScrollTask?.cancel()
         }
@@ -366,11 +360,10 @@ public struct PetChatScreen: View {
             do {
                 let outcome = try PetInteractionStreak.applyBondEvent(.chatMessage, to: pet, modelContext: modelContext)
                 if outcome.awardedXP == 0 {
-                    await SharedSubscriptionManager.forceRefresh()
-                    if subscriptionManager.currentEntitlements == .free,
-                       PaywallPresentationGate.beginPresentation(source: "chat_daily_cap") {
-                        showSubscriptionOffer = true
-                    }
+                    paywallPresentation = await PaywallPresentationCoordinator.requestPresentation(
+                        source: "chat_daily_cap",
+                        forceRefresh: true
+                    )
                 }
                 if let levelUp = outcome.levelUp {
                     withAnimation {

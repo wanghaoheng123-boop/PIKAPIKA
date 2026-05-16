@@ -9,8 +9,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.scenePhase) private var scenePhase
     @State private var showOnboarding = false
-    @State private var showSubscriptionOffer = false
-    @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
+    @State private var paywallPresentation: PaywallPresentationCoordinator.ActivePresentation?
     private let onboardingOfferSeenKey = "com.pikapika.PIKAPIKA.onboardingOfferSeen"
 
     var body: some View {
@@ -40,13 +39,8 @@ struct ContentView: View {
                 Task { await maybeShowSubscriptionOfferAfterOnboarding() }
             }
         }
-        .sheet(isPresented: $showSubscriptionOffer) {
-            SubscriptionOfferSheet(subscriptionManager: subscriptionManager, source: "onboarding_macos") {
-                showSubscriptionOffer = false
-                PaywallPresentationGate.endPresentation(source: "onboarding_macos")
-                UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
-            }
-            .frame(minWidth: 520, minHeight: 420)
+        .paywallOfferSheet(presentation: $paywallPresentation) {
+            UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
         }
         .task {
             await SharedSubscriptionManager.refreshIfNeeded()
@@ -55,9 +49,8 @@ struct ContentView: View {
             if newPhase == .active {
                 Task { await SharedSubscriptionManager.refreshIfNeeded(minInterval: 5) }
             }
-            guard newPhase != .active, showSubscriptionOffer else { return }
-            showSubscriptionOffer = false
-            PaywallPresentationGate.endPresentation(source: "onboarding_macos")
+            guard newPhase != .active, paywallPresentation != nil else { return }
+            PaywallPresentationCoordinator.clearBinding(&paywallPresentation)
         }
     }
 
@@ -65,14 +58,13 @@ struct ContentView: View {
     private func maybeShowSubscriptionOfferAfterOnboarding() async {
         guard !UserDefaults.standard.bool(forKey: onboardingOfferSeenKey) else { return }
         await SharedSubscriptionManager.forceRefresh()
-        guard subscriptionManager.currentEntitlements == .free else {
+        if let presentation = await PaywallPresentationCoordinator.requestPresentation(
+            source: "onboarding_macos",
+            forceRefresh: true
+        ) {
+            paywallPresentation = presentation
+        } else {
             UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
-            return
         }
-        guard PaywallPresentationGate.beginPresentation(source: "onboarding_macos") else {
-            UserDefaults.standard.set(true, forKey: onboardingOfferSeenKey)
-            return
-        }
-        showSubscriptionOffer = true
     }
 }

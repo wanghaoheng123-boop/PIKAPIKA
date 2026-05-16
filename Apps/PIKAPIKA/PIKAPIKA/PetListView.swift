@@ -8,7 +8,7 @@ struct PetListView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showAddPet = false
     @State private var showSettings = false
-    @State private var showSubscriptionOffer = false
+    @State private var paywallPresentation: PaywallPresentationCoordinator.ActivePresentation?
     @ObservedObject private var subscriptionManager = SharedSubscriptionManager.instance
 
     private static let freePetCap = 1
@@ -114,19 +114,13 @@ struct PetListView: View {
             .sheet(isPresented: $showAddPet) {
                 AddPetSheet()
             }
-            .sheet(isPresented: $showSubscriptionOffer) {
-                SubscriptionOfferSheet(subscriptionManager: subscriptionManager, source: "pet_limit") {
-                    showSubscriptionOffer = false
-                    PaywallPresentationGate.endPresentation(source: "pet_limit")
-                }
-            }
+            .paywallOfferSheet(presentation: $paywallPresentation)
             .sheet(isPresented: $showSettings) {
                 SettingsView()
             }
             .onChange(of: scenePhase) { _, newPhase in
-                guard newPhase != .active, showSubscriptionOffer else { return }
-                showSubscriptionOffer = false
-                PaywallPresentationGate.endPresentation(source: "pet_limit")
+                guard newPhase != .active, paywallPresentation != nil else { return }
+                PaywallPresentationCoordinator.clearBinding(&paywallPresentation)
             }
             .task {
                 await SharedSubscriptionManager.refreshIfNeeded()
@@ -231,8 +225,8 @@ struct PetListView: View {
             }
             Spacer()
             Button("See Pro") {
-                if PaywallPresentationGate.beginPresentation(source: "pet_limit") {
-                    showSubscriptionOffer = true
+                Task {
+                    paywallPresentation = await PaywallPresentationCoordinator.requestPresentation(source: "pet_limit")
                 }
             }
             .buttonStyle(.borderedProminent)
@@ -252,8 +246,9 @@ struct PetListView: View {
             showAddPet = true
             return
         }
-        if PaywallPresentationGate.beginPresentation(source: "pet_limit") {
-            showSubscriptionOffer = true
-        }
+        paywallPresentation = await PaywallPresentationCoordinator.requestPresentation(
+            source: "pet_limit",
+            forceRefresh: true
+        )
     }
 }

@@ -24,28 +24,12 @@ struct SubscriptionOfferSheet: View {
 
                 VStack(spacing: PikaTheme.Spacing.sm) {
                     ForEach(subscriptionManager.products, id: \.id) { product in
-                        Button {
-                            Task { await purchase(product) }
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(product.displayName)
-                                        .font(PikaTheme.Typography.body.weight(.semibold))
-                                    Text(product.description)
-                                        .font(PikaTheme.Typography.caption)
-                                        .foregroundStyle(PikaTheme.Palette.textMuted)
-                                        .lineLimit(2)
-                                }
-                                Spacer()
-                                Text(product.displayPrice)
-                                    .font(PikaTheme.Typography.body.weight(.semibold))
-                            }
-                            .padding(PikaTheme.Spacing.md)
-                            .background(PikaTheme.Palette.card)
-                            .clipShape(RoundedRectangle(cornerRadius: PikaTheme.Radius.card))
-                        }
-                        .disabled(purchasingProductID != nil || subscriptionManager.activeProductID?.rawValue == product.id)
-                        .buttonStyle(.plain)
+                        SubscriptionProductRow(
+                            product: product,
+                            isPurchasing: purchasingProductID != nil,
+                            isActive: subscriptionManager.activeProductID?.rawValue == product.id,
+                            onPurchase: { Task { await purchase(product) } }
+                        )
                     }
                 }
 
@@ -108,5 +92,35 @@ struct SubscriptionOfferSheet: View {
             SubscriptionAnalytics.track(.purchaseNotCompleted, source: source)
             purchaseErrorText = SharedSubscriptionManager.latestErrorMessage() ?? "Purchase failed. Please check your connection and try again."
         }
+    }
+}
+
+private struct SubscriptionProductRow: View {
+    let product: Product
+    let isPurchasing: Bool
+    let isActive: Bool
+    let onPurchase: () -> Void
+
+    var body: some View {
+        Button(action: onPurchase) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(product.displayName)
+                        .font(PikaTheme.Typography.body.weight(.semibold))
+                    Text(product.description)
+                        .font(PikaTheme.Typography.caption)
+                        .foregroundStyle(PikaTheme.Palette.textMuted)
+                        .lineLimit(2)
+                }
+                Spacer()
+                Text(product.displayPrice)
+                    .font(PikaTheme.Typography.body.weight(.semibold))
+            }
+            .padding(PikaTheme.Spacing.md)
+            .background(PikaTheme.Palette.accent.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: PikaTheme.Radius.card))
+        }
+        .disabled(isPurchasing || isActive)
+        .buttonStyle(.plain)
     }
 }

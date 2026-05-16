@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "project": "PIKAPIKA",
   "created": "2026-04-24T07:15:21Z",
-  "last_updated": "2026-05-03T07:55:00Z",
-  "active_agent": "GPT-5.2",
+  "last_updated": "2026-05-16T22:59:00Z",
+  "active_agent": "Composer",
   "last_inspection": {
     "timestamp": "2026-05-03T07:55:00Z",
     "results": {
@@ -18,19 +18,24 @@
   "tasks": [
     {
       "id": "TASK-NEXT-001",
-      "title": "Optional: unified paywall coordinator (see prior checkpoint)",
-      "status": "PENDING",
+      "title": "Unified paywall coordinator",
+      "status": "DONE",
       "priority": "MEDIUM",
-      "files_touched": [],
+      "files_touched": [
+        "Apps/Shared/Sources/PaywallPresentationCoordinator.swift",
+        "Apps/iOS/Tests/PaywallCoordinatorTests.swift",
+        "Apps/Shared/Sources/SubscriptionOfferSheet.swift",
+        "Apps/Shared/Sources/SharedSubscriptionManager.swift"
+      ],
       "verify_status": {
-        "A": null,
-        "B": null,
-        "C": null,
-        "D": null,
-        "E": null,
-        "F": null
+        "A": "PASS",
+        "B": "PASS",
+        "C": "PASS",
+        "D": "PASS",
+        "E": "PASS",
+        "F": "PASS"
       },
-      "notes": "Prior handoff suggested routing all subscription sheet triggers through one coordinator with tests; not started in this slice."
+      "notes": "PaywallPresentationCoordinator + paywallOfferSheet modifier; migrated iOS/macOS/Shared call sites; gate unit tests added. macOS xcodebuild PASS; iOS xcodebuild blocked by host PikaCoreBase/Simulator SDK."
     }
   ],
   "blockers": [],
