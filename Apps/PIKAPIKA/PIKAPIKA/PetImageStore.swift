@@ -13,6 +13,7 @@ enum PetImageStore {
         let url = documentsRoot().appendingPathComponent(rootFolder, isDirectory: true)
             .appendingPathComponent(petId.uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        applyDirectoryProtection(url)
         return url
     }
 
@@ -21,10 +22,20 @@ enum PetImageStore {
         "\(rootFolder)/\(petId.uuidString)/\(filename)"
     }
 
+    /// Saves `image` as a high-quality JPEG (0.88) and returns the relative path.
+    static func saveJPEG(_ image: UIImage, petId: UUID, filename: String = "avatar.jpg", quality: CGFloat = 0.88) throws -> String {
+        guard let data = image.jpegData(compressionQuality: quality) else {
+            throw NSError(domain: "PetImageStore", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to create JPEG data"])
+        }
+        return try saveJPEG(data, petId: petId, filename: filename)
+    }
+
+    /// Saves raw JPEG `data` atomically and returns the relative path.
     static func saveJPEG(_ data: Data, petId: UUID, filename: String = "avatar.jpg") throws -> String {
         let dir = try petDirectoryURL(for: petId)
         let url = dir.appendingPathComponent(filename, isDirectory: false)
         try data.write(to: url, options: .atomic)
+        applyFileProtection(url)
         return relativePath(petId: petId, filename: filename)
     }
 
@@ -34,6 +45,7 @@ enum PetImageStore {
         let dir = try petDirectoryURL(for: petId)
         let url = dir.appendingPathComponent(filename, isDirectory: false)
         try data.write(to: url, options: .atomic)
+        applyFileProtection(url)
         return relativePath(petId: petId, filename: filename)
     }
 
@@ -53,5 +65,19 @@ enum PetImageStore {
         let url = documentsRoot().appendingPathComponent(rootFolder, isDirectory: true)
             .appendingPathComponent(petId.uuidString, isDirectory: true)
         try? FileManager.default.removeItem(at: url)
+    }
+
+    private static func applyDirectoryProtection(_ url: URL) {
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try? url.setResourceValues(values)
+        try? (url as NSURL).setResourceValue(URLFileProtection.completeUntilFirstUserAuthentication, forKey: .fileProtectionKey)
+    }
+
+    private static func applyFileProtection(_ url: URL) {
+        try? (url as NSURL).setResourceValue(URLFileProtection.completeUntilFirstUserAuthentication, forKey: .fileProtectionKey)
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try? url.setResourceValues(values)
     }
 }

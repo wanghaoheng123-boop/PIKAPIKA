@@ -18,7 +18,7 @@ let package = Package(
             path: "Sources/PikaCoreBase"
         ),
         .testTarget(
-            name: "PikaCoreTests",
+            name: "PikaCoreBaseTests",
             dependencies: ["PikaCoreBase"],
             path: "Tests/PikaCoreTests"
         )

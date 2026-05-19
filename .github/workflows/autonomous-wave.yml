@@ -1,0 +1,80 @@
+name: Autonomous Wave
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_minutes:
+        description: "Autonomous run budget (minutes)"
+        required: false
+        default: "180"
+      auto_pr:
+        description: "Enable auto PR creation"
+        required: false
+        default: "true"
+  schedule:
+    - cron: "0 */6 * * *"
+
+concurrency:
+  group: autonomous-wave-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  autonomous-wave:
+    name: Run autonomous wave orchestrator
+    runs-on: ubuntu-latest
+    timeout-minutes: 190
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Prepare runtime config
+        run: |
+          set -eo pipefail
+          cp Scripts/autonomous_wave_config.json /tmp/autonomous_wave_config.json
+          python3 - <<'PY'
+          import json
+          import os
+          p = "/tmp/autonomous_wave_config.json"
+          with open(p, "r", encoding="utf-8") as f:
+              cfg = json.load(f)
+          run_minutes = os.environ.get("RUN_MINUTES")
+          if run_minutes and run_minutes.isdigit():
+              cfg["run_minutes"] = int(run_minutes)
+          auto_pr = os.environ.get("AUTO_PR")
+          if auto_pr:
+              cfg["auto_pr"] = auto_pr.lower() == "true"
+          with open(p, "w", encoding="utf-8") as f:
+              json.dump(cfg, f, indent=2, ensure_ascii=True)
+              f.write("\n")
+          PY
+        env:
+          RUN_MINUTES: ${{ github.event.inputs.run_minutes }}
+          AUTO_PR: ${{ github.event.inputs.auto_pr }}
+
+      - name: Execute autonomous wave
+        run: |
+          set -eo pipefail
+          chmod +x Scripts/autonomous_wave.sh
+          Scripts/autonomous_wave.sh /tmp/autonomous_wave_config.json
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload autonomous artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autonomous-wave-artifacts
+          path: |
+            workspace/RUN_MANIFEST.json
+            workspace/RUN_HEARTBEAT.json
+            workspace/SESSION_STATE.json
+            workspace/MEMORY_LOG.md
+            workspace/USAGE_MONITOR.json

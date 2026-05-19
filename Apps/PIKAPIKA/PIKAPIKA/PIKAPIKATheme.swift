@@ -1,13 +1,25 @@
 import SwiftUI
 
-/// Visual language: warm, playful “digital companion” (inspired by classic QQ pet care — soft, rounded, alive).
+/// Visual language: warm, playful "digital companion" (inspired by classic QQ pet care — soft, rounded, alive).
 /// Target: people who want emotional stickiness + light gamification, not a clinical productivity tool.
+///
+/// Dark mode note: These brand colors are intentionally warm and readable in both light and dark modes.
+/// When Assets.xcassets is created with Color Set entries (light/dark variants), replace the computed
+/// properties below with `Color("Accent")` etc. from the asset catalog.
 enum PIKAPIKATheme {
 
     // MARK: - Brand (coral → orchid — friendly, spirited)
 
+    // TODO (Medium): Replace with Color("Accent") from Assets.xcassets Color Set
+    // with Light variant: #FA6B73, Dark variant: #FF8A92
     static let accent = Color(red: 0.98, green: 0.42, blue: 0.45)
+
+    // TODO (Medium): Replace with Color("AccentSecondary") from asset catalog
+    // with Light variant: #9E61F2, Dark variant: #B88AFF
     static let accentSecondary = Color(red: 0.62, green: 0.38, blue: 0.95)
+
+    // TODO (Medium): Replace with Color("Warmth") from asset catalog
+    // with Light variant: #FFB861, Dark variant: #FFCC8A
     static let warmth = Color(red: 1.0, green: 0.72, blue: 0.38)
 
     static var heroGradient: LinearGradient {

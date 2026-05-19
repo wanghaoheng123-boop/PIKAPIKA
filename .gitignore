@@ -1,5 +1,6 @@
 # Swift Package Manager
 .build/
+build/
 .swiftpm/
 
 # Xcode
@@ -16,3 +17,12 @@ DerivedData/
 
 # Local agent / worktree metadata (do not publish)
 .claude/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Firebase Cloud Functions (Node)
+Backend/functions/node_modules/
+Backend/functions/lib/

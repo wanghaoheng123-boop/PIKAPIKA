@@ -221,9 +221,9 @@ struct AddPetSheet: View {
         }
 
         var hadSaveError = false
-        if let jpeg = uploadedJPEG {
+        if let jpegData = uploadedJPEG, let image = UIImage(data: jpegData) {
             do {
-                let path = try PetImageStore.saveJPEG(jpeg, petId: pet.id, filename: "avatar.jpg")
+                let path = try PetImageStore.saveJPEG(image, petId: pet.id, filename: "avatar.jpg", quality: 0.88)
                 pet.avatarImagePath = path
                 pet.lastImagePrompt = creatureDescription
             } catch {

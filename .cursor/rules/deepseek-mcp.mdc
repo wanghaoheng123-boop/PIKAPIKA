@@ -1,0 +1,24 @@
+---
+description: Prefer DeepSeek MCP (user-deepseek) for planning and deep reasoning in Cursor
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# DeepSeek MCP (Cursor)
+
+When the **`user-deepseek`** MCP server is available in this workspace:
+
+1. **Before the first MCP call**, read the tool schema JSON under the Cursor project folder `mcps/user-deepseek/tools/` for the tool you intend to use (required by the MCP contract in this repo).
+2. For **architecture, refactors, multi-step plans, and careful code review**, call **`chat_completion`** on server **`user-deepseek`** with:
+   - `model`: **`deepseek-v4-pro`**
+   - `thinking`: `{ "type": "enabled" }`
+   - `reasoning_effort`: `"high"` (use `"max"` only when justified)
+   - Prefer `messages` with an explicit `system` message that anchors repo paths/constraints and demands structured output.
+3. For **fast/cheap** passes (triage, simple classification), you may use `deepseek-v4-flash` instead.
+4. For **fill-in-the-middle** code completion, use tool **`completion`** (defaults to `deepseek-v4-pro` per schema).
+5. When unsure about model IDs, call **`list_models`** first.
+6. Use a stable `conversation_id` only when a **multi-turn** plan benefits from server-side memory; otherwise omit it. Use **`reset_conversation`** when reusing an id but starting fresh.
+7. Set `include_raw_response=true` **only** for debugging.
+8. **Never** log API keys, bearer tokens, or raw `.env` contents. Do not commit secrets.
+
+If MCP is unavailable, fall back to the terminal flow in `Docs/DEEPSEEK_AGENT_SETUP.md` (repo root) or normal editor tools.

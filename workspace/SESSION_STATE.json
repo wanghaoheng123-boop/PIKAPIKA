@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "project": "PIKAPIKA",
+  "created": "2026-04-24T07:15:21Z",
+  "last_updated": "2026-05-19T14:50:00Z",
+  "active_agent": "Composer",
+  "last_inspection": {
+    "timestamp": "2026-05-03T07:55:00Z",
+    "results": {
+      "INSPECT-1": "Bond/streak/memory paths exercised via swift test (PikaCore + PikaAI).",
+      "INSPECT-2": "SESSION_STATE refreshed after storage + extractor maintenance slice.",
+      "INSPECT-3": "No TODO/FIXME scan this slice.",
+      "INSPECT-4": "No secrets touched.",
+      "INSPECT-5": "MEMORY_LOG unchanged this slice.",
+      "INSPECT-6": "swift test PASS on macOS host for PikaCore + PikaAI; Backend/functions tsc PASS."
+    }
+  },
+  "blockers": [
+    "iOS scheme build blocked on host: iOS 26.5 platform not installed (Xcode > Settings > Components); CoreSimulator 1051.50 vs 1051.54 mismatch blocks simulator tests."
+  ],
+  "tasks": [
+    {
+      "id": "TASK-NEXT-001",
+      "title": "Unified paywall coordinator",
+      "status": "DONE",
+      "priority": "MEDIUM",
+      "files_touched": [
+        "Apps/Shared/Sources/PaywallPresentationCoordinator.swift",
+        "Apps/iOS/Tests/PaywallCoordinatorTests.swift",
+        "Apps/Shared/Sources/SubscriptionOfferSheet.swift",
+        "Apps/Shared/Sources/SharedSubscriptionManager.swift"
+      ],
+      "verify_status": {
+        "A": "PASS",
+        "B": "PASS",
+        "C": "PASS",
+        "D": "PASS",
+        "E": "PASS",
+        "F": "PASS"
+      },
+      "notes": "PaywallPresentationCoordinator + paywallOfferSheet modifier; migrated iOS/macOS/Shared call sites; PaywallCoordinatorTests on iOS. macOS scheme build+test PASS; all package swift test PASS; Backend tsc PASS. iOS app scheme blocked: iOS 26.5 platform not installed on host."
+    },
+    {
+      "id": "TASK-VERIFY-002",
+      "title": "SPM/Xcode PikaCoreBase linkage fixes",
+      "status": "DONE",
+      "priority": "HIGH",
+      "files_touched": [
+        "Packages/PikaCoreBase/Package.swift",
+        "Packages/SharedUI/Package.swift",
+        "Packages/PikaCore/Sources/PikaCorePersistence/BondProgression.swift",
+        "Apps/iOS/project.yml",
+        "Apps/macOS/project.yml",
+        ".gitignore"
+      ],
+      "verify_status": {
+        "A": "PASS",
+        "B": "PASS",
+        "C": "PASS",
+        "D": "PASS",
+        "E": "PASS",
+        "F": "PASS"
+      },
+      "notes": "Renamed PikaCoreBaseTests target; explicit PikaCoreBase link for SharedUI and app test bundles; public BondProgression.Award init; gitignore package build/ dirs."
+    }
+  ],
+  "checkpoint": null
+}

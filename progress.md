@@ -4,6 +4,43 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 
 ---
 
+## 2026-04-27 — Scope lock for research-driven quality loop
+
+- **Scope decision captured:** PIKAPIKA-only delivery in this repo; no QuantLab/trading code exists in-source.
+- **Execution framing:** “analysis/backtesting” mapped to algorithm QA loops (bond/streak/AI routing) and testability hardening.
+- **Reference split:** External finance app research limited to transferable UX/process patterns until a dedicated finance module/repo exists.
+
+---
+
+## 2026-04-25 — Enterprise publish-readiness implementation (security + gates)
+
+- **Completed:** Added secure provider network defaults and error-body sanitization in [Packages/PikaAI/Sources/PikaAI/SecureNetworkPolicy.swift](Packages/PikaAI/Sources/PikaAI/SecureNetworkPolicy.swift) and wired OpenAI/Anthropic/DeepSeek clients.
+- **Completed:** Hardened local session/privacy surfaces in [AuthSession.swift](Apps/PIKAPIKA/PIKAPIKA/AuthSession.swift), [PetMemoryFileStore.swift](Apps/PIKAPIKA/PIKAPIKA/PetMemoryFileStore.swift), [PetImageStore.swift](Apps/PIKAPIKA/PIKAPIKA/PetImageStore.swift), and [SettingsView.swift](Apps/PIKAPIKA/PIKAPIKA/SettingsView.swift).
+- **Completed:** Added baseline test foundation for enterprise gates: [Packages/SharedUI/Tests](Packages/SharedUI/Tests), `PikaTests` targets in [Apps/iOS/project.yml](Apps/iOS/project.yml) and [Apps/macOS/project.yml](Apps/macOS/project.yml), and smoke tests in app trees.
+- **Completed:** Upgraded CI/release security gates via [pika-app-build.yml](.github/workflows/pika-app-build.yml), [pika-ci.yml](.github/workflows/pika-ci.yml), [security-gates.yml](.github/workflows/security-gates.yml), [Scripts/check_release_policy.sh](Scripts/check_release_policy.sh), and [SECURITY.md](SECURITY.md).
+- **Verification note:** Local shell still lacks `swift`/Xcode execution; final readiness remains blocked pending CI and signed-build validation (see `workspace/security-verification-report.md`).
+
+---
+
+## 2026-04-25 — P2 Bond loop execution slice (shared cap + event flow)
+
+- **Completed:** Unified bond award path in [Packages/PikaCore/Sources/PikaCorePersistence/PetInteractionStreak.swift](Packages/PikaCore/Sources/PikaCorePersistence/PetInteractionStreak.swift) via `applyBondEvent(...)` (daily cap via `recordXPEarned`, XP/level update, streak update, `BondEvent` insert, save).
+- **Completed:** Replaced duplicated cap math in [Apps/iOS/Sources/PetHomeView.swift](Apps/iOS/Sources/PetHomeView.swift) and [Apps/macOS/Sources/PetHomeView.swift](Apps/macOS/Sources/PetHomeView.swift) with shared helper; added daily XP/remaining XP UI and latest-event surfacing.
+- **Completed:** Extended [Apps/Shared/Sources/PetChatScreen.swift](Apps/Shared/Sources/PetChatScreen.swift) to write chat bond events (`.chatMessage`) and show bond status header + level-up banner.
+- **Quality loop:** Ran DeepSeek v4-pro review pass and applied a low-risk thread-safety hardening (`NSLock`) around daily XP cap writes.
+- **Verification note:** `swift test` could not run in this Windows shell because `swift` is not on `PATH`; IDE lints for touched files are clean.
+
+---
+
+## 2026-04-25 — Additional optimization pass (DeepSeek-driven)
+
+- **Completed:** [Packages/SharedUI/Sources/SharedUI/TypingIndicator.swift](Packages/SharedUI/Sources/SharedUI/TypingIndicator.swift) now uses a phase-based wave scale animation for smoother visual cadence.
+- **Completed:** SSE parsing in [OpenAIClient.swift](Packages/PikaAI/Sources/PikaAI/OpenAIClient.swift), [DeepSeekClient.swift](Packages/PikaAI/Sources/PikaAI/DeepSeekClient.swift), and [AnthropicClient.swift](Packages/PikaAI/Sources/PikaAI/AnthropicClient.swift) was tightened to line-enumeration parsing with empty-payload suppression and explicit stream-stop handling.
+- **Quality loop:** Ran a second DeepSeek v4-pro MCP review focused on likely regressions and validated low-risk fixes.
+- **Verification note:** local package tests remain blocked by missing `swift` CLI in this shell; lints for touched files are clean.
+
+---
+
 ## 2026-04-17 — Memory Bank bootstrap
 
 - **Completed:** Universal Orchestration Protocol Phase 1 (retain baseline Memory Bank architecture; rationale in `systemPatterns.md`).
@@ -133,5 +170,22 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 - **Manual iOS app CI:** Added [`.github/workflows/pika-app-build.yml`](.github/workflows/pika-app-build.yml) (`workflow_dispatch`) for XcodeGen + `xcodebuild` on **`Apps/iOS`**.
 - **Docs:** [Docs/SOUL_AND_SUBSCRIPTION.md](Docs/SOUL_AND_SUBSCRIPTION.md), [Docs/APP_STORE_PREFLIGHT.md](Docs/APP_STORE_PREFLIGHT.md); README Memory Bank table links.
 - **Repo health:** `git fsck` on workspace (dangling commits only; exit 0).
+
+---
+
+## 2026-05-03 — Storage rules hardening + extractor compile fix
+
+- **Completed:** Tightened [Backend/storage.rules](Backend/storage.rules) with per-path upload caps (users vs gallery), image MIME restriction on `gallery/`, and owner-only user paths with delete-safe `request.resource == null` guard.
+- **Completed:** Removed stray duplicate lockfile `Backend/functions/package-lock 2.json`.
+- **Completed:** Fixed `PetMemoryExtractor` control-character rejection to use `CharacterSet` (compatible Swift toolchain API).
+- **Verify:** `npm run build` in `Backend/functions`; `swift test` for `Packages/PikaCore` and `Packages/PikaAI` (local macOS).
+
+---
+
+## 2026-05-19 — Full verification pass (paywall branch + SPM linkage)
+
+- **Verify:** All seven Swift packages `swift test` PASS; `Backend/functions` `npm ci` + `tsc` PASS; macOS `xcodebuild` scheme Pika build + test PASS.
+- **Fixes:** Renamed `PikaCoreBase` test target to `PikaCoreBaseTests` (SPM graph uniqueness); explicit `PikaCoreBase` dependency for `SharedUI` and app `PikaTests`; public `BondProgression.Award` initializer; `.gitignore` `build/` for local Xcode/SPM artifacts.
+- **Host blockers:** iOS app `xcodebuild -scheme Pika` requires iOS 26.5 platform (not installed here); CoreSimulator version mismatch blocks simulator `test`. Per-package iOS device SDK scheme builds (e.g. `PikaCoreBase`, `PikaAI`) succeed.
 
 ---

@@ -20,6 +20,20 @@ public enum PromptLibrary {
         bondLevel: BondLevel,
         context: AppContext = .unknown
     ) -> String {
+        systemPrompt(petName: petName, species: species, traits: traits, bondLevel: bondLevel,
+                     creatureDescription: nil, memoryFacts: [], context: context)
+    }
+
+    /// Build the system prompt for a chat turn, with optional lore and memory facts.
+    public static func systemPrompt(
+        petName: String,
+        species: String,
+        traits: [String],
+        bondLevel: BondLevel,
+        creatureDescription: String?,
+        memoryFacts: [String],
+        context: AppContext = .unknown
+    ) -> String {
         let traitLine = traits.isEmpty ? "balanced and expressive" : traits.joined(separator: ", ")
         let intimacy: String
         switch bondLevel {
@@ -30,11 +44,25 @@ public enum PromptLibrary {
         case .soulBonded, .inseparable: intimacy = "soulfully attuned; you finish each other's sentences"
         }
 
+        let loreBlock: String
+        if let lore = creatureDescription, !lore.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            loreBlock = " Creature design: \(lore.trimmingCharacters(in: .whitespacesAndNewlines))"
+        } else {
+            loreBlock = ""
+        }
+
+        let memoryBlock: String
+        if memoryFacts.isEmpty {
+            memoryBlock = ""
+        } else {
+            memoryBlock = " What you remember about your human (most important first): \(memoryFacts.joined(separator: " · "))."
+        }
+
         return """
-        You are \(petName), a virtual \(species) living on the user's device.
+        You are \(petName), a virtual \(species) living on the user's device.\(loreBlock)
         Personality: \(traitLine). Tone: \(intimacy).
         Bond level: \(bondLevel.displayName) (\(bondLevel.rawValue)/9).
-        Context hint: \(context.systemPromptHint)
+        Context hint: \(context.systemPromptHint)\(memoryBlock)
 
         Rules:
         - Speak in first person as \(petName). Keep replies under 3 short sentences.

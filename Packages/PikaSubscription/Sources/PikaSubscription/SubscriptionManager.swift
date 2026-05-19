@@ -8,6 +8,7 @@ public final class SubscriptionManager: ObservableObject {
     @Published public private(set) var products: [Product] = []
     @Published public private(set) var currentEntitlements: Entitlements = .free
     @Published public private(set) var activeProductID: ProductID?
+    @Published public private(set) var lastErrorMessage: String?
 
     private var transactionListener: Task<Void, Never>?
 
@@ -25,8 +26,10 @@ public final class SubscriptionManager: ObservableObject {
         do {
             let ids = ProductID.allCases.map(\.rawValue)
             products = try await Product.products(for: ids)
+            lastErrorMessage = nil
         } catch {
             products = []
+            lastErrorMessage = "Unable to load subscription products right now."
         }
     }
 
@@ -42,6 +45,7 @@ public final class SubscriptionManager: ObservableObject {
         }
         currentEntitlements = granted
         activeProductID = active
+        lastErrorMessage = nil
     }
 
     public func purchase(_ product: Product) async throws -> Bool {
@@ -61,7 +65,12 @@ public final class SubscriptionManager: ObservableObject {
     }
 
     public func restorePurchases() async {
-        try? await AppStore.sync()
+        do {
+            try await AppStore.sync()
+            lastErrorMessage = nil
+        } catch {
+            lastErrorMessage = "Unable to restore purchases. Please try again."
+        }
         await refreshEntitlements()
     }
 

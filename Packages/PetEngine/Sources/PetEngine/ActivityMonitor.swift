@@ -52,7 +52,7 @@ public final class MacActivityMonitor: ActivitySource, @unchecked Sendable {
         let kpm = Double(keystrokeTimestamps.count)
         lock.unlock()
 
-        let idle = CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: .init(~0)) ?? 0
+        let idle: Double = CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: CGEventType(rawValue: ~0)!) ?? 0
         let front = NSWorkspace.shared.frontmostApplication
         let bundleID = front?.bundleIdentifier ?? ""
         let ctx = AppContextMapper.context(for: bundleID)

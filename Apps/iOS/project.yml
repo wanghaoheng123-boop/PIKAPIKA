@@ -13,6 +13,7 @@ settings:
     # `complete` + SwiftData/SwiftUI often produces noisy or blocking diagnostics in Xcode; `minimal` keeps apps buildable while packages opt in separately.
     SWIFT_STRICT_CONCURRENCY: minimal
 packages:
+  PikaCoreBase:     { path: ../../Packages/PikaCoreBase }
   PikaCore:         { path: ../../Packages/PikaCore }
   PikaAI:           { path: ../../Packages/PikaAI }
   PetEngine:        { path: ../../Packages/PetEngine }
@@ -49,3 +50,18 @@ targets:
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: "YES"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
         ENABLE_PREVIEWS: "YES"
+  PikaTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: Pika
+      - package: SharedUI
+      - package: PikaCore
+      - package: PikaCoreBase
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.pikapika.app.tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Pika.app/Pika"
+        BUNDLE_LOADER: "$(TEST_HOST)"

@@ -15,6 +15,8 @@ struct ChatView: View {
     @State private var isSending = false
     @State private var errorText: String?
     @StateObject private var voiceInput = VoiceInputManager()
+    @State private var pendingStreamingScrollTask: Task<Void, Never>?
+    private let streamScrollThrottleSeconds: TimeInterval = 0.12
 
     init(pet: Pet) {
         self.pet = pet
@@ -51,6 +53,9 @@ struct ChatView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
+                        if messages.isEmpty && streamingAssistant.isEmpty {
+                            emptyChatState
+                        }
                         ForEach(messages, id: \.id) { msg in
                             bubble(role: msg.role, text: msg.content)
                                 .id(msg.id)
@@ -63,12 +68,13 @@ struct ChatView: View {
                     .padding()
                 }
                 .onChange(of: messages.count) { _, _ in
+                    pendingStreamingScrollTask?.cancel()
                     if let last = messages.last {
                         withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
                     }
                 }
                 .onChange(of: streamingAssistant) { _, _ in
-                    withAnimation { proxy.scrollTo("stream", anchor: .bottom) }
+                    scheduleStreamingScroll(proxy: proxy)
                 }
             }
 
@@ -130,6 +136,7 @@ struct ChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear {
             voiceInput.stop(commit: false) { _ in }
+            pendingStreamingScrollTask?.cancel()
         }
         .alert("Microphone or speech permission denied", isPresented: $voiceInput.authorizationDenied) {
             Button("OK", role: .cancel) {}
@@ -167,6 +174,24 @@ struct ChatView: View {
         }
     }
 
+    private var emptyChatState: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "bubble.left.and.bubble.right")
+                .font(.system(size: 48))
+                .foregroundStyle(PIKAPIKATheme.accent.opacity(0.6))
+            Text("Say hello to \(pet.name)!")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+            Text("Your conversations will appear here.")
+                .font(.subheadline)
+                .foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Empty chat. Say hello to your pet to start a conversation.")
+    }
+
     private func send() async {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
@@ -185,8 +210,10 @@ struct ChatView: View {
                     allowRemoteChat: aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteChat,
                     allowMemoryExtraction: aiHolder.hasRemoteAI && aiHolder.usagePolicy.allowRemoteMemoryExtraction
                 )
-            ) { partial in
-                streamingAssistant = partial
+            ) { [weak self] partial in
+                Task { @MainActor in
+                    self?.streamingAssistant = partial
+                }
             }
             PetSoundEngine.shared.speakReplyIfEnabled(streamingAssistant, for: pet, mood: spirit)
             streamingAssistant = ""
@@ -195,6 +222,16 @@ struct ChatView: View {
         }
 
         isSending = false
+    }
+
+    private func scheduleStreamingScroll(proxy: ScrollViewProxy) {
+        pendingStreamingScrollTask?.cancel()
+        let delay = UInt64(streamScrollThrottleSeconds * 1_000_000_000)
+        pendingStreamingScrollTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: delay)
+            guard !Task.isCancelled else { return }
+            proxy.scrollTo("stream", anchor: .bottom)
+        }
     }
 
     private func applyVoiceIntent(_ intent: VoiceIntent) {
@@ -215,11 +252,13 @@ struct ChatView: View {
     }
 
     private func localAction(event: String, xp: Int, reply: String) {
-        PetInteractionStreak.recordInteraction(pet: pet)
+        let awardedXP = PetInteractionStreak.recordXPEarned(petID: pet.id, amount: xp)
+        guard awardedXP > 0 else { return }
+        PetInteractionStreak.recordStreak(pet: pet)
         pet.lastInteractedAt = Date()
-        pet.bondXP += xp
+        pet.bondXP += awardedXP
         pet.bondLevel = BondLevel.from(xp: pet.bondXP).rawValue
-        modelContext.insert(BondEvent(pet: pet, eventType: event, xpAwarded: xp))
+        modelContext.insert(BondEvent(pet: pet, eventType: event, xpAwarded: awardedXP))
         modelContext.insert(ConversationMessage(pet: pet, role: "assistant", content: reply))
         do {
             try modelContext.save()

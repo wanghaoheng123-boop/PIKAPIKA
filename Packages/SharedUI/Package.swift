@@ -11,12 +11,24 @@ let package = Package(
         .library(name: "SharedUI", targets: ["SharedUI"])
     ],
     dependencies: [
-        .package(path: "../PikaCore")
+        .package(path: "../PikaCore"),
+        .package(path: "../PikaCoreBase")
     ],
     targets: [
         .target(
             name: "SharedUI",
-            dependencies: ["PikaCore"]
+            dependencies: [
+                "PikaCore",
+                .product(name: "PikaCoreBase", package: "PikaCoreBase")
+            ]
+        ),
+        .testTarget(
+            name: "SharedUITests",
+            dependencies: [
+                "SharedUI",
+                "PikaCore",
+                .product(name: "PikaCoreBase", package: "PikaCoreBase")
+            ]
         )
     ]
 )

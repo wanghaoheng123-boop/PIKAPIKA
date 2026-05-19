@@ -1,0 +1,9 @@
+---
+description: Universal agent hook — always active
+globs: ["**/*"]
+alwaysApply: true
+---
+<!-- AGENT HOOK v1 -->
+Read AGENT.md fully before any action.
+Never write secrets inline. Never stop mid-task. Log all progress to workspace/ files.
+Block edits to *.env, secrets/, *credential*, *token* paths.

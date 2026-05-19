@@ -19,7 +19,7 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
         maxTokens: Int = 1024,
         apiVersion: String = "2023-06-01",
         baseURL: URL = URL(string: "https://api.anthropic.com")!,
-        session: URLSession = .shared
+        session: URLSession = SecureNetworkPolicy.makeSession()
     ) {
         self.apiKey = apiKey
         self.model = model
@@ -31,7 +31,7 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
 
     public func chat(
         messages: [ChatMessage],
-        systemPrompt: String,
+        systemPrompt: String?,
         temperature: Double
     ) async throws -> AsyncThrowingStream<String, Error> {
         guard !apiKey.isEmpty else { throw AIClientError.missingAPIKey }
@@ -43,20 +43,23 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
                 "content": $0.content
             ] as [String: Any] }
 
-        let cacheControl: [String: Any] = ["type": "ephemeral"]
-        let systemBlock: [String: Any] = [
-            "type": "text",
-            "text": systemPrompt,
-            "cache_control": cacheControl
-        ]
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "model": model,
             "max_tokens": maxTokens,
             "temperature": temperature,
             "stream": true,
-            "system": [systemBlock],
             "messages": userMessages
         ]
+
+        if let prompt = systemPrompt, !prompt.isEmpty {
+            let cacheControl: [String: Any] = ["type": "ephemeral"]
+            let systemBlock: [String: Any] = [
+                "type": "text",
+                "text": prompt,
+                "cache_control": cacheControl
+            ]
+            body["system"] = [systemBlock]
+        }
 
         var request = URLRequest(url: baseURL.appendingPathComponent("/v1/messages"))
         request.httpMethod = "POST"
@@ -66,31 +69,47 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let (data, response) = try await session.data(for: request)
-        try Self.validate(response, body: data)
-
-        let payloadText = String(data: data, encoding: .utf8) ?? ""
-        let lines = payloadText.components(separatedBy: .newlines)
-
         return AsyncThrowingStream { continuation in
             Task {
-                for line in lines {
-                    guard line.hasPrefix("data:") else { continue }
-                    let payload = line.dropFirst(5).trimmingCharacters(in: .whitespaces)
-                    guard let lineData = payload.data(using: .utf8),
-                          let json = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any]
-                    else { continue }
-
-                    let type = json["type"] as? String
-                    if type == "content_block_delta",
-                       let delta = json["delta"] as? [String: Any],
-                       let text = delta["text"] as? String {
-                        continuation.yield(text)
-                    } else if type == "message_stop" {
-                        break
+                do {
+                    let (bytes, response) = try await session.bytes(for: request)
+                    guard let http = response as? HTTPURLResponse else {
+                        throw AIClientError.networkUnavailable
                     }
+                    guard (200..<300).contains(http.statusCode) else {
+                        var body = Data()
+                        for try await byte in bytes {
+                            body.append(byte)
+                        }
+                        throw Self.httpError(statusCode: http.statusCode, body: body)
+                    }
+
+                    for try await line in bytes.lines {
+                        if Task.isCancelled { break }
+                        switch SSELineParser.parseLine(line) {
+                        case .ignore, .done:
+                            continue
+                        case .data(let payload):
+                            guard let lineData = payload.data(using: .utf8),
+                                  let json = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any] else {
+                                continue
+                            }
+
+                            let type = json["type"] as? String
+                            if type == "content_block_delta",
+                               let delta = json["delta"] as? [String: Any],
+                               let text = delta["text"] as? String {
+                                continuation.yield(text)
+                            } else if type == "message_stop" {
+                                continuation.finish()
+                                return
+                            }
+                        }
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
                 }
-                continuation.finish()
             }
         }
     }
@@ -141,14 +160,18 @@ public final class AnthropicClient: AIClient, @unchecked Sendable {
 
     private static func validate(_ response: URLResponse, body: Data = Data()) throws {
         guard let http = response as? HTTPURLResponse else { return }
-        switch http.statusCode {
-        case 200..<300: return
-        case 401:       throw AIClientError.missingAPIKey
-        case 429:       throw AIClientError.rateLimited
-        case 413:       throw AIClientError.contextTooLong
+        guard (200..<300).contains(http.statusCode) else {
+            throw httpError(statusCode: http.statusCode, body: body)
+        }
+    }
+
+    private static func httpError(statusCode: Int, body: Data) -> AIClientError {
+        switch statusCode {
+        case 401: return .missingAPIKey
+        case 429: return .rateLimited
+        case 413: return .contextTooLong
         default:
-            let text = String(data: body, encoding: .utf8) ?? ""
-            throw AIClientError.serverError(statusCode: http.statusCode, body: text)
+            return .serverError(statusCode: statusCode, body: SecureNetworkPolicy.sanitizeServerBody(body))
         }
     }
 }
