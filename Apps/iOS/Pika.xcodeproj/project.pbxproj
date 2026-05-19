@@ -24,6 +24,7 @@
 		AED5766DDE5C62D6BF293849 /* PaywallCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35374AE328FD42970AD0E1CF /* PaywallCoordinatorTests.swift */; };
 		B045460622F233B31DC45306 /* PikaSecuritySmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E63932595C4C04C22AD29F8 /* PikaSecuritySmokeTests.swift */; };
 		C941FFC499E2EBFFC58BE67C /* PetOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4460878ECCDDA29DD1338882 /* PetOnboardingView.swift */; };
+		D1CDADA6A17F060C8EE59266 /* PikaCoreBase in Frameworks */ = {isa = PBXBuildFile; productRef = 4A2787425976285E2D3FE147 /* PikaCoreBase */; };
 		D675B894A8D7A66914571A86 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD02B5047A50FC6F69BD46FC /* SettingsView.swift */; };
 		DD553A3AC44195FC1C622511 /* PetEngine in Frameworks */ = {isa = PBXBuildFile; productRef = F6F679928EFA7EB5BB0C2907 /* PetEngine */; };
 		E3928BAF379BCDA0706DE67C /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D50FBAA9B4727A6EBC4F8FD /* ChatView.swift */; };
@@ -46,6 +47,7 @@
 
 /* Begin PBXFileReference section */
 		1950F894BE0ECC7DB3B8DEE3 /* PikaCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PikaCore; path = ../../Packages/PikaCore; sourceTree = SOURCE_ROOT; };
+		1BC5C6489549C8B9E38D4954 /* PikaCoreBase */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PikaCoreBase; path = ../../Packages/PikaCoreBase; sourceTree = SOURCE_ROOT; };
 		1D43768D9EFBFD0879111A4C /* PikaSync */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PikaSync; path = ../../Packages/PikaSync; sourceTree = SOURCE_ROOT; };
 		1D50FBAA9B4727A6EBC4F8FD /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		1D84198A61AE3D72F607E137 /* PaywallPresentationGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallPresentationGate.swift; sourceTree = "<group>"; };
@@ -79,6 +81,7 @@
 			files = (
 				F322F580861242409EEBFEF6 /* SharedUI in Frameworks */,
 				007EDE123988CF77B20FBF37 /* PikaCore in Frameworks */,
+				D1CDADA6A17F060C8EE59266 /* PikaCoreBase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,6 +182,7 @@
 				81F192F72A9816372E205C5F /* PetEngine */,
 				C3EE9DE7FA211C9300D5DBEF /* PikaAI */,
 				1950F894BE0ECC7DB3B8DEE3 /* PikaCore */,
+				1BC5C6489549C8B9E38D4954 /* PikaCoreBase */,
 				451EEE2778284776F908F50D /* PikaSubscription */,
 				1D43768D9EFBFD0879111A4C /* PikaSync */,
 				6194E75783E38A0872593125 /* SharedUI */,
@@ -229,6 +233,7 @@
 			packageProductDependencies = (
 				80EE916F58650204EFF2DD9B /* SharedUI */,
 				E5215EEEC8A1617D9D2A2B55 /* PikaCore */,
+				4A2787425976285E2D3FE147 /* PikaCoreBase */,
 			);
 			productName = PikaTests;
 			productReference = E366BE398C3E8FAA39A15A33 /* PikaTests.xctest */;
@@ -264,6 +269,7 @@
 				418004E81400541286C8CEA2 /* XCLocalSwiftPackageReference "../../Packages/PetEngine" */,
 				D808CFF54ED2CAABDEC16686 /* XCLocalSwiftPackageReference "../../Packages/PikaAI" */,
 				4286459574B5A036402CF310 /* XCLocalSwiftPackageReference "../../Packages/PikaCore" */,
+				A61D284FD123F126FFC4D99A /* XCLocalSwiftPackageReference "../../Packages/PikaCoreBase" */,
 				E28C162DD924B23C28231551 /* XCLocalSwiftPackageReference "../../Packages/PikaSubscription" */,
 				6C34A60D4A47159A708E7F05 /* XCLocalSwiftPackageReference "../../Packages/PikaSync" */,
 				415A310F817F05613C64871F /* XCLocalSwiftPackageReference "../../Packages/SharedUI" */,
@@ -568,6 +574,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../Packages/PikaSync;
 		};
+		A61D284FD123F126FFC4D99A /* XCLocalSwiftPackageReference "../../Packages/PikaCoreBase" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/PikaCoreBase;
+		};
 		D808CFF54ED2CAABDEC16686 /* XCLocalSwiftPackageReference "../../Packages/PikaAI" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../Packages/PikaAI;
@@ -579,6 +589,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4A2787425976285E2D3FE147 /* PikaCoreBase */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PikaCoreBase;
+		};
 		7C4643A59C7C8DD1DDD1E621 /* PikaCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PikaCore;

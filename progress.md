@@ -181,3 +181,11 @@ Format: newest entries at the **bottom**. Do not rewrite history; add corrective
 - **Verify:** `npm run build` in `Backend/functions`; `swift test` for `Packages/PikaCore` and `Packages/PikaAI` (local macOS).
 
 ---
+
+## 2026-05-19 — Full verification pass (paywall branch + SPM linkage)
+
+- **Verify:** All seven Swift packages `swift test` PASS; `Backend/functions` `npm ci` + `tsc` PASS; macOS `xcodebuild` scheme Pika build + test PASS.
+- **Fixes:** Renamed `PikaCoreBase` test target to `PikaCoreBaseTests` (SPM graph uniqueness); explicit `PikaCoreBase` dependency for `SharedUI` and app `PikaTests`; public `BondProgression.Award` initializer; `.gitignore` `build/` for local Xcode/SPM artifacts.
+- **Host blockers:** iOS app `xcodebuild -scheme Pika` requires iOS 26.5 platform (not installed here); CoreSimulator version mismatch blocks simulator `test`. Per-package iOS device SDK scheme builds (e.g. `PikaCoreBase`, `PikaAI`) succeed.
+
+---

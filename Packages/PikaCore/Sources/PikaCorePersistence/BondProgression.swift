@@ -21,6 +21,12 @@ public struct BondProgression: Sendable {
         public let xp: Int
         public let eventType: String
         public let metadata: String?
+
+        public init(xp: Int, eventType: String, metadata: String?) {
+            self.xp = xp
+            self.eventType = eventType
+            self.metadata = metadata
+        }
     }
 
     public struct LevelUp: Sendable, Equatable {

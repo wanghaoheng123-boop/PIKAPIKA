@@ -13,6 +13,7 @@ settings:
     # `complete` + SwiftData/SwiftUI often produces noisy or blocking diagnostics in Xcode; `minimal` keeps apps buildable while packages opt in separately.
     SWIFT_STRICT_CONCURRENCY: minimal
 packages:
+  PikaCoreBase:     { path: ../../Packages/PikaCoreBase }
   PikaCore:         { path: ../../Packages/PikaCore }
   PikaAI:           { path: ../../Packages/PikaAI }
   PetEngine:        { path: ../../Packages/PetEngine }
@@ -58,6 +59,7 @@ targets:
       - target: Pika
       - package: SharedUI
       - package: PikaCore
+      - package: PikaCoreBase
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.pikapika.app.tests

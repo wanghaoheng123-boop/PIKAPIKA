@@ -12,6 +12,7 @@ settings:
     DEVELOPMENT_TEAM: ""
     SWIFT_STRICT_CONCURRENCY: minimal
 packages:
+  PikaCoreBase:     { path: ../../Packages/PikaCoreBase }
   PikaCore:         { path: ../../Packages/PikaCore }
   PikaAI:           { path: ../../Packages/PikaAI }
   PetEngine:        { path: ../../Packages/PetEngine }
@@ -60,6 +61,7 @@ targets:
       - target: Pika
       - package: SharedUI
       - package: PikaCore
+      - package: PikaCoreBase
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.pikapika.app.tests
